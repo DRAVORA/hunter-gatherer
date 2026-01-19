@@ -39,3 +39,13 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Custom additions
+*.db
+*.db-journal
+.env.local
+.env.development.local
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
