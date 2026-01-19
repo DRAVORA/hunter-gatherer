@@ -183,13 +183,13 @@ export function formatSaltInTeaspoons(saltGrams: number): string {
     return "pinch of salt";
   }
   if (teaspoons < 0.5) {
-    return "¼ tsp salt";
+    return "Â¼ tsp salt";
   }
   if (teaspoons < 0.75) {
-    return "½ tsp salt";
+    return "Â½ tsp salt";
   }
   if (teaspoons < 1) {
-    return "¾ tsp salt";
+    return "Â¾ tsp salt";
   }
   if (teaspoons === 1) {
     return "1 tsp salt";
