@@ -14,7 +14,7 @@ export const GLOBAL_RULES = {
       "Form can be repeated",
       "No compensation patterns",
     ],
-    emphasis: "If unsure → it does NOT count.",
+    emphasis: "If unsure â†’ it does NOT count.",
   },
 
   repDisqualification: {
@@ -56,8 +56,8 @@ export const GLOBAL_RULES = {
     subtitle: "Choosing Weight:",
     rules: [
       "Choose a load you can complete all prescribed reps with 2 clean reps in reserve",
-      "If rep speed slows dramatically → load is too heavy",
-      "If form degrades before final set → reduce load immediately",
+      "If rep speed slows dramatically â†’ load is too heavy",
+      "If form degrades before final set â†’ reduce load immediately",
       "Never increase load in the same session",
     ],
     emphasis: "This prevents ego-loading and protects execution quality.",
@@ -69,8 +69,8 @@ export const GLOBAL_RULES = {
     rules: [
       "Rest exactly the prescribed time",
       "Do not shorten rest to 'push conditioning'",
-      "If breathing is not calm by end of rest → extend rest 30–60s",
-      "If rest must be extended repeatedly → reduce volume next session",
+      "If breathing is not calm by end of rest â†’ extend rest 30â€“60s",
+      "If rest must be extended repeatedly â†’ reduce volume next session",
     ],
     emphasis: "Rest protects the nervous system and maintains quality.",
   },
@@ -86,7 +86,7 @@ export const GLOBAL_RULES = {
       "Movement feels smooth",
     ],
     emphasis:
-      "If first working set feels unstable → stop and downgrade session.",
+      "If first working set feels unstable â†’ stop and downgrade session.",
     emphasisSubtitle: "This prevents forcing training on bad days.",
   },
 };
@@ -183,7 +183,7 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
     ],
     scaling: {
       description: "Cluster sets or isometric holds",
-      options: ["Cluster sets: 2 reps + 20–30s rest", "Isometric holds: 5–10s"],
+      options: ["Cluster sets: 2 reps + 20â€“30s rest", "Isometric holds: 5â€“10s"],
     },
   },
 
@@ -248,7 +248,7 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
     category: ExerciseCategory.PULL,
     setup: [
       "Hip-width stance",
-      "Hinge at hips (45° torso angle)",
+      "Hinge at hips (45Â° torso angle)",
       "Neutral spine",
       "Overhand or underhand grip",
     ],
@@ -370,7 +370,7 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
     ],
     executionFocus: [
       "Lower chest to floor",
-      "Elbows 45° angle",
+      "Elbows 45Â° angle",
       "Push through full ROM",
       "Body stays rigid",
     ],
@@ -381,7 +381,7 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
     stopRules: [
       "Hips sag",
       "Hips pike up",
-      "Elbows flare wide (>45°)",
+      "Elbows flare wide (>45Â°)",
       "Neck cranes forward",
       "Shoulders shrug to ears",
     ],
@@ -409,7 +409,7 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
     stopRules: [
       "Hips sag",
       "Hips pike up",
-      "Elbows flare wide (>45°)",
+      "Elbows flare wide (>45Â°)",
       "Loss of control on descent",
       "Incomplete lockout",
     ],
@@ -482,7 +482,7 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
     ],
     executionFocus: [
       "Lower bar to mid-chest",
-      "Elbows 45° angle",
+      "Elbows 45Â° angle",
       "Drive through full foot",
       "Lock out at top",
     ],
@@ -765,7 +765,7 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
     setup: [
       "Lie on back",
       "Lower back pressed to floor",
-      "Arms vertical, knees at 90°",
+      "Arms vertical, knees at 90Â°",
       "Ribs down",
     ],
     executionFocus: [
@@ -825,7 +825,7 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       "Legs straight or knees bent",
     ],
     executionFocus: [
-      "Raise legs to 90° (or knees to chest)",
+      "Raise legs to 90Â° (or knees to chest)",
       "No swinging",
       "Lower with control",
       "Maintain shoulder position",

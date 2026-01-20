@@ -12,7 +12,7 @@ export async function testDatabaseInit(): Promise<void> {
     // Test 1: Initialize database
     console.log("\n[Test 1] Initializing database...");
     const db = await initDatabase();
-    console.log("✓ Database initialized");
+    console.log("âœ“ Database initialized");
 
     // Test 2: Check health
     console.log("\n[Test 2] Checking database health...");
@@ -20,8 +20,8 @@ export async function testDatabaseInit(): Promise<void> {
     console.log("Database health:", health);
     console.log(
       health.healthy
-        ? "✓ Database is healthy"
-        : "✗ Database health check failed",
+        ? "âœ“ Database is healthy"
+        : "âœ— Database health check failed",
     );
 
     // Test 3: Verify tables exist
@@ -45,9 +45,9 @@ export async function testDatabaseInit(): Promise<void> {
     const missingTables = requiredTables.filter((t) => !tableNames.includes(t));
 
     if (missingTables.length === 0) {
-      console.log("✓ All required tables exist");
+      console.log("âœ“ All required tables exist");
     } else {
-      console.log("✗ Missing tables:", missingTables.join(", "));
+      console.log("âœ— Missing tables:", missingTables.join(", "));
     }
 
     // Test 4: Verify indices exist
@@ -56,7 +56,7 @@ export async function testDatabaseInit(): Promise<void> {
       "SELECT name FROM sqlite_master WHERE type='index' ORDER BY name",
     );
     console.log("Indices found:", indices.length);
-    console.log("✓ Indices created");
+    console.log("âœ“ Indices created");
 
     // Test 5: Verify views exist
     console.log("\n[Test 5] Verifying views...");
@@ -64,7 +64,7 @@ export async function testDatabaseInit(): Promise<void> {
       "SELECT name FROM sqlite_master WHERE type='view' ORDER BY name",
     );
     console.log("Views found:", views.map((v) => v.name).join(", "));
-    console.log("✓ Views created");
+    console.log("âœ“ Views created");
 
     // Test 6: Check foreign keys enabled
     console.log("\n[Test 6] Checking foreign keys...");
@@ -73,8 +73,8 @@ export async function testDatabaseInit(): Promise<void> {
     );
     console.log(
       fkResult?.foreign_keys === 1
-        ? "✓ Foreign keys enabled"
-        : "✗ Foreign keys disabled",
+        ? "âœ“ Foreign keys enabled"
+        : "âœ— Foreign keys disabled",
     );
 
     // Test 7: Migration status
@@ -83,11 +83,11 @@ export async function testDatabaseInit(): Promise<void> {
     console.log("Current version:", migrationStatus.currentVersion);
     console.log("Latest version:", migrationStatus.latestVersion);
     console.log("Pending migrations:", migrationStatus.pendingMigrations);
-    console.log("✓ Migration system operational");
+    console.log("âœ“ Migration system operational");
 
     console.log("\n=== ALL TESTS PASSED ===\n");
   } catch (error) {
-    console.error("\n✗ TEST FAILED:", error);
+    console.error("\nâœ— TEST FAILED:", error);
     throw error;
   }
 }
@@ -124,7 +124,7 @@ export async function testBasicCRUD(): Promise<void> {
         new Date().toISOString(),
       ],
     );
-    console.log("✓ INSERT successful");
+    console.log("âœ“ INSERT successful");
 
     // Test SELECT
     console.log("\n[Test 2] Testing SELECT...");
@@ -133,7 +133,7 @@ export async function testBasicCRUD(): Promise<void> {
       [testCheckInId],
     );
     console.log("Retrieved check-in:", checkIn);
-    console.log("✓ SELECT successful");
+    console.log("âœ“ SELECT successful");
 
     // Test UPDATE
     console.log("\n[Test 3] Testing UPDATE...");
@@ -146,7 +146,7 @@ export async function testBasicCRUD(): Promise<void> {
       [testCheckInId],
     );
     console.log("Updated sleep_hours:", updatedCheckIn?.sleep_hours);
-    console.log("✓ UPDATE successful");
+    console.log("âœ“ UPDATE successful");
 
     // Test DELETE
     console.log("\n[Test 4] Testing DELETE...");
@@ -158,12 +158,12 @@ export async function testBasicCRUD(): Promise<void> {
       [testCheckInId],
     );
     console.log(
-      deletedCheckIn === null ? "✓ DELETE successful" : "✗ DELETE failed",
+      deletedCheckIn === null ? "âœ“ DELETE successful" : "âœ— DELETE failed",
     );
 
     console.log("\n=== CRUD TESTS PASSED ===\n");
   } catch (error) {
-    console.error("\n✗ CRUD TEST FAILED:", error);
+    console.error("\nâœ— CRUD TEST FAILED:", error);
     throw error;
   }
 }
@@ -176,9 +176,9 @@ export async function runAllDatabaseTests(): Promise<void> {
   try {
     await testDatabaseInit();
     await testBasicCRUD();
-    console.log("🎉 ALL DATABASE TESTS PASSED 🎉");
+    console.log("ðŸŽ‰ ALL DATABASE TESTS PASSED ðŸŽ‰");
   } catch (error) {
-    console.error("❌ DATABASE TESTS FAILED:", error);
+    console.error("âŒ DATABASE TESTS FAILED:", error);
     throw error;
   }
 }
