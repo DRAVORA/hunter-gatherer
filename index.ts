@@ -1,5 +1,14 @@
-import { registerRootComponent } from "expo";
+// ============================================================================
+// CRITICAL: This import MUST be first!
+// ============================================================================
+// Polyfills crypto.getRandomValues() for React Native
+// Required by the uuid package
+import "react-native-get-random-values";
 
+// ============================================================================
+// APP REGISTRATION
+// ============================================================================
+import { registerRootComponent } from "expo";
 import App from "./App";
 
 // registerRootComponent calls AppRegistry.registerComponent('main', () => App);
