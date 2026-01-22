@@ -7,240 +7,215 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RouteProp } from "@react-navigation/native";
+import { RootStackParamList } from "../../App";
 import { v4 as uuidv4 } from "uuid";
+import "react-native-get-random-values";
+
 import { ReadinessIndicator } from "../components";
-import { useDatabase } from "../hooks/useDatabase";
-import { HUNTER_GATHERER_BASIC } from "../data/programs";
 import { ReadinessStatus } from "../types";
-import { getTodayDate, getCurrentTimestamp } from "../utils/formatting";
+import { getDatabase } from "../database/init";
+import { getSessionById } from "../data/programs";
+import { applyVolumeAdjustment } from "../utils/calculations";
 
-// ============================================================================
-// SESSION READINESS SCREEN
-// ============================================================================
-// Shows readiness status and pre-training checklist
-// Creates training session and navigates to exercise execution
-// ============================================================================
+type SessionReadinessNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  "SessionReadiness"
+>;
 
-interface SessionReadinessScreenProps {
-  route: any;
-  navigation: any;
+type SessionReadinessRouteProp = RouteProp<
+  RootStackParamList,
+  "SessionReadiness"
+>;
+
+interface Props {
+  navigation: SessionReadinessNavigationProp;
+  route: SessionReadinessRouteProp;
 }
 
-export default function SessionReadinessScreen({
-  route,
-  navigation,
-}: SessionReadinessScreenProps) {
-  const {
-    checkInId,
-    readinessStatus,
-    volumeAdjustment,
-    message,
-    allowTraining,
-  } = route.params;
+// ============================================================================
+// SESSION READINESS SCREEN (PLACEHOLDER)
+// ============================================================================
 
-  const db = useDatabase();
+export default function SessionReadinessScreen({ navigation, route }: Props) {
+  const { checkInId, readinessStatus, volumeAdjustmentPercent } = route.params;
 
-  // Pre-training checklist state
   const [waterConsumed, setWaterConsumed] = useState(false);
-  const [notFasted, setNotFasted] = useState(false);
+  const [notTrainingFasted, setNotTrainingFasted] = useState(false);
   const [noDizziness, setNoDizziness] = useState(false);
 
-  // User profile check (for nausea-prone check)
-  const [nauseaProneWhileFasted, setNauseaProneWhileFasted] = useState(false);
+  const canBeginSession =
+    waterConsumed && notTrainingFasted && noDizziness &&
+    (readinessStatus === ReadinessStatus.READY ||
+      readinessStatus === ReadinessStatus.VOLUME_REDUCED);
 
-  // Load user profile on mount
-  React.useEffect(() => {
-    const loadProfile = async () => {
-      const profile = await db.getUserProfile();
-      if (profile) {
-        setNauseaProneWhileFasted(profile.nauseaProneWhileFasted);
-      }
-    };
-    loadProfile();
-  }, []);
-
-  // Checklist complete check
-  const checklistComplete =
-    waterConsumed && noDizziness && (nauseaProneWhileFasted ? notFasted : true); // Only require notFasted if nausea-prone
-
-  const handleBeginSession = async () => {
-    if (!checklistComplete) {
-      Alert.alert(
-        "Checklist Incomplete",
-        "Please complete all pre-training checks before starting.",
-      );
-      return;
+  function getReadinessMessage(): string {
+    switch (readinessStatus) {
+      case ReadinessStatus.READY:
+        return "Ready to train at full volume.";
+      case ReadinessStatus.VOLUME_REDUCED:
+        return `Volume reduced by ${volumeAdjustmentPercent}% due to recovery status.`;
+      case ReadinessStatus.NO_PROGRESSION:
+        return "Two consecutive poor nights. No progression allowed today.";
+      case ReadinessStatus.REST_DAY:
+        return "Sharp pain detected. Rest day required.";
+      default:
+        return "Unknown readiness status.";
     }
+  }
 
+  async function handleBeginSession() {
     try {
-      // For now, we'll use the first session from the program
-      // In a real app, you'd select which session to do
-      const program = HUNTER_GATHERER_BASIC;
-      const sessionToRun = program.sessions[0]; // Pull Session A
+      const db = getDatabase();
 
-      // Calculate planned volume (total sets)
-      const plannedVolume = sessionToRun.exercises.reduce(
+      // For demo purposes, use first session from Pull Session A
+      const session = getSessionById("pull-a");
+      if (!session) {
+        Alert.alert("Error", "Session not found");
+        return;
+      }
+
+      // Create training session
+      const sessionId = uuidv4();
+      const today = new Date().toISOString().split("T")[0];
+
+      // Calculate planned volume
+      let plannedVolume = session.exercises.reduce(
         (sum, ex) => sum + ex.targetSets,
         0,
       );
 
-      // Create training session in database
-      const sessionId = await db.saveTrainingSession({
-        id: uuidv4(),
-        date: getTodayDate(),
-        programName: program.name,
-        sessionName: sessionToRun.name,
-        startTime: getCurrentTimestamp(),
-        plannedVolume,
-        completedVolume: 0,
-        volumeAdjustmentApplied: volumeAdjustment,
-        preTrainingChecklistComplete: true,
-      });
+      await db.runAsync(
+        `INSERT INTO training_session (
+          id, date, program_name, session_name, start_time,
+          planned_volume, volume_adjustment_applied,
+          pre_training_checklist_complete
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          sessionId,
+          today,
+          "Hunter-Gatherer Basic",
+          session.name,
+          new Date().toISOString(),
+          plannedVolume,
+          volumeAdjustmentPercent,
+          1,
+        ],
+      );
+
+      console.log("[SessionReadiness] Session created:", sessionId);
 
       // Navigate to exercise execution
       navigation.navigate("ExerciseExecution", {
         sessionId,
-        programExercises: sessionToRun.exercises,
-        volumeAdjustment,
+        programName: "Hunter-Gatherer Basic",
+        sessionName: session.name,
       });
-    } catch (err) {
-      console.error("[SessionReadiness] Failed to create session:", err);
+    } catch (error) {
+      console.error("[SessionReadiness] Failed to create session:", error);
       Alert.alert("Error", "Failed to start session. Please try again.");
     }
-  };
+  }
 
-  const handleRestDay = () => {
-    Alert.alert("Rest Day", "Good choice. Recovery is training.", [
-      {
-        text: "View History",
-        onPress: () => navigation.navigate("SessionHistory"),
-      },
-      {
-        text: "OK",
-        style: "cancel",
-      },
-    ]);
-  };
-
-  // If not allowed to train, show rest day message
-  if (!allowTraining) {
-    return (
-      <ScrollView style={styles.container}>
-        <View style={styles.content}>
-          <ReadinessIndicator status={readinessStatus} message={message} />
-
-          <View style={styles.section}>
-            <Text style={styles.messageText}>
-              Training is not recommended today. Take a rest day and let your
-              body recover.
-            </Text>
-          </View>
-
-          <TouchableOpacity
-            style={[styles.button, styles.restDayButton]}
-            onPress={() => navigation.goBack()}
-          >
-            <Text style={styles.buttonText}>Back to Check-In</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.button, styles.secondaryButton]}
-            onPress={() => navigation.navigate("SessionHistory")}
-          >
-            <Text style={styles.buttonText}>View History</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+  function handleRestDay() {
+    Alert.alert(
+      "Rest Day",
+      "You've chosen to take a rest day. Return to check-in tomorrow.",
+      [
+        {
+          text: "OK",
+          onPress: () => navigation.navigate("DailyCheckIn"),
+        },
+      ],
     );
   }
 
-  // Show pre-training checklist
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
-        <ReadinessIndicator status={readinessStatus} message={message} />
+        <ReadinessIndicator
+          status={readinessStatus as ReadinessStatus}
+          message={getReadinessMessage()}
+        />
 
-        {/* Volume adjustment notice */}
-        {volumeAdjustment > 0 && (
-          <View style={styles.noticeBox}>
-            <Text style={styles.noticeTitle}>Volume Adjustment Applied</Text>
-            <Text style={styles.noticeText}>
-              Set count will be reduced by {volumeAdjustment}% to match your
-              current readiness.
-            </Text>
+        {/* Pre-training checklist (only if training allowed) */}
+        {(readinessStatus === ReadinessStatus.READY ||
+          readinessStatus === ReadinessStatus.VOLUME_REDUCED) && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Pre-Training Checklist</Text>
+
+            <TouchableOpacity
+              style={styles.checkbox}
+              onPress={() => setWaterConsumed(!waterConsumed)}
+            >
+              <View
+                style={[
+                  styles.checkboxBox,
+                  waterConsumed && styles.checkboxBoxChecked,
+                ]}
+              >
+                {waterConsumed && <Text style={styles.checkmark}>✓</Text>}
+              </View>
+              <Text style={styles.checkboxLabel}>
+                Water consumed (500-750ml)
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.checkbox}
+              onPress={() => setNotTrainingFasted(!notTrainingFasted)}
+            >
+              <View
+                style={[
+                  styles.checkboxBox,
+                  notTrainingFasted && styles.checkboxBoxChecked,
+                ]}
+              >
+                {notTrainingFasted && <Text style={styles.checkmark}>✓</Text>}
+              </View>
+              <Text style={styles.checkboxLabel}>Not training fasted</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.checkbox}
+              onPress={() => setNoDizziness(!noDizziness)}
+            >
+              <View
+                style={[
+                  styles.checkboxBox,
+                  noDizziness && styles.checkboxBoxChecked,
+                ]}
+              >
+                {noDizziness && <Text style={styles.checkmark}>✓</Text>}
+              </View>
+              <Text style={styles.checkboxLabel}>No dizziness</Text>
+            </TouchableOpacity>
           </View>
         )}
 
-        {/* Pre-training checklist */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Pre-Training Checklist</Text>
-          <Text style={styles.sectionSubtitle}>
-            Complete all items before starting
-          </Text>
-
-          <ChecklistItem
-            label="Water consumed (500-750ml)"
-            checked={waterConsumed}
-            onToggle={() => setWaterConsumed(!waterConsumed)}
-          />
-
-          {nauseaProneWhileFasted && (
-            <ChecklistItem
-              label="Not training fasted"
-              checked={notFasted}
-              onToggle={() => setNotFasted(!notFasted)}
-            />
+        {/* Action Buttons */}
+        <View style={styles.buttonContainer}>
+          {(readinessStatus === ReadinessStatus.READY ||
+            readinessStatus === ReadinessStatus.VOLUME_REDUCED) && (
+            <TouchableOpacity
+              style={[
+                styles.beginButton,
+                !canBeginSession && styles.beginButtonDisabled,
+              ]}
+              onPress={handleBeginSession}
+              disabled={!canBeginSession}
+            >
+              <Text style={styles.beginButtonText}>Begin Session</Text>
+            </TouchableOpacity>
           )}
 
-          <ChecklistItem
-            label="No dizziness or lightheadedness"
-            checked={noDizziness}
-            onToggle={() => setNoDizziness(!noDizziness)}
-          />
+          <TouchableOpacity style={styles.restButton} onPress={handleRestDay}>
+            <Text style={styles.restButtonText}>Rest Day</Text>
+          </TouchableOpacity>
         </View>
-
-        {/* Action buttons */}
-        <TouchableOpacity
-          style={[
-            styles.button,
-            styles.beginButton,
-            !checklistComplete && styles.buttonDisabled,
-          ]}
-          onPress={handleBeginSession}
-          disabled={!checklistComplete}
-        >
-          <Text style={styles.buttonText}>Begin Session</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.button, styles.restDayButton]}
-          onPress={handleRestDay}
-        >
-          <Text style={styles.buttonText}>Rest Day</Text>
-        </TouchableOpacity>
       </View>
     </ScrollView>
-  );
-}
-
-// ============================================================================
-// CHECKLIST ITEM COMPONENT
-// ============================================================================
-
-interface ChecklistItemProps {
-  label: string;
-  checked: boolean;
-  onToggle: () => void;
-}
-
-function ChecklistItem({ label, checked, onToggle }: ChecklistItemProps) {
-  return (
-    <TouchableOpacity style={styles.checklistItem} onPress={onToggle}>
-      <View style={[styles.checkbox, checked && styles.checkboxChecked]}>
-        {checked && <Text style={styles.checkmark}>✓</Text>}
-      </View>
-      <Text style={styles.checklistLabel}>{label}</Text>
-    </TouchableOpacity>
   );
 }
 
@@ -251,104 +226,80 @@ function ChecklistItem({ label, checked, onToggle }: ChecklistItemProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFF",
+    backgroundColor: "#F5F5F5",
   },
   content: {
-    padding: 20,
+    padding: 16,
   },
   section: {
-    marginTop: 24,
-    marginBottom: 16,
+    backgroundColor: "#FFF",
+    borderRadius: 4,
+    padding: 16,
+    marginTop: 16,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 4,
-    color: "#000",
-  },
-  sectionSubtitle: {
-    fontSize: 14,
-    color: "#666",
     marginBottom: 16,
-  },
-  noticeBox: {
-    backgroundColor: "#FFF3E0",
-    padding: 16,
-    borderRadius: 4,
-    marginTop: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: "#FFA500",
-  },
-  noticeTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 8,
     color: "#000",
-  },
-  noticeText: {
-    fontSize: 14,
-    color: "#333",
-    lineHeight: 20,
-  },
-  messageText: {
-    fontSize: 16,
-    color: "#333",
-    lineHeight: 24,
-    marginTop: 16,
-  },
-  checklistItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#EEE",
   },
   checkbox: {
-    width: 28,
-    height: 28,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+  },
+  checkboxBox: {
+    width: 24,
+    height: 24,
     borderWidth: 2,
-    borderColor: "#CCC",
+    borderColor: "#757575",
     borderRadius: 4,
     marginRight: 12,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#FFF",
   },
-  checkboxChecked: {
+  checkboxBoxChecked: {
     backgroundColor: "#4CAF50",
     borderColor: "#4CAF50",
   },
   checkmark: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "bold",
     color: "#FFF",
   },
-  checklistLabel: {
+  checkboxLabel: {
     fontSize: 16,
-    color: "#000",
+    color: "#333",
     flex: 1,
   },
-  button: {
-    padding: 16,
-    borderRadius: 4,
-    alignItems: "center",
-    marginTop: 16,
+  buttonContainer: {
+    marginTop: 24,
   },
   beginButton: {
     backgroundColor: "#4CAF50",
+    paddingVertical: 16,
+    borderRadius: 4,
+    alignItems: "center",
+    marginBottom: 12,
   },
-  restDayButton: {
-    backgroundColor: "#2196F3",
+  beginButtonDisabled: {
+    backgroundColor: "#BDBDBD",
   },
-  secondaryButton: {
-    backgroundColor: "#757575",
-  },
-  buttonDisabled: {
-    backgroundColor: "#CCC",
-  },
-  buttonText: {
-    color: "#FFF",
+  beginButtonText: {
     fontSize: 18,
     fontWeight: "bold",
+    color: "#FFF",
+  },
+  restButton: {
+    backgroundColor: "#757575",
+    paddingVertical: 16,
+    borderRadius: 4,
+    alignItems: "center",
+  },
+  restButtonText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#FFF",
   },
 });

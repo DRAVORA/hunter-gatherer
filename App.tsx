@@ -2,12 +2,9 @@ import React, { useEffect, useState } from "react";
 import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { StatusBar } from "expo-status-bar";
+import { initDatabase, checkDatabaseHealth } from "./src/database/init";
 
-// Database
-import { initDatabase } from "./src/database/init";
-
-// Screens
+// Import screens (Phase 4 - will be implemented)
 import DailyCheckInScreen from "./src/screens/DailyCheckInScreen";
 import SessionReadinessScreen from "./src/screens/SessionReadinessScreen";
 import ExerciseExecutionScreen from "./src/screens/ExerciseExecutionScreen";
@@ -23,14 +20,12 @@ export type RootStackParamList = {
   SessionReadiness: {
     checkInId: string;
     readinessStatus: string;
-    volumeAdjustment: number;
-    message: string;
-    allowTraining: boolean;
+    volumeAdjustmentPercent: number;
   };
   ExerciseExecution: {
     sessionId: string;
-    programExercises: any[];
-    volumeAdjustment: number;
+    programName: string;
+    sessionName: string;
   };
   PostSession: {
     sessionId: string;
@@ -49,140 +44,157 @@ export default function App() {
   const [dbError, setDbError] = useState<string | null>(null);
 
   useEffect(() => {
-    initializeApp();
+    initializeDatabase();
   }, []);
 
-  const initializeApp = async () => {
+  async function initializeDatabase() {
     try {
       console.log("[App] Initializing database...");
       await initDatabase();
-      console.log("[App] Database initialized successfully");
+
+      const health = await checkDatabaseHealth();
+      console.log("[App] Database health:", health);
+
+      if (!health.healthy) {
+        throw new Error(
+          `Database unhealthy: version=${health.version}, tables=${health.tableCount}`,
+        );
+      }
+
       setIsDbReady(true);
-    } catch (err) {
-      console.error("[App] Database initialization failed:", err);
-      setDbError(String(err));
+      console.log("[App] Database ready");
+    } catch (error) {
+      console.error("[App] Database initialization failed:", error);
+      setDbError(String(error));
     }
-  };
+  }
 
-  // Show loading screen while database initializes
-  if (!isDbReady) {
-    if (dbError) {
-      return (
-        <View style={styles.centerContainer}>
-          <Text style={styles.errorTitle}>Database Error</Text>
-          <Text style={styles.errorText}>{dbError}</Text>
-          <Text style={styles.errorHint}>
-            Please restart the app. If the problem persists, reinstall.
-          </Text>
-        </View>
-      );
-    }
-
+  // Loading state
+  if (!isDbReady && !dbError) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#4CAF50" />
-        <Text style={styles.loadingText}>Initializing...</Text>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#2196F3" />
+        <Text style={styles.loadingText}>Initializing database...</Text>
       </View>
     );
   }
 
+  // Error state
+  if (dbError) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorTitle}>Database Error</Text>
+        <Text style={styles.errorMessage}>{dbError}</Text>
+        <Text style={styles.errorHint}>
+          Try restarting the app. If the problem persists, the database may
+          need to be reset.
+        </Text>
+      </View>
+    );
+  }
+
+  // Main app navigation
   return (
-    <>
-      <StatusBar style="auto" />
-      <NavigationContainer>
-        <Stack.Navigator
-          initialRouteName="DailyCheckIn"
-          screenOptions={{
-            headerStyle: {
-              backgroundColor: "#FFF",
-            },
-            headerTintColor: "#000",
-            headerTitleStyle: {
-              fontWeight: "bold",
-            },
+    <NavigationContainer>
+      <Stack.Navigator
+        initialRouteName="DailyCheckIn"
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: "#2B2B2B",
+          },
+          headerTintColor: "#FFF",
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+          headerBackTitleVisible: false,
+        }}
+      >
+        <Stack.Screen
+          name="DailyCheckIn"
+          component={DailyCheckInScreen}
+          options={{
+            title: "Daily Check-In",
+            headerLeft: () => null, // No back button on check-in
           }}
-        >
-          <Stack.Screen
-            name="DailyCheckIn"
-            component={DailyCheckInScreen}
-            options={{
-              title: "Daily Check-In",
-              headerLeft: () => null, // Prevent going back
-            }}
-          />
+        />
 
-          <Stack.Screen
-            name="SessionReadiness"
-            component={SessionReadinessScreen}
-            options={{
-              title: "Session Readiness",
-            }}
-          />
+        <Stack.Screen
+          name="SessionReadiness"
+          component={SessionReadinessScreen}
+          options={{
+            title: "Session Readiness",
+          }}
+        />
 
-          <Stack.Screen
-            name="ExerciseExecution"
-            component={ExerciseExecutionScreen}
-            options={{
-              title: "Training",
-              headerLeft: () => null, // Prevent going back during workout
-            }}
-          />
+        <Stack.Screen
+          name="ExerciseExecution"
+          component={ExerciseExecutionScreen}
+          options={{
+            title: "Training Session",
+            headerLeft: () => null, // Prevent back navigation during session
+          }}
+        />
 
-          <Stack.Screen
-            name="PostSession"
-            component={PostSessionScreen}
-            options={{
-              title: "Session Complete",
-              headerLeft: () => null, // Prevent going back
-            }}
-          />
+        <Stack.Screen
+          name="PostSession"
+          component={PostSessionScreen}
+          options={{
+            title: "Session Complete",
+            headerLeft: () => null, // No back button on post-session
+          }}
+        />
 
-          <Stack.Screen
-            name="SessionHistory"
-            component={SessionHistoryScreen}
-            options={{
-              title: "Session History",
-            }}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </>
+        <Stack.Screen
+          name="SessionHistory"
+          component={SessionHistoryScreen}
+          options={{
+            title: "Session History",
+          }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
 // ============================================================================
-// BASIC STYLES
+// STYLES
 // ============================================================================
 
 const styles = StyleSheet.create({
-  centerContainer: {
+  loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#FFF",
-    padding: 20,
+    backgroundColor: "#F5F5F5",
   },
   loadingText: {
     marginTop: 16,
     fontSize: 16,
     color: "#666",
   },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#FFF",
+    padding: 24,
+  },
   errorTitle: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#D32F2F",
-    marginBottom: 12,
+    marginBottom: 16,
   },
-  errorText: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 8,
+  errorMessage: {
+    fontSize: 16,
+    color: "#333",
+    marginBottom: 16,
     textAlign: "center",
   },
   errorHint: {
-    fontSize: 12,
-    color: "#999",
+    fontSize: 14,
+    color: "#666",
     textAlign: "center",
-    marginTop: 16,
+    fontStyle: "italic",
   },
 });

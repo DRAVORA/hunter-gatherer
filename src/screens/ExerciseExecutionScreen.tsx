@@ -7,318 +7,184 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
-import { useSessionState } from "../hooks/useSessionState";
-import {
-  StopRulesBox,
-  RepCounter,
-  RestTimer,
-  ConfirmationDialog,
-} from "../components";
-import { getExerciseRules } from "../data/exercises";
-import { StopReason } from "../types";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RouteProp } from "@react-navigation/native";
+import { RootStackParamList } from "../../App";
 
-// ============================================================================
-// EXERCISE EXECUTION SCREEN
-// ============================================================================
-// The main workout screen
-// Shows exercise details, tracks sets/reps, manages rest periods
-// This is the most complex screen in the app
-// ============================================================================
+import { StopRulesBox, RepCounter, RestTimer } from "../components";
+import { getDatabase } from "../database/init";
 
-interface ExerciseExecutionScreenProps {
-  route: any;
-  navigation: any;
+type ExerciseExecutionNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  "ExerciseExecution"
+>;
+
+type ExerciseExecutionRouteProp = RouteProp<
+  RootStackParamList,
+  "ExerciseExecution"
+>;
+
+interface Props {
+  navigation: ExerciseExecutionNavigationProp;
+  route: ExerciseExecutionRouteProp;
 }
 
-export default function ExerciseExecutionScreen({
-  route,
-  navigation,
-}: ExerciseExecutionScreenProps) {
-  const { sessionId, programExercises, volumeAdjustment } = route.params;
+// ============================================================================
+// EXERCISE EXECUTION SCREEN (PLACEHOLDER)
+// ============================================================================
+// This is a minimal demonstration of the execution flow
+// Full implementation will be in Phase 4
+// ============================================================================
 
-  // Session state management
-  const session = useSessionState({
-    sessionId,
-    programExercises,
-    volumeAdjustmentPercent: volumeAdjustment,
-  });
+export default function ExerciseExecutionScreen({ navigation, route }: Props) {
+  const { sessionId } = route.params;
 
-  // UI state
+  const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
+  const [currentSet, setCurrentSet] = useState(1);
+  const [cleanReps, setCleanReps] = useState(0);
   const [showRestTimer, setShowRestTimer] = useState(false);
-  const [feltClean, setFeltClean] = useState(true);
-  const [showSetupCues, setShowSetupCues] = useState(true);
-  const [showStopConfirmation, setShowStopConfirmation] = useState(false);
 
-  // Get exercise rules
-  const exerciseRules = session.currentExercise
-    ? getExerciseRules(session.currentExercise.exerciseName)
-    : null;
+  // Demo exercises (simplified)
+  const demoExercises = [
+    { name: "Scapular Pull-Up", sets: 3, reps: 5, rest: 90 },
+    { name: "Pull-Up", sets: 5, reps: 5, rest: 180 },
+  ];
 
-  // Handle setup viewed (mark it in database on first set)
-  React.useEffect(() => {
-    if (session.currentSetNumber === 1 && !session.setupViewed) {
-      session.markSetupViewed();
-    }
-  }, [session.currentSetNumber]);
+  const currentExercise = demoExercises[currentExerciseIndex];
+  const isLastExercise = currentExerciseIndex === demoExercises.length - 1;
+  const isLastSet = currentSet === currentExercise.sets;
 
-  // Auto-open setup cues on first set
-  React.useEffect(() => {
-    if (session.currentSetNumber === 1) {
-      setShowSetupCues(true);
-    } else {
-      setShowSetupCues(false);
-    }
-  }, [session.currentSetNumber, session.currentExerciseIndex]);
+  const demoStopRules = [
+    "Any elbow bend",
+    "Back arches",
+    "Hip shaking or swinging",
+    "Shoulders elevate instead of depress",
+  ];
 
-  const handleStartSet = () => {
-    session.startSet();
-  };
-
-  const handleStopSet = async () => {
-    try {
-      const result = await session.stopSet(
-        feltClean,
-        StopReason.CLEAN_COMPLETION,
-        undefined, // Will be filled by rest timer
-      );
-
-      if (result.sessionComplete) {
-        // Navigate to post-session screen
-        navigation.navigate("PostSession", { sessionId });
-      } else if (result.movedToNextExercise) {
-        // Reset state for new exercise
-        setFeltClean(true);
-        setShowSetupCues(true);
-      } else {
-        // Show rest timer for next set
-        setShowRestTimer(true);
-      }
-    } catch (err) {
-      console.error("[ExerciseExecution] Failed to stop set:", err);
-      Alert.alert("Error", "Failed to save set. Please try again.");
-    }
-  };
-
-  const handleRestComplete = (actualSeconds: number) => {
-    setShowRestTimer(false);
-    setFeltClean(true); // Reset for next set
-  };
-
-  const handleSkipRest = () => {
-    setShowRestTimer(false);
-    setFeltClean(true);
-  };
-
-  const handleEndSession = () => {
-    setShowStopConfirmation(true);
-  };
-
-  const confirmEndSession = () => {
-    setShowStopConfirmation(false);
-    navigation.navigate("PostSession", { sessionId });
-  };
-
-  // Loading state
-  if (!session.isInitialized || !exerciseRules) {
-    return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.loadingText}>Loading exercise...</Text>
-      </View>
+  function handleStopSet() {
+    Alert.alert(
+      "Set Complete",
+      `${cleanReps} clean reps recorded. Did this set feel clean?`,
+      [
+        {
+          text: "Yes",
+          onPress: () => handleSetComplete(true),
+        },
+        {
+          text: "No",
+          onPress: () => handleSetComplete(false),
+        },
+      ],
     );
   }
 
+  function handleSetComplete(feltClean: boolean) {
+    console.log(
+      `[Exercise] Set ${currentSet} complete: ${cleanReps} reps, felt clean: ${feltClean}`,
+    );
+
+    // Reset rep counter
+    setCleanReps(0);
+
+    // Check if this was the last set of the last exercise
+    if (isLastExercise && isLastSet) {
+      handleSessionComplete();
+      return;
+    }
+
+    // Check if more sets remain for this exercise
+    if (currentSet < currentExercise.sets) {
+      setCurrentSet(currentSet + 1);
+      setShowRestTimer(true);
+    } else {
+      // Move to next exercise
+      setCurrentExerciseIndex(currentExerciseIndex + 1);
+      setCurrentSet(1);
+      setShowRestTimer(false);
+    }
+  }
+
+  function handleRestComplete(actualSeconds: number) {
+    console.log(`[Exercise] Rest complete: ${actualSeconds}s`);
+    setShowRestTimer(false);
+  }
+
+  function handleSkipRest() {
+    console.log("[Exercise] Rest skipped");
+    setShowRestTimer(false);
+  }
+
+  async function handleSessionComplete() {
+    try {
+      const db = getDatabase();
+
+      // Update session end time
+      await db.runAsync(
+        "UPDATE training_session SET end_time = ? WHERE id = ?",
+        [new Date().toISOString(), sessionId],
+      );
+
+      console.log("[Exercise] Session complete:", sessionId);
+
+      // Navigate to post-session screen
+      navigation.navigate("PostSession", { sessionId });
+    } catch (error) {
+      console.error("[Exercise] Failed to complete session:", error);
+      Alert.alert("Error", "Failed to complete session. Please try again.");
+    }
+  }
+
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.scrollView}>
-        <View style={styles.content}>
-          {/* Exercise Header */}
-          <View style={styles.header}>
-            <Text style={styles.exerciseName}>
-              {session.currentExercise.exerciseName}
-            </Text>
-            <Text style={styles.setCounter}>
-              Set {session.currentSetNumber} of{" "}
-              {session.currentExercise.targetSets}
-            </Text>
-            <Text style={styles.progressText}>
-              Exercise {session.currentExerciseIndex + 1} of{" "}
-              {session.totalExercises}
-            </Text>
-          </View>
+    <ScrollView style={styles.container}>
+      <View style={styles.content}>
+        {/* Exercise Header */}
+        <View style={styles.header}>
+          <Text style={styles.exerciseName}>{currentExercise.name}</Text>
+          <Text style={styles.setInfo}>
+            Set {currentSet} of {currentExercise.sets}
+          </Text>
+        </View>
 
-          {/* Setup Cues (Collapsible, first set only) */}
-          {session.currentSetNumber === 1 && (
-            <View style={styles.section}>
-              <TouchableOpacity
-                style={styles.collapsibleHeader}
-                onPress={() => setShowSetupCues(!showSetupCues)}
-              >
-                <Text style={styles.sectionTitle}>
-                  {showSetupCues ? "▼" : "▶"} Setup
-                </Text>
-              </TouchableOpacity>
+        {/* Stop Rules */}
+        <View style={styles.section}>
+          <StopRulesBox rules={demoStopRules} />
+        </View>
 
-              {showSetupCues && (
-                <View style={styles.cueList}>
-                  {exerciseRules.setup.map((cue, index) => (
-                    <View key={index} style={styles.cueItem}>
-                      <Text style={styles.cueBullet}>•</Text>
-                      <Text style={styles.cueText}>{cue}</Text>
-                    </View>
-                  ))}
-                </View>
-              )}
-            </View>
-          )}
-
-          {/* Execution Focus (Always visible) */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Focus</Text>
-            <View style={styles.cueList}>
-              {exerciseRules.executionFocus.map((cue, index) => (
-                <View key={index} style={styles.cueItem}>
-                  <Text style={styles.cueBullet}>•</Text>
-                  <Text style={styles.cueText}>{cue}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-
-          {/* Breathing */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Breathing</Text>
-            <View style={styles.breathingRow}>
-              <View style={styles.breathingItem}>
-                <Text style={styles.breathingLabel}>Inhale:</Text>
-                <Text style={styles.breathingText}>
-                  {exerciseRules.breathing.inhale}
-                </Text>
-              </View>
-              <View style={styles.breathingDivider} />
-              <View style={styles.breathingItem}>
-                <Text style={styles.breathingLabel}>Exhale:</Text>
-                <Text style={styles.breathingText}>
-                  {exerciseRules.breathing.exhale}
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Stop Rules (ALWAYS VISIBLE) */}
-          <StopRulesBox rules={exerciseRules.stopRules} />
-
-          {/* Rep Counter (when set is active) */}
-          {session.isSetActive && (
+        {/* Rep Counter (only if not resting) */}
+        {!showRestTimer && (
+          <>
             <View style={styles.section}>
               <RepCounter
-                cleanReps={session.cleanReps}
-                onIncrement={session.incrementReps}
-                onDecrement={session.decrementReps}
+                cleanReps={cleanReps}
+                onIncrement={() => setCleanReps(cleanReps + 1)}
+                onDecrement={() =>
+                  setCleanReps(Math.max(0, cleanReps - 1))
+                }
               />
             </View>
-          )}
 
-          {/* Set Actions */}
-          {!showRestTimer && (
-            <View style={styles.actionButtons}>
-              {!session.isSetActive ? (
-                <TouchableOpacity
-                  style={[styles.button, styles.startButton]}
-                  onPress={handleStartSet}
-                >
-                  <Text style={styles.buttonText}>Start Set</Text>
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity
-                  style={[styles.button, styles.stopButton]}
-                  onPress={handleStopSet}
-                >
-                  <Text style={styles.buttonText}>STOP SET</Text>
-                </TouchableOpacity>
-              )}
+            {/* Stop Set Button */}
+            <TouchableOpacity
+              style={styles.stopButton}
+              onPress={handleStopSet}
+            >
+              <Text style={styles.stopButtonText}>Stop Set</Text>
+            </TouchableOpacity>
+          </>
+        )}
 
-              <TouchableOpacity
-                style={[styles.button, styles.endButton]}
-                onPress={handleEndSession}
-              >
-                <Text style={styles.buttonText}>End Session Early</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {/* Rest Timer Between Sets */}
-          {showRestTimer && (
-            <View style={styles.restSection}>
-              <View style={styles.feltCleanContainer}>
-                <Text style={styles.feltCleanLabel}>
-                  Did that set feel clean?
-                </Text>
-                <View style={styles.feltCleanButtons}>
-                  <TouchableOpacity
-                    style={[
-                      styles.feltCleanButton,
-                      feltClean && styles.feltCleanButtonYes,
-                    ]}
-                    onPress={() => setFeltClean(true)}
-                  >
-                    <Text
-                      style={[
-                        styles.feltCleanButtonText,
-                        feltClean && styles.feltCleanButtonTextYes,
-                      ]}
-                    >
-                      Yes
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[
-                      styles.feltCleanButton,
-                      !feltClean && styles.feltCleanButtonNo,
-                    ]}
-                    onPress={() => setFeltClean(false)}
-                  >
-                    <Text
-                      style={[
-                        styles.feltCleanButtonText,
-                        !feltClean && styles.feltCleanButtonTextNo,
-                      ]}
-                    >
-                      No
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              {!feltClean && (
-                <View style={styles.warningBox}>
-                  <Text style={styles.warningText}>
-                    ⚠️ Form breakdown detected. Consider ending session.
-                  </Text>
-                </View>
-              )}
-
-              <RestTimer
-                targetSeconds={session.currentExercise.restTimeSeconds || 120}
-                onComplete={handleRestComplete}
-                onSkip={handleSkipRest}
-              />
-            </View>
-          )}
-        </View>
-      </ScrollView>
-
-      {/* Confirmation Dialog */}
-      <ConfirmationDialog
-        visible={showStopConfirmation}
-        title="End Session Early?"
-        message="Are you sure you want to end the session now? This will save your current progress."
-        confirmText="End Session"
-        cancelText="Continue Training"
-        onConfirm={confirmEndSession}
-        onCancel={() => setShowStopConfirmation(false)}
-      />
-    </View>
+        {/* Rest Timer (between sets) */}
+        {showRestTimer && (
+          <View style={styles.section}>
+            <RestTimer
+              targetSeconds={currentExercise.rest}
+              onComplete={handleRestComplete}
+              onSkip={handleSkipRest}
+            />
+          </View>
+        )}
+      </View>
+    </ScrollView>
   );
 }
 
@@ -329,180 +195,36 @@ export default function ExerciseExecutionScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFF",
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  scrollView: {
-    flex: 1,
+    backgroundColor: "#F5F5F5",
   },
   content: {
     padding: 16,
   },
-  loadingText: {
-    fontSize: 16,
-    color: "#666",
-  },
   header: {
     marginBottom: 24,
-    paddingBottom: 16,
-    borderBottomWidth: 2,
-    borderBottomColor: "#EEE",
   },
   exerciseName: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 8,
     color: "#000",
+    marginBottom: 8,
   },
-  setCounter: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#4CAF50",
-    marginBottom: 4,
-  },
-  progressText: {
-    fontSize: 14,
+  setInfo: {
+    fontSize: 18,
     color: "#666",
   },
   section: {
-    marginBottom: 20,
-  },
-  collapsibleHeader: {
-    marginBottom: 8,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 12,
-    color: "#000",
-  },
-  cueList: {
-    backgroundColor: "#F9F9F9",
-    padding: 12,
-    borderRadius: 4,
-  },
-  cueItem: {
-    flexDirection: "row",
-    marginBottom: 8,
-  },
-  cueBullet: {
-    fontSize: 16,
-    marginRight: 8,
-    color: "#000",
-  },
-  cueText: {
-    fontSize: 16,
-    flex: 1,
-    color: "#333",
-    lineHeight: 22,
-  },
-  breathingRow: {
-    flexDirection: "row",
-    backgroundColor: "#F9F9F9",
-    padding: 16,
-    borderRadius: 4,
-  },
-  breathingItem: {
-    flex: 1,
-  },
-  breathingDivider: {
-    width: 1,
-    backgroundColor: "#DDD",
-    marginHorizontal: 16,
-  },
-  breathingLabel: {
-    fontSize: 14,
-    fontWeight: "bold",
-    marginBottom: 4,
-    color: "#666",
-  },
-  breathingText: {
-    fontSize: 16,
-    color: "#000",
-  },
-  actionButtons: {
-    marginTop: 24,
-    gap: 12,
-  },
-  button: {
-    padding: 18,
-    borderRadius: 4,
-    alignItems: "center",
-  },
-  startButton: {
-    backgroundColor: "#4CAF50",
+    marginBottom: 24,
   },
   stopButton: {
     backgroundColor: "#D32F2F",
-  },
-  endButton: {
-    backgroundColor: "#757575",
-  },
-  buttonText: {
-    color: "#FFF",
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  restSection: {
-    marginTop: 24,
-  },
-  feltCleanContainer: {
-    marginBottom: 20,
-  },
-  feltCleanLabel: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 12,
-    textAlign: "center",
-    color: "#000",
-  },
-  feltCleanButtons: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  feltCleanButton: {
-    flex: 1,
     paddingVertical: 16,
     borderRadius: 4,
     alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#CCC",
-    backgroundColor: "#FFF",
   },
-  feltCleanButtonYes: {
-    backgroundColor: "#4CAF50",
-    borderColor: "#4CAF50",
-  },
-  feltCleanButtonNo: {
-    backgroundColor: "#FFA500",
-    borderColor: "#FFA500",
-  },
-  feltCleanButtonText: {
+  stopButtonText: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#000",
-  },
-  feltCleanButtonTextYes: {
     color: "#FFF",
-  },
-  feltCleanButtonTextNo: {
-    color: "#FFF",
-  },
-  warningBox: {
-    backgroundColor: "#FFF3E0",
-    padding: 16,
-    borderRadius: 4,
-    marginBottom: 20,
-    borderLeftWidth: 4,
-    borderLeftColor: "#FFA500",
-  },
-  warningText: {
-    fontSize: 14,
-    color: "#333",
-    fontWeight: "bold",
   },
 });

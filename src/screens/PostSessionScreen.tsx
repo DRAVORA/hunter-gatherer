@@ -8,28 +8,31 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
-import { useDatabase } from "../hooks/useDatabase";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RouteProp } from "@react-navigation/native";
+import { RootStackParamList } from "../../App";
+
 import { SessionFeel } from "../types";
-import { getCurrentTimestamp } from "../utils/formatting";
+import { getDatabase } from "../database/init";
 
-// ============================================================================
-// POST SESSION SCREEN
-// ============================================================================
-// Collects post-session feedback
-// Updates training session and navigates to history
-// ============================================================================
+type PostSessionNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  "PostSession"
+>;
 
-interface PostSessionScreenProps {
-  route: any;
-  navigation: any;
+type PostSessionRouteProp = RouteProp<RootStackParamList, "PostSession">;
+
+interface Props {
+  navigation: PostSessionNavigationProp;
+  route: PostSessionRouteProp;
 }
 
-export default function PostSessionScreen({
-  route,
-  navigation,
-}: PostSessionScreenProps) {
+// ============================================================================
+// POST-SESSION SCREEN (PLACEHOLDER)
+// ============================================================================
+
+export default function PostSessionScreen({ navigation, route }: Props) {
   const { sessionId } = route.params;
-  const db = useDatabase();
 
   const [appetiteReturned, setAppetiteReturned] = useState<boolean | null>(
     null,
@@ -38,75 +41,66 @@ export default function PostSessionScreen({
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleLogSession = async () => {
-    // Validation
-    if (appetiteReturned === null) {
-      Alert.alert("Missing Info", "Please indicate if appetite returned.");
+  const canSubmit = appetiteReturned !== null && sessionFeel !== null;
+
+  async function handleSubmit() {
+    if (!canSubmit) {
+      Alert.alert("Error", "Please complete all required fields");
       return;
     }
 
-    if (sessionFeel === null) {
-      Alert.alert("Missing Info", "Please indicate how the session felt.");
-      return;
-    }
+    setIsSubmitting(true);
 
     try {
-      setIsSubmitting(true);
+      const db = getDatabase();
 
-      // Update training session with post-session data
-      await db.updateTrainingSession(sessionId, {
-        endTime: getCurrentTimestamp(),
-        appetiteReturnedWithin60Min: appetiteReturned,
-        sessionFeel,
-        notes: notes || undefined,
-      });
+      // Update session with post-session data
+      await db.runAsync(
+        `UPDATE training_session 
+         SET appetite_returned_within_60_min = ?, 
+             session_feel = ?, 
+             notes = ?
+         WHERE id = ?`,
+        [appetiteReturned ? 1 : 0, sessionFeel, notes || null, sessionId],
+      );
 
-      // Show success message
-      Alert.alert("Session Logged", "Great work! Session saved successfully.", [
-        {
-          text: "View History",
-          onPress: () => navigation.navigate("SessionHistory"),
-        },
+      console.log("[PostSession] Session data saved:", sessionId);
+
+      Alert.alert("Session Complete", "Your training session has been logged.", [
         {
           text: "OK",
-          onPress: () => navigation.navigate("SessionHistory"),
+          onPress: () => navigation.navigate("DailyCheckIn"),
         },
       ]);
-    } catch (err) {
-      console.error("[PostSession] Failed to log session:", err);
-      Alert.alert("Error", "Failed to log session. Please try again.");
+    } catch (error) {
+      console.error("[PostSession] Failed to save:", error);
+      Alert.alert("Error", "Failed to save session data. Please try again.");
       setIsSubmitting(false);
     }
-  };
+  }
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Session Complete</Text>
-          <Text style={styles.subtitle}>How did it go?</Text>
-        </View>
+        <Text style={styles.title}>Session Complete</Text>
 
-        {/* Appetite Return Check */}
+        {/* Appetite Returned */}
         <View style={styles.section}>
           <Text style={styles.label}>
-            Did appetite return within 60 minutes?
+            Did your appetite return within 60 minutes?
           </Text>
-          <Text style={styles.hint}>
-            Appetite return indicates good recovery tolerance
-          </Text>
-          <View style={styles.buttonGroup}>
+          <View style={styles.buttonRow}>
             <TouchableOpacity
               style={[
-                styles.optionButton,
-                appetiteReturned === true && styles.optionButtonSelected,
+                styles.choiceButton,
+                appetiteReturned === true && styles.choiceButtonSelected,
               ]}
               onPress={() => setAppetiteReturned(true)}
             >
               <Text
                 style={[
-                  styles.optionButtonText,
-                  appetiteReturned === true && styles.optionButtonTextSelected,
+                  styles.choiceButtonText,
+                  appetiteReturned === true && styles.choiceButtonTextSelected,
                 ]}
               >
                 Yes
@@ -115,108 +109,52 @@ export default function PostSessionScreen({
 
             <TouchableOpacity
               style={[
-                styles.optionButton,
-                appetiteReturned === false && styles.optionButtonSelected,
+                styles.choiceButton,
+                appetiteReturned === false && styles.choiceButtonSelected,
               ]}
               onPress={() => setAppetiteReturned(false)}
             >
               <Text
                 style={[
-                  styles.optionButtonText,
-                  appetiteReturned === false && styles.optionButtonTextSelected,
+                  styles.choiceButtonText,
+                  appetiteReturned === false && styles.choiceButtonTextSelected,
                 ]}
               >
                 No
               </Text>
             </TouchableOpacity>
           </View>
-
-          {appetiteReturned === false && (
-            <View style={styles.warningBox}>
-              <Text style={styles.warningText}>
-                ⚠️ Consider reducing volume next session
-              </Text>
-            </View>
-          )}
         </View>
 
         {/* Session Feel */}
         <View style={styles.section}>
-          <Text style={styles.label}>Session felt:</Text>
-          <Text style={styles.hint}>
-            Be honest - this helps adjust future sessions
-          </Text>
-
-          <TouchableOpacity
-            style={[
-              styles.feelOption,
-              sessionFeel === SessionFeel.CONTROLLED &&
-                styles.feelOptionSelected,
-            ]}
-            onPress={() => setSessionFeel(SessionFeel.CONTROLLED)}
-          >
-            <View style={styles.feelContent}>
-              <Text style={styles.feelTitle}>Controlled</Text>
-              <Text style={styles.feelDescription}>
-                All reps clean, could have done more
-              </Text>
-            </View>
-            {sessionFeel === SessionFeel.CONTROLLED && (
-              <Text style={styles.checkmark}>✓</Text>
-            )}
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.feelOption,
-              sessionFeel === SessionFeel.PUSHED && styles.feelOptionSelected,
-            ]}
-            onPress={() => setSessionFeel(SessionFeel.PUSHED)}
-          >
-            <View style={styles.feelContent}>
-              <Text style={styles.feelTitle}>Pushed</Text>
-              <Text style={styles.feelDescription}>
-                Final sets challenging, form held
-              </Text>
-            </View>
-            {sessionFeel === SessionFeel.PUSHED && (
-              <Text style={styles.checkmark}>✓</Text>
-            )}
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.feelOption,
-              sessionFeel === SessionFeel.EASY && styles.feelOptionSelected,
-            ]}
-            onPress={() => setSessionFeel(SessionFeel.EASY)}
-          >
-            <View style={styles.feelContent}>
-              <Text style={styles.feelTitle}>Easy</Text>
-              <Text style={styles.feelDescription}>
-                Felt light, ready for more volume
-              </Text>
-            </View>
-            {sessionFeel === SessionFeel.EASY && (
-              <Text style={styles.checkmark}>✓</Text>
-            )}
-          </TouchableOpacity>
+          <Text style={styles.label}>How did the session feel?</Text>
+          {Object.values(SessionFeel).map((feel) => (
+            <TouchableOpacity
+              key={feel}
+              style={styles.radio}
+              onPress={() => setSessionFeel(feel)}
+            >
+              <View style={styles.radioCircle}>
+                {sessionFeel === feel && (
+                  <View style={styles.radioCircleSelected} />
+                )}
+              </View>
+              <Text style={styles.radioLabel}>{feel}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
-        {/* Notes */}
+        {/* Optional Notes */}
         <View style={styles.section}>
-          <Text style={styles.label}>Notes (Optional)</Text>
-          <Text style={styles.hint}>
-            Compensation patterns, pain, or other observations
-          </Text>
+          <Text style={styles.label}>Notes (optional)</Text>
           <TextInput
-            style={[styles.input, styles.textArea]}
+            style={styles.textInput}
             value={notes}
             onChangeText={setNotes}
-            placeholder="e.g., Right shoulder felt tight on overhead press..."
+            placeholder="Any observations or concerns..."
             multiline
             numberOfLines={4}
-            placeholderTextColor="#999"
           />
         </View>
 
@@ -224,18 +162,13 @@ export default function PostSessionScreen({
         <TouchableOpacity
           style={[
             styles.submitButton,
-            (isSubmitting ||
-              appetiteReturned === null ||
-              sessionFeel === null) &&
-              styles.submitButtonDisabled,
+            (!canSubmit || isSubmitting) && styles.submitButtonDisabled,
           ]}
-          onPress={handleLogSession}
-          disabled={
-            isSubmitting || appetiteReturned === null || sessionFeel === null
-          }
+          onPress={handleSubmit}
+          disabled={!canSubmit || isSubmitting}
         >
           <Text style={styles.submitButtonText}>
-            {isSubmitting ? "Logging..." : "Log Session"}
+            {isSubmitting ? "Saving..." : "Log Session"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -250,137 +183,100 @@ export default function PostSessionScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFF",
+    backgroundColor: "#F5F5F5",
   },
   content: {
-    padding: 20,
-  },
-  header: {
-    marginBottom: 24,
+    padding: 16,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 4,
+    marginBottom: 24,
     color: "#000",
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "#666",
   },
   section: {
-    marginBottom: 32,
+    marginBottom: 24,
   },
   label: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 4,
+    marginBottom: 12,
     color: "#000",
   },
-  hint: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 12,
-  },
-  buttonGroup: {
+  buttonRow: {
     flexDirection: "row",
     gap: 12,
   },
-  optionButton: {
+  choiceButton: {
     flex: 1,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 4,
+    backgroundColor: "#FFF",
     borderWidth: 2,
     borderColor: "#CCC",
-    alignItems: "center",
-    backgroundColor: "#FFF",
-  },
-  optionButtonSelected: {
-    borderColor: "#4CAF50",
-    backgroundColor: "#4CAF50",
-  },
-  optionButtonText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#000",
-  },
-  optionButtonTextSelected: {
-    color: "#FFF",
-  },
-  warningBox: {
-    marginTop: 12,
-    padding: 12,
-    backgroundColor: "#FFF3E0",
     borderRadius: 4,
-    borderLeftWidth: 4,
-    borderLeftColor: "#FFA500",
+    paddingVertical: 12,
+    alignItems: "center",
   },
-  warningText: {
-    fontSize: 14,
+  choiceButtonSelected: {
+    backgroundColor: "#2196F3",
+    borderColor: "#2196F3",
+  },
+  choiceButtonText: {
+    fontSize: 16,
+    fontWeight: "bold",
     color: "#333",
   },
-  feelOption: {
+  choiceButtonTextSelected: {
+    color: "#FFF",
+  },
+  radio: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    padding: 16,
-    borderRadius: 4,
+    paddingVertical: 8,
+  },
+  radioCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     borderWidth: 2,
-    borderColor: "#CCC",
-    marginBottom: 12,
+    borderColor: "#757575",
+    marginRight: 12,
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: "#FFF",
   },
-  feelOptionSelected: {
-    borderColor: "#4CAF50",
-    backgroundColor: "#E8F5E9",
+  radioCircleSelected: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "#2196F3",
   },
-  feelContent: {
-    flex: 1,
+  radioLabel: {
+    fontSize: 16,
+    color: "#333",
   },
-  feelTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 4,
-    color: "#000",
-  },
-  feelDescription: {
-    fontSize: 14,
-    color: "#666",
-  },
-  checkmark: {
-    fontSize: 24,
-    color: "#4CAF50",
-    fontWeight: "bold",
-    marginLeft: 12,
-  },
-  input: {
+  textInput: {
+    backgroundColor: "#FFF",
     borderWidth: 1,
     borderColor: "#CCC",
     borderRadius: 4,
     padding: 12,
     fontSize: 16,
-    backgroundColor: "#FFF",
     color: "#000",
-  },
-  textArea: {
-    minHeight: 100,
     textAlignVertical: "top",
   },
   submitButton: {
     backgroundColor: "#4CAF50",
-    padding: 18,
+    paddingVertical: 16,
     borderRadius: 4,
     alignItems: "center",
-    marginTop: 8,
-    marginBottom: 40,
+    marginTop: 16,
   },
   submitButtonDisabled: {
-    backgroundColor: "#CCC",
+    backgroundColor: "#BDBDBD",
   },
   submitButtonText: {
-    color: "#FFF",
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "bold",
+    color: "#FFF",
   },
 });

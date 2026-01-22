@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -8,97 +8,160 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
-import { useDailyCheckIn } from "../hooks/useDailyCheckIn";
-import { AppetiteStatus, SorenessLevel } from "../types";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../../App";
+import { v4 as uuidv4 } from "uuid";
+import "react-native-get-random-values";
 
-// ============================================================================
-// DAILY CHECK-IN SCREEN
-// ============================================================================
-// Entry point for the app - NO SKIP ALLOWED
-// Collects sleep, hydration, appetite, soreness, pain data
-// Calculates readiness and navigates to SessionReadinessScreen
-// ============================================================================
+import {
+  AppetiteStatus,
+  SorenessLevel,
+  DailyCheckInFormData,
+} from "../types";
+import { calculateReadiness } from "../utils/calculations";
+import { formatDate } from "../utils/formatting";
+import { validateSleepHours } from "../utils/validation";
+import { getDatabase } from "../database/init";
 
-interface DailyCheckInScreenProps {
-  navigation: any;
+type DailyCheckInScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  "DailyCheckIn"
+>;
+
+interface Props {
+  navigation: DailyCheckInScreenNavigationProp;
 }
 
-export default function DailyCheckInScreen({
-  navigation,
-}: DailyCheckInScreenProps) {
-  const {
-    sleepHours,
-    setSleepHours,
-    morningHydration,
-    setMorningHydration,
-    appetite,
-    setAppetite,
-    soreness,
-    setSoreness,
-    hasSharpPain,
-    setHasSharpPain,
-    sharpPainLocation,
-    setSharpPainLocation,
-    notes,
-    setNotes,
-    handleSubmit,
-    isSubmitting,
-    error,
-  } = useDailyCheckIn();
+// ============================================================================
+// DAILY CHECK-IN SCREEN (PLACEHOLDER)
+// ============================================================================
+// This is a minimal implementation to demonstrate the navigation flow
+// Full implementation will follow in Phase 4
+// ============================================================================
 
-  const onSubmit = async () => {
-    try {
-      const result = await handleSubmit();
+export default function DailyCheckInScreen({ navigation }: Props) {
+  const [sleepHours, setSleepHours] = useState("8.0");
+  const [morningHydration, setMorningHydration] = useState(false);
+  const [appetiteStatus, setAppetiteStatus] = useState<AppetiteStatus>(
+    AppetiteStatus.NORMAL,
+  );
+  const [sorenessLevel, setSorenessLevel] = useState<SorenessLevel>(
+    SorenessLevel.NONE,
+  );
+  const [hasSharpPain, setHasSharpPain] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-      // Navigate to SessionReadinessScreen with result
-      navigation.navigate("SessionReadiness", {
-        checkInId: result.checkInId,
-        readinessStatus: result.readinessStatus,
-        volumeAdjustment: result.volumeAdjustment,
-        message: result.message,
-        allowTraining: result.allowTraining,
-      });
-    } catch (err) {
-      Alert.alert("Error", "Failed to save check-in. Please try again.");
+  async function handleSubmit() {
+    // Validate sleep hours
+    const hours = parseFloat(sleepHours);
+    const error = validateSleepHours(hours);
+
+    if (error) {
+      Alert.alert("Validation Error", error.message);
+      return;
     }
-  };
+
+    setIsSubmitting(true);
+
+    try {
+      // Get recent check-ins to calculate consecutive poor nights
+      const db = getDatabase();
+      const recentCheckIns = await db.getAllAsync<{ sleep_hours: number }>(
+        "SELECT sleep_hours FROM daily_checkin ORDER BY date DESC LIMIT 2",
+      );
+
+      const recentSleepHours = recentCheckIns.map((c) => c.sleep_hours);
+      let consecutivePoorNights = 0;
+
+      // Add today's sleep to the front
+      if (hours < 6.5) {
+        consecutivePoorNights = 1;
+        // Check if yesterday was also poor
+        if (recentSleepHours.length > 0 && recentSleepHours[0] < 6.5) {
+          consecutivePoorNights = 2;
+        }
+      }
+
+      // Calculate readiness
+      const readiness = calculateReadiness(
+        hours,
+        hasSharpPain,
+        consecutivePoorNights,
+      );
+
+      // Save check-in
+      const checkInId = uuidv4();
+      const today = formatDate(new Date());
+
+      await db.runAsync(
+        `INSERT INTO daily_checkin (
+          id, date, sleep_hours, morning_hydration_complete,
+          appetite_status, soreness_level, has_sharp_pain,
+          readiness_status, volume_adjustment_percent, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          checkInId,
+          today,
+          hours,
+          morningHydration ? 1 : 0,
+          appetiteStatus,
+          sorenessLevel,
+          hasSharpPain ? 1 : 0,
+          readiness.status,
+          readiness.volumeAdjustmentPercent,
+          new Date().toISOString(),
+        ],
+      );
+
+      console.log("[DailyCheckIn] Check-in saved:", checkInId);
+
+      // Navigate to readiness screen
+      navigation.navigate("SessionReadiness", {
+        checkInId,
+        readinessStatus: readiness.status,
+        volumeAdjustmentPercent: readiness.volumeAdjustmentPercent,
+      });
+    } catch (error) {
+      console.error("[DailyCheckIn] Failed to save:", error);
+      Alert.alert("Error", "Failed to save check-in. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>Daily Check-In</Text>
-        <Text style={styles.subtitle}>Required before training</Text>
 
         {/* Sleep Hours */}
         <View style={styles.section}>
-          <Text style={styles.label}>Sleep Hours (0-24)</Text>
+          <Text style={styles.label}>Sleep Hours</Text>
           <TextInput
             style={styles.input}
-            value={sleepHours.toString()}
-            onChangeText={(text) => {
-              const num = parseFloat(text);
-              if (!isNaN(num) && num >= 0 && num <= 24) {
-                setSleepHours(num);
-              }
-            }}
+            value={sleepHours}
+            onChangeText={setSleepHours}
             keyboardType="decimal-pad"
-            placeholder="7.5"
+            placeholder="8.0"
           />
         </View>
 
         {/* Morning Hydration */}
         <View style={styles.section}>
-          <Text style={styles.label}>Morning Hydration</Text>
-          <Text style={styles.hint}>750ml water + 1/4 tsp salt</Text>
           <TouchableOpacity
-            style={[
-              styles.checkbox,
-              morningHydration && styles.checkboxChecked,
-            ]}
+            style={styles.checkbox}
             onPress={() => setMorningHydration(!morningHydration)}
           >
+            <View
+              style={[
+                styles.checkboxBox,
+                morningHydration && styles.checkboxBoxChecked,
+              ]}
+            >
+              {morningHydration && <Text style={styles.checkmark}>✓</Text>}
+            </View>
             <Text style={styles.checkboxLabel}>
-              {morningHydration ? "✓ Complete" : "Incomplete"}
+              Morning hydration complete (750ml + ¼ tsp salt)
             </Text>
           </TouchableOpacity>
         </View>
@@ -106,139 +169,71 @@ export default function DailyCheckInScreen({
         {/* Appetite Status */}
         <View style={styles.section}>
           <Text style={styles.label}>Appetite Status</Text>
-          <View style={styles.radioGroup}>
-            <RadioButton
-              label="Normal"
-              selected={appetite === AppetiteStatus.NORMAL}
-              onPress={() => setAppetite(AppetiteStatus.NORMAL)}
-            />
-            <RadioButton
-              label="Reduced"
-              selected={appetite === AppetiteStatus.REDUCED}
-              onPress={() => setAppetite(AppetiteStatus.REDUCED)}
-            />
-            <RadioButton
-              label="None"
-              selected={appetite === AppetiteStatus.NONE}
-              onPress={() => setAppetite(AppetiteStatus.NONE)}
-            />
-          </View>
+          {Object.values(AppetiteStatus).map((status) => (
+            <TouchableOpacity
+              key={status}
+              style={styles.radio}
+              onPress={() => setAppetiteStatus(status)}
+            >
+              <View style={styles.radioCircle}>
+                {appetiteStatus === status && (
+                  <View style={styles.radioCircleSelected} />
+                )}
+              </View>
+              <Text style={styles.radioLabel}>{status}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
         {/* Soreness Level */}
         <View style={styles.section}>
           <Text style={styles.label}>Soreness Level</Text>
-          <View style={styles.radioGroup}>
-            <RadioButton
-              label="None"
-              selected={soreness === SorenessLevel.NONE}
-              onPress={() => setSoreness(SorenessLevel.NONE)}
-            />
-            <RadioButton
-              label="Light"
-              selected={soreness === SorenessLevel.LIGHT}
-              onPress={() => setSoreness(SorenessLevel.LIGHT)}
-            />
-            <RadioButton
-              label="Moderate"
-              selected={soreness === SorenessLevel.MODERATE}
-              onPress={() => setSoreness(SorenessLevel.MODERATE)}
-            />
-            <RadioButton
-              label="Severe"
-              selected={soreness === SorenessLevel.SEVERE}
-              onPress={() => setSoreness(SorenessLevel.SEVERE)}
-            />
-          </View>
+          {Object.values(SorenessLevel).map((level) => (
+            <TouchableOpacity
+              key={level}
+              style={styles.radio}
+              onPress={() => setSorenessLevel(level)}
+            >
+              <View style={styles.radioCircle}>
+                {sorenessLevel === level && (
+                  <View style={styles.radioCircleSelected} />
+                )}
+              </View>
+              <Text style={styles.radioLabel}>{level}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
         {/* Sharp Pain */}
         <View style={styles.section}>
-          <Text style={styles.label}>Sharp Pain?</Text>
-          <View style={styles.radioGroup}>
-            <RadioButton
-              label="No"
-              selected={!hasSharpPain}
-              onPress={() => setHasSharpPain(false)}
-            />
-            <RadioButton
-              label="Yes"
-              selected={hasSharpPain}
-              onPress={() => setHasSharpPain(true)}
-            />
-          </View>
-
-          {hasSharpPain && (
-            <View style={styles.conditionalInput}>
-              <Text style={styles.label}>Pain Location</Text>
-              <TextInput
-                style={styles.input}
-                value={sharpPainLocation}
-                onChangeText={setSharpPainLocation}
-                placeholder="e.g., left knee, right shoulder"
-              />
+          <TouchableOpacity
+            style={styles.checkbox}
+            onPress={() => setHasSharpPain(!hasSharpPain)}
+          >
+            <View
+              style={[
+                styles.checkboxBox,
+                hasSharpPain && styles.checkboxBoxChecked,
+              ]}
+            >
+              {hasSharpPain && <Text style={styles.checkmark}>✓</Text>}
             </View>
-          )}
+            <Text style={styles.checkboxLabel}>Sharp pain present</Text>
+          </TouchableOpacity>
         </View>
-
-        {/* Notes */}
-        <View style={styles.section}>
-          <Text style={styles.label}>Notes (Optional)</Text>
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            value={notes}
-            onChangeText={setNotes}
-            placeholder="Any additional notes..."
-            multiline
-            numberOfLines={4}
-          />
-        </View>
-
-        {/* Error Display */}
-        {error && (
-          <View style={styles.errorBox}>
-            <Text style={styles.errorText}>{error}</Text>
-          </View>
-        )}
 
         {/* Submit Button */}
         <TouchableOpacity
-          style={[
-            styles.submitButton,
-            isSubmitting && styles.submitButtonDisabled,
-          ]}
-          onPress={onSubmit}
+          style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
+          onPress={handleSubmit}
           disabled={isSubmitting}
         >
           <Text style={styles.submitButtonText}>
-            {isSubmitting ? "Submitting..." : "Submit Check-In"}
+            {isSubmitting ? "Saving..." : "Continue"}
           </Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
-  );
-}
-
-// ============================================================================
-// RADIO BUTTON COMPONENT
-// ============================================================================
-
-interface RadioButtonProps {
-  label: string;
-  selected: boolean;
-  onPress: () => void;
-}
-
-function RadioButton({ label, selected, onPress }: RadioButtonProps) {
-  return (
-    <TouchableOpacity style={styles.radioButton} onPress={onPress}>
-      <View
-        style={[styles.radioCircle, selected && styles.radioCircleSelected]}
-      >
-        {selected && <View style={styles.radioInner} />}
-      </View>
-      <Text style={styles.radioLabel}>{label}</Text>
-    </TouchableOpacity>
   );
 }
 
@@ -249,21 +244,16 @@ function RadioButton({ label, selected, onPress }: RadioButtonProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFF",
+    backgroundColor: "#F5F5F5",
   },
   content: {
-    padding: 20,
+    padding: 16,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 8,
-    color: "#000",
-  },
-  subtitle: {
-    fontSize: 14,
-    color: "#666",
     marginBottom: 24,
+    color: "#000",
   },
   section: {
     marginBottom: 24,
@@ -274,44 +264,45 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     color: "#000",
   },
-  hint: {
-    fontSize: 12,
-    color: "#666",
-    marginBottom: 8,
-  },
   input: {
+    backgroundColor: "#FFF",
     borderWidth: 1,
     borderColor: "#CCC",
     borderRadius: 4,
     padding: 12,
     fontSize: 16,
-    backgroundColor: "#FFF",
     color: "#000",
   },
-  textArea: {
-    minHeight: 100,
-    textAlignVertical: "top",
-  },
   checkbox: {
-    borderWidth: 1,
-    borderColor: "#CCC",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  checkboxBox: {
+    width: 24,
+    height: 24,
+    borderWidth: 2,
+    borderColor: "#757575",
     borderRadius: 4,
-    padding: 12,
+    marginRight: 12,
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: "#FFF",
   },
-  checkboxChecked: {
+  checkboxBoxChecked: {
     backgroundColor: "#4CAF50",
     borderColor: "#4CAF50",
   },
+  checkmark: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#FFF",
+  },
   checkboxLabel: {
-    fontSize: 16,
-    color: "#000",
-    fontWeight: "500",
+    fontSize: 14,
+    color: "#333",
+    flex: 1,
   },
-  radioGroup: {
-    gap: 8,
-  },
-  radioButton: {
+  radio: {
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 8,
@@ -321,51 +312,35 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: "#CCC",
+    borderColor: "#757575",
     marginRight: 12,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "#FFF",
   },
   radioCircleSelected: {
-    borderColor: "#4CAF50",
-  },
-  radioInner: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: "#4CAF50",
+    backgroundColor: "#2196F3",
   },
   radioLabel: {
     fontSize: 16,
-    color: "#000",
-  },
-  conditionalInput: {
-    marginTop: 12,
-  },
-  errorBox: {
-    backgroundColor: "#FFEBEE",
-    padding: 12,
-    borderRadius: 4,
-    marginBottom: 16,
-  },
-  errorText: {
-    color: "#D32F2F",
-    fontSize: 14,
+    color: "#333",
   },
   submitButton: {
-    backgroundColor: "#4CAF50",
-    padding: 16,
+    backgroundColor: "#2196F3",
+    paddingVertical: 16,
     borderRadius: 4,
     alignItems: "center",
-    marginTop: 8,
-    marginBottom: 40,
+    marginTop: 16,
   },
   submitButtonDisabled: {
-    backgroundColor: "#CCC",
+    backgroundColor: "#BDBDBD",
   },
   submitButtonText: {
-    color: "#FFF",
     fontSize: 18,
     fontWeight: "bold",
+    color: "#FFF",
   },
 });
