@@ -4,6 +4,7 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
+  Alert,
 } from "react-native";
 import { formatRestTime } from "../utils/formatting";
 
@@ -13,6 +14,7 @@ import { formatRestTime } from "../utils/formatting";
 // Countdown timer between sets
 // Editable duration before starting
 // Shows MM:SS format
+// Plays alarm when finished
 // ============================================================================
 
 interface RestTimerProps {
@@ -28,6 +30,7 @@ export default function RestTimer({
 }: RestTimerProps) {
   const [isRunning, setIsRunning] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState(targetSeconds);
+  const [hasCompleted, setHasCompleted] = useState(false);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -37,21 +40,29 @@ export default function RestTimer({
         setRemainingSeconds((prev) => {
           if (prev <= 1) {
             setIsRunning(false);
+            setHasCompleted(true);
             return 0;
           }
           return prev - 1;
         });
       }, 1000);
-    } else if (remainingSeconds === 0 && isRunning) {
-      // Timer just finished
-      setIsRunning(false);
-      onComplete(targetSeconds);
     }
 
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isRunning, remainingSeconds, targetSeconds, onComplete]);
+  }, [isRunning, remainingSeconds]);
+
+  // Show alarm when timer completes
+  useEffect(() => {
+    if (hasCompleted) {
+      setHasCompleted(false);
+      onComplete(targetSeconds);
+      Alert.alert("Rest Complete", "Time to start your next set", [
+        { text: "OK", onPress: () => onSkip() }
+      ]);
+    }
+  }, [hasCompleted, targetSeconds, onComplete, onSkip]);
 
   const handleStart = () => {
     setIsRunning(true);
