@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,9 +10,14 @@ import {
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "../../App";
+import { v4 as uuidv4 } from "uuid";
 
 import { StopRulesBox, RepCounter, RestTimer } from "../components";
 import { getDatabase } from "../database/init";
+import { getSessionById, ProgramExercise } from "../data/programs";
+import { getExerciseRules } from "../data/exercises";
+import { useSessionState } from "../hooks/useSessionState";
+import { StopReason } from "../types";
 
 type ExerciseExecutionNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -30,154 +35,284 @@ interface Props {
 }
 
 // ============================================================================
-// EXERCISE EXECUTION SCREEN (PLACEHOLDER)
-// ============================================================================
-// This is a minimal demonstration of the execution flow
-// Full implementation will be in Phase 4
+// EXERCISE EXECUTION SCREEN
 // ============================================================================
 
 export default function ExerciseExecutionScreen({ navigation, route }: Props) {
   const { sessionId } = route.params;
-
-  const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
-  const [currentSet, setCurrentSet] = useState(1);
-  const [cleanReps, setCleanReps] = useState(0);
+  
+  const [programExercises, setProgramExercises] = useState<ProgramExercise[]>([]);
+  const [volumeAdjustment, setVolumeAdjustment] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showSetupCues, setShowSetupCues] = useState(true);
   const [showRestTimer, setShowRestTimer] = useState(false);
 
-  // Demo exercises (simplified)
-  const demoExercises = [
-    { name: "Scapular Pull-Up", sets: 3, reps: 5, rest: 90 },
-    { name: "Pull-Up", sets: 5, reps: 5, rest: 180 },
-  ];
+  // Load session data
+  useEffect(() => {
+    loadSessionData();
+  }, []);
 
-  const currentExercise = demoExercises[currentExerciseIndex];
-  const isLastExercise = currentExerciseIndex === demoExercises.length - 1;
-  const isLastSet = currentSet === currentExercise.sets;
+  async function loadSessionData() {
+    try {
+      const db = getDatabase();
+      
+      // Get session details
+      const sessionRow = await db.getFirstAsync<any>(
+        "SELECT * FROM training_session WHERE id = ?",
+        [sessionId],
+      );
 
-  const demoStopRules = [
-    "Any elbow bend",
-    "Back arches",
-    "Hip shaking or swinging",
-    "Shoulders elevate instead of depress",
-  ];
+      if (!sessionRow) {
+        Alert.alert("Error", "Session not found");
+        navigation.goBack();
+        return;
+      }
 
-  function handleStopSet() {
+      // Get program session from static data
+      const programSession = getSessionById(sessionRow.session_name.includes("Day 1") ? "no-gym-day1" :
+                                           sessionRow.session_name.includes("Day 2") ? "no-gym-day2" :
+                                           sessionRow.session_name.includes("Day 3") ? "no-gym-day3" :
+                                           "no-gym-day4");
+
+      if (!programSession) {
+        Alert.alert("Error", "Program not found");
+        navigation.goBack();
+        return;
+      }
+
+      setProgramExercises(programSession.exercises);
+      setVolumeAdjustment(sessionRow.volume_adjustment_applied || 0);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("[ExerciseExecution] Failed to load:", error);
+      Alert.alert("Error", "Failed to load session");
+      navigation.goBack();
+    }
+  }
+
+  const sessionState = useSessionState({
+    sessionId,
+    programExercises,
+    volumeAdjustmentPercent: volumeAdjustment,
+  });
+
+  const {
+    currentExercise,
+    currentExerciseIndex,
+    totalExercises,
+    currentSetNumber,
+    cleanReps,
+    isSetActive,
+    setupViewed,
+    isInitialized,
+    isLastExercise,
+    isLastSet,
+    startSet,
+    incrementReps,
+    decrementReps,
+    stopSet,
+    markSetupViewed,
+  } = sessionState;
+
+  // Get exercise rules
+  const exerciseRules = currentExercise ? getExerciseRules(currentExercise.exerciseName) : null;
+
+  // Show setup cues on first set
+  useEffect(() => {
+    if (currentSetNumber === 1 && !setupViewed) {
+      setShowSetupCues(true);
+    } else {
+      setShowSetupCues(false);
+    }
+  }, [currentSetNumber, setupViewed]);
+
+  function handleStartSet() {
+    if (showSetupCues && !setupViewed) {
+      markSetupViewed();
+      setShowSetupCues(false);
+    }
+    startSet();
+  }
+
+  async function handleStopSet() {
     Alert.alert(
       "Set Complete",
       `${cleanReps} clean reps recorded. Did this set feel clean?`,
       [
         {
-          text: "Yes",
-          onPress: () => handleSetComplete(true),
+          text: "Yes - Clean",
+          onPress: () => completeSet(true, StopReason.CLEAN_COMPLETION),
         },
         {
-          text: "No",
-          onPress: () => handleSetComplete(false),
+          text: "No - Form Break",
+          onPress: () => completeSet(false, StopReason.CORE_FAILURE),
+          style: "destructive",
         },
       ],
     );
   }
 
-  function handleSetComplete(feltClean: boolean) {
-    console.log(
-      `[Exercise] Set ${currentSet} complete: ${cleanReps} reps, felt clean: ${feltClean}`,
+  async function completeSet(feltClean: boolean, stopReason: StopReason) {
+    const result = await stopSet(
+      feltClean,
+      stopReason,
+      currentExercise?.restTimeSeconds,
     );
 
-    // Reset rep counter
-    setCleanReps(0);
-
-    // Check if this was the last set of the last exercise
-    if (isLastExercise && isLastSet) {
+    if (result.sessionComplete) {
+      // Session finished!
       handleSessionComplete();
-      return;
-    }
-
-    // Check if more sets remain for this exercise
-    if (currentSet < currentExercise.sets) {
-      setCurrentSet(currentSet + 1);
-      setShowRestTimer(true);
-    } else {
-      // Move to next exercise
-      setCurrentExerciseIndex(currentExerciseIndex + 1);
-      setCurrentSet(1);
+    } else if (result.movedToNextExercise) {
+      // New exercise - show setup cues
+      setShowSetupCues(true);
       setShowRestTimer(false);
+    } else {
+      // Rest between sets
+      setShowRestTimer(true);
     }
   }
 
-  function handleRestComplete(actualSeconds: number) {
-    console.log(`[Exercise] Rest complete: ${actualSeconds}s`);
+  function handleRestComplete() {
     setShowRestTimer(false);
   }
 
   function handleSkipRest() {
-    console.log("[Exercise] Rest skipped");
     setShowRestTimer(false);
   }
 
   async function handleSessionComplete() {
     try {
       const db = getDatabase();
-
-      // Update session end time
       await db.runAsync(
         "UPDATE training_session SET end_time = ? WHERE id = ?",
         [new Date().toISOString(), sessionId],
       );
 
-      console.log("[Exercise] Session complete:", sessionId);
-
-      // Navigate to post-session screen
       navigation.navigate("PostSession", { sessionId });
     } catch (error) {
-      console.error("[Exercise] Failed to complete session:", error);
-      Alert.alert("Error", "Failed to complete session. Please try again.");
+      console.error("[ExerciseExecution] Failed to complete:", error);
+      Alert.alert("Error", "Failed to complete session");
     }
   }
+
+  if (isLoading || !isInitialized || !currentExercise || !exerciseRules) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Loading...</Text>
+      </View>
+    );
+  }
+
+  // Determine target display
+  const targetDisplay = currentExercise.targetReps !== undefined
+    ? currentExercise.targetReps === 0 
+      ? "AMRAP" 
+      : `${currentExercise.targetReps} reps`
+    : currentExercise.targetDuration !== undefined
+      ? currentExercise.targetDuration === 0
+        ? "Max time"
+        : `${currentExercise.targetDuration}s hold`
+      : "AMRAP"; // Default to AMRAP if neither is specified
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
-        {/* Exercise Header */}
-        <View style={styles.header}>
-          <Text style={styles.exerciseName}>{currentExercise.name}</Text>
-          <Text style={styles.setInfo}>
-            Set {currentSet} of {currentExercise.sets}
+        {/* Exercise Progress Header */}
+        <View style={styles.progressHeader}>
+          <Text style={styles.exerciseNumber}>
+            Exercise {currentExerciseIndex + 1} of {totalExercises}
           </Text>
+          <Text style={styles.exerciseName}>{currentExercise.exerciseName}</Text>
+          <Text style={styles.setInfo}>
+            Set {currentSetNumber} of {currentExercise.targetSets}
+          </Text>
+          <Text style={styles.targetInfo}>Target: {targetDisplay}</Text>
+          <Text style={styles.intensityRule}>Stop 1 rep before failure</Text>
         </View>
 
-        {/* Stop Rules */}
-        <View style={styles.section}>
-          <StopRulesBox rules={demoStopRules} />
-        </View>
+        {/* Setup Cues (First Set Only) */}
+        {showSetupCues && (
+          <View style={styles.setupSection}>
+            <Text style={styles.setupTitle}>SETUP</Text>
+            {exerciseRules.setup.map((cue, index) => (
+              <Text key={index} style={styles.cueText}>
+                • {cue}
+              </Text>
+            ))}
+            <TouchableOpacity
+              style={styles.setupReadyButton}
+              onPress={handleStartSet}
+            >
+              <Text style={styles.setupReadyButtonText}>Ready - Start Set</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
-        {/* Rep Counter (only if not resting) */}
-        {!showRestTimer && (
+        {/* Execution Focus (Always Visible) */}
+        {!showSetupCues && !showRestTimer && (
           <>
-            <View style={styles.section}>
-              <RepCounter
-                cleanReps={cleanReps}
-                onIncrement={() => setCleanReps(cleanReps + 1)}
-                onDecrement={() =>
-                  setCleanReps(Math.max(0, cleanReps - 1))
-                }
-              />
+            <View style={styles.focusSection}>
+              <Text style={styles.focusTitle}>FOCUS ON</Text>
+              {exerciseRules.executionFocus.map((cue, index) => (
+                <Text key={index} style={styles.cueText}>
+                  • {cue}
+                </Text>
+              ))}
             </View>
 
-            {/* Stop Set Button */}
-            <TouchableOpacity
-              style={styles.stopButton}
-              onPress={handleStopSet}
-            >
-              <Text style={styles.stopButtonText}>Stop Set</Text>
-            </TouchableOpacity>
+            {/* Breathing */}
+            <View style={styles.breathingSection}>
+              <Text style={styles.breathingTitle}>BREATHING</Text>
+              <Text style={styles.breathingText}>
+                Inhale: {exerciseRules.breathing.inhale}
+              </Text>
+              <Text style={styles.breathingText}>
+                Exhale: {exerciseRules.breathing.exhale}
+              </Text>
+            </View>
+
+            {/* Stop Rules Box */}
+            <View style={styles.stopRulesSection}>
+              <StopRulesBox rules={exerciseRules.stopRules} />
+            </View>
+
+            {/* Rep Counter */}
+            {!isSetActive && (
+              <TouchableOpacity
+                style={styles.startSetButton}
+                onPress={handleStartSet}
+              >
+                <Text style={styles.startSetButtonText}>Start Set</Text>
+              </TouchableOpacity>
+            )}
+
+            {isSetActive && (
+              <>
+                <View style={styles.repCounterSection}>
+                  <RepCounter
+                    cleanReps={cleanReps}
+                    onIncrement={incrementReps}
+                    onDecrement={decrementReps}
+                  />
+                </View>
+
+                {/* Stop Set Button */}
+                <TouchableOpacity
+                  style={styles.stopButton}
+                  onPress={handleStopSet}
+                >
+                  <Text style={styles.stopButtonText}>Stop Set</Text>
+                </TouchableOpacity>
+              </>
+            )}
           </>
         )}
 
-        {/* Rest Timer (between sets) */}
+        {/* Rest Timer */}
         {showRestTimer && (
-          <View style={styles.section}>
+          <View style={styles.restSection}>
             <RestTimer
-              targetSeconds={currentExercise.rest}
+              targetSeconds={currentExercise.restTimeSeconds}
               onComplete={handleRestComplete}
               onSkip={handleSkipRest}
             />
@@ -189,7 +324,7 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
 }
 
 // ============================================================================
-// BASIC STYLES (NO THEMING YET)
+// STYLES
 // ============================================================================
 
 const styles = StyleSheet.create({
@@ -200,31 +335,140 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
   },
-  header: {
-    marginBottom: 24,
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F5F5F5",
+  },
+  loadingText: {
+    fontSize: 16,
+    color: "#666",
+  },
+  progressHeader: {
+    backgroundColor: "#2B2B2B",
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  exerciseNumber: {
+    fontSize: 12,
+    color: "#AAA",
+    marginBottom: 4,
   },
   exerciseName: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#000",
+    color: "#FFF",
     marginBottom: 8,
   },
   setInfo: {
     fontSize: 18,
-    color: "#666",
+    color: "#FFF",
+    marginBottom: 4,
   },
-  section: {
-    marginBottom: 24,
+  targetInfo: {
+    fontSize: 16,
+    color: "#4CAF50",
+    fontWeight: "bold",
   },
-  stopButton: {
-    backgroundColor: "#D32F2F",
+  intensityRule: {
+    fontSize: 14,
+    color: "#FFA500",
+    fontStyle: "italic",
+    marginTop: 4,
+  },
+  setupSection: {
+    backgroundColor: "#E3F2FD",
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: "#2196F3",
+  },
+  setupTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#1976D2",
+    marginBottom: 12,
+  },
+  cueText: {
+    fontSize: 14,
+    color: "#333",
+    marginBottom: 6,
+    paddingLeft: 8,
+  },
+  setupReadyButton: {
+    backgroundColor: "#4CAF50",
     paddingVertical: 16,
     borderRadius: 4,
     alignItems: "center",
+    marginTop: 16,
   },
-  stopButtonText: {
+  setupReadyButtonText: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#FFF",
+  },
+  focusSection: {
+    backgroundColor: "#FFF",
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  focusTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#2196F3",
+    marginBottom: 12,
+  },
+  breathingSection: {
+    backgroundColor: "#F5F5F5",
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  breathingTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#666",
+    marginBottom: 8,
+  },
+  breathingText: {
+    fontSize: 14,
+    color: "#333",
+    marginBottom: 4,
+  },
+  stopRulesSection: {
+    marginBottom: 16,
+  },
+  startSetButton: {
+    backgroundColor: "#4CAF50",
+    paddingVertical: 20,
+    borderRadius: 8,
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  startSetButtonText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#FFF",
+  },
+  repCounterSection: {
+    marginBottom: 16,
+  },
+  stopButton: {
+    backgroundColor: "#D32F2F",
+    paddingVertical: 20,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  stopButtonText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#FFF",
+  },
+  restSection: {
+    marginTop: 16,
   },
 });

@@ -16,7 +16,6 @@ import "react-native-get-random-values";
 import {
   AppetiteStatus,
   SorenessLevel,
-  DailyCheckInFormData,
 } from "../types";
 import { calculateReadiness } from "../utils/calculations";
 import { formatDate } from "../utils/formatting";
@@ -33,10 +32,7 @@ interface Props {
 }
 
 // ============================================================================
-// DAILY CHECK-IN SCREEN (PLACEHOLDER)
-// ============================================================================
-// This is a minimal implementation to demonstrate the navigation flow
-// Full implementation will follow in Phase 4
+// DAILY CHECK-IN SCREEN
 // ============================================================================
 
 export default function DailyCheckInScreen({ navigation }: Props) {
@@ -115,12 +111,8 @@ export default function DailyCheckInScreen({ navigation }: Props) {
 
       console.log("[DailyCheckIn] Check-in saved:", checkInId);
 
-      // Navigate to readiness screen
-      navigation.navigate("SessionReadiness", {
-        checkInId,
-        readinessStatus: readiness.status,
-        volumeAdjustmentPercent: readiness.volumeAdjustmentPercent,
-      });
+      // Navigate to home screen
+      navigation.navigate("Home");
     } catch (error) {
       console.error("[DailyCheckIn] Failed to save:", error);
       Alert.alert("Error", "Failed to save check-in. Please try again.");
@@ -133,6 +125,9 @@ export default function DailyCheckInScreen({ navigation }: Props) {
     <ScrollView style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>Daily Check-In</Text>
+        <Text style={styles.instructions}>
+          Complete this before starting any training session.
+        </Text>
 
         {/* Sleep Hours */}
         <View style={styles.section}>
@@ -229,7 +224,7 @@ export default function DailyCheckInScreen({ navigation }: Props) {
           disabled={isSubmitting}
         >
           <Text style={styles.submitButtonText}>
-            {isSubmitting ? "Saving..." : "Continue"}
+            {isSubmitting ? "Saving..." : "Complete Check-In"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -252,8 +247,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 24,
+    marginBottom: 8,
     color: "#000",
+  },
+  instructions: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 24,
   },
   section: {
     marginBottom: 24,

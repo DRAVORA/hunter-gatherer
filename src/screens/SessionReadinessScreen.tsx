@@ -10,14 +10,10 @@ import {
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "../../App";
-import { v4 as uuidv4 } from "uuid";
-import "react-native-get-random-values";
 
 import { ReadinessIndicator } from "../components";
 import { ReadinessStatus } from "../types";
 import { getDatabase } from "../database/init";
-import { getSessionById } from "../data/programs";
-import { applyVolumeAdjustment } from "../utils/calculations";
 
 type SessionReadinessNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -35,11 +31,11 @@ interface Props {
 }
 
 // ============================================================================
-// SESSION READINESS SCREEN (PLACEHOLDER)
+// SESSION READINESS SCREEN
 // ============================================================================
 
 export default function SessionReadinessScreen({ navigation, route }: Props) {
-  const { checkInId, readinessStatus, volumeAdjustmentPercent } = route.params;
+  const { sessionId, checkInId, readinessStatus, volumeAdjustmentPercent } = route.params;
 
   const [waterConsumed, setWaterConsumed] = useState(false);
   const [notTrainingFasted, setNotTrainingFasted] = useState(false);
@@ -69,51 +65,33 @@ export default function SessionReadinessScreen({ navigation, route }: Props) {
     try {
       const db = getDatabase();
 
-      // For demo purposes, use first session from Pull Session A
-      const session = getSessionById("pull-a");
+      // Update session to mark checklist complete
+      await db.runAsync(
+        "UPDATE training_session SET pre_training_checklist_complete = 1 WHERE id = ?",
+        [sessionId],
+      );
+
+      console.log("[SessionReadiness] Checklist complete, starting session");
+
+      // Get session details for navigation
+      const session = await db.getFirstAsync<any>(
+        "SELECT program_name, session_name FROM training_session WHERE id = ?",
+        [sessionId],
+      );
+
       if (!session) {
         Alert.alert("Error", "Session not found");
         return;
       }
 
-      // Create training session
-      const sessionId = uuidv4();
-      const today = new Date().toISOString().split("T")[0];
-
-      // Calculate planned volume
-      let plannedVolume = session.exercises.reduce(
-        (sum, ex) => sum + ex.targetSets,
-        0,
-      );
-
-      await db.runAsync(
-        `INSERT INTO training_session (
-          id, date, program_name, session_name, start_time,
-          planned_volume, volume_adjustment_applied,
-          pre_training_checklist_complete
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          sessionId,
-          today,
-          "Hunter-Gatherer Basic",
-          session.name,
-          new Date().toISOString(),
-          plannedVolume,
-          volumeAdjustmentPercent,
-          1,
-        ],
-      );
-
-      console.log("[SessionReadiness] Session created:", sessionId);
-
       // Navigate to exercise execution
       navigation.navigate("ExerciseExecution", {
         sessionId,
-        programName: "Hunter-Gatherer Basic",
-        sessionName: session.name,
+        programName: session.program_name,
+        sessionName: session.session_name,
       });
     } catch (error) {
-      console.error("[SessionReadiness] Failed to create session:", error);
+      console.error("[SessionReadiness] Failed to start session:", error);
       Alert.alert("Error", "Failed to start session. Please try again.");
     }
   }
@@ -121,11 +99,11 @@ export default function SessionReadinessScreen({ navigation, route }: Props) {
   function handleRestDay() {
     Alert.alert(
       "Rest Day",
-      "You've chosen to take a rest day. Return to check-in tomorrow.",
+      "You've chosen to take a rest day. Return to home.",
       [
         {
           text: "OK",
-          onPress: () => navigation.navigate("DailyCheckIn"),
+          onPress: () => navigation.navigate("Home"),
         },
       ],
     );

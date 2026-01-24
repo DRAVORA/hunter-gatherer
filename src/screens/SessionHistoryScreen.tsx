@@ -33,7 +33,7 @@ interface SessionSummary {
 }
 
 // ============================================================================
-// SESSION HISTORY SCREEN (PLACEHOLDER)
+// SESSION HISTORY SCREEN
 // ============================================================================
 
 export default function SessionHistoryScreen({ navigation }: Props) {
@@ -80,6 +80,14 @@ export default function SessionHistoryScreen({ navigation }: Props) {
         ? Math.round((item.completed_volume / item.planned_volume) * 100)
         : 0;
 
+    // Ensure all values are safe for rendering
+    const sessionName = String(item.session_name || "Unknown Session");
+    const sessionDate = String(item.date || "No date");
+    const completedVol = Number(item.completed_volume) || 0;
+    const plannedVol = Number(item.planned_volume) || 0;
+    const durationMins = item.duration_minutes;
+    const sessionFeel = item.session_feel;
+
     return (
       <TouchableOpacity
         style={styles.sessionCard}
@@ -87,31 +95,30 @@ export default function SessionHistoryScreen({ navigation }: Props) {
       >
         <View style={styles.sessionHeader}>
           <View>
-            <Text style={styles.sessionName}>{item.session_name}</Text>
-            <Text style={styles.sessionDate}>{formatDate(item.date)}</Text>
+            <Text style={styles.sessionName}>{sessionName}</Text>
+            <Text style={styles.sessionDate}>{sessionDate}</Text>
           </View>
           <View style={styles.sessionStats}>
             <Text style={styles.statsText}>
-              {item.completed_volume}/{item.planned_volume} sets
+              {completedVol}/{plannedVol} sets
             </Text>
-            {item.duration_minutes && (
+            {durationMins !== null && durationMins > 0 ? (
               <Text style={styles.statsText}>
-                {formatMinutes(item.duration_minutes)}
+                {formatMinutes(durationMins)}
               </Text>
-            )}
+            ) : null}
           </View>
         </View>
 
         {isExpanded && (
           <View style={styles.sessionDetails}>
-            <Text style={styles.detailText}>
-              Completion: {completionRate}%
-            </Text>
-            {item.session_feel && (
-              <Text style={styles.detailText}>
-                Feel: {item.session_feel}
-              </Text>
-            )}
+            <Text style={styles.detailText}>Completion: {completionRate}%</Text>
+            {sessionFeel ? (
+              <Text style={styles.detailText}>Feel: {String(sessionFeel)}</Text>
+            ) : null}
+            {durationMins === null || durationMins === 0 ? (
+              <Text style={styles.detailText}>Duration: Not recorded</Text>
+            ) : null}
           </View>
         )}
       </TouchableOpacity>

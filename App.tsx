@@ -4,7 +4,8 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { initDatabase, checkDatabaseHealth } from "./src/database/init";
 
-// Import screens (Phase 4 - will be implemented)
+// Import screens
+import HomeScreen from "./src/screens/HomeScreen";
 import DailyCheckInScreen from "./src/screens/DailyCheckInScreen";
 import SessionReadinessScreen from "./src/screens/SessionReadinessScreen";
 import ExerciseExecutionScreen from "./src/screens/ExerciseExecutionScreen";
@@ -16,8 +17,10 @@ import SessionHistoryScreen from "./src/screens/SessionHistoryScreen";
 // ============================================================================
 
 export type RootStackParamList = {
+  Home: undefined;
   DailyCheckIn: undefined;
   SessionReadiness: {
+    sessionId: string;
     checkInId: string;
     readinessStatus: string;
     volumeAdjustmentPercent: number;
@@ -97,7 +100,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="DailyCheckIn"
+        initialRouteName="Home"
         screenOptions={{
           headerStyle: {
             backgroundColor: "#2B2B2B",
@@ -110,11 +113,19 @@ export default function App() {
         }}
       >
         <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{
+            title: "Hunter-Gatherer",
+            headerLeft: () => null, // No back button on home
+          }}
+        />
+
+        <Stack.Screen
           name="DailyCheckIn"
           component={DailyCheckInScreen}
           options={{
             title: "Daily Check-In",
-            headerLeft: () => null, // No back button on check-in
           }}
         />
 

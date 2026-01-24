@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  TextInput,
   StyleSheet,
 } from "react-native";
 import { formatRestTime } from "../utils/formatting";
@@ -29,7 +28,6 @@ export default function RestTimer({
 }: RestTimerProps) {
   const [isRunning, setIsRunning] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState(targetSeconds);
-  const [editedSeconds, setEditedSeconds] = useState(targetSeconds.toString());
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -64,16 +62,6 @@ export default function RestTimer({
   const handleReset = () => {
     setIsRunning(false);
     setRemainingSeconds(targetSeconds);
-    setEditedSeconds(targetSeconds.toString());
-  };
-
-  const handleEditComplete = () => {
-    const newSeconds = parseInt(editedSeconds, 10);
-    if (!isNaN(newSeconds) && newSeconds > 0) {
-      setRemainingSeconds(newSeconds);
-    } else {
-      setEditedSeconds(remainingSeconds.toString());
-    }
   };
 
   const handleSkip = () => {
@@ -84,23 +72,10 @@ export default function RestTimer({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Rest Timer</Text>
+      <Text style={styles.title}>Rest Timer (Fixed)</Text>
+      <Text style={styles.subtitle}>{targetSeconds} seconds prescribed</Text>
 
-      {!isRunning && remainingSeconds === targetSeconds ? (
-        <View style={styles.editContainer}>
-          <TextInput
-            style={styles.input}
-            value={editedSeconds}
-            onChangeText={setEditedSeconds}
-            onBlur={handleEditComplete}
-            keyboardType="number-pad"
-            selectTextOnFocus
-          />
-          <Text style={styles.unit}>seconds</Text>
-        </View>
-      ) : (
-        <Text style={styles.timer}>{formatRestTime(remainingSeconds)}</Text>
-      )}
+      <Text style={styles.timer}>{formatRestTime(remainingSeconds)}</Text>
 
       <View style={styles.buttonRow}>
         {!isRunning ? (
@@ -144,9 +119,15 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 12,
+    marginBottom: 4,
     textAlign: "center",
     color: "#000",
+  },
+  subtitle: {
+    fontSize: 14,
+    color: "#666",
+    textAlign: "center",
+    marginBottom: 12,
   },
   timer: {
     fontSize: 64,
@@ -154,30 +135,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginVertical: 16,
     color: "#000",
-  },
-  editContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginVertical: 16,
-  },
-  input: {
-    fontSize: 32,
-    fontWeight: "bold",
-    backgroundColor: "#FFF",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: "#CCC",
-    textAlign: "center",
-    width: 100,
-    marginRight: 8,
-    color: "#000",
-  },
-  unit: {
-    fontSize: 16,
-    color: "#666",
   },
   buttonRow: {
     flexDirection: "row",

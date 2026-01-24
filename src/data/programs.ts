@@ -1,5 +1,8 @@
 import { Program, ProgramSession, ProgramExercise } from "../types";
 
+// Re-export types for convenience
+export type { ProgramExercise };
+
 // ============================================================================
 // PROGRAM DEFINITIONS
 // ============================================================================
@@ -341,10 +344,226 @@ export const HUNTER_GATHERER_BASIC: Program = {
 };
 
 // ============================================================================
+// PROGRAM: HUNTER-GATHERER NO-GYM (BODYWEIGHT ONLY)
+// ============================================================================
+
+/**
+ * Day 1: Pull + Traps
+ * Focus: Pull-up variations, scapular control, dead hangs
+ */
+const NO_GYM_DAY1_PULL: ProgramSession = {
+  id: "no-gym-day1",
+  programId: "hunter-gatherer-no-gym",
+  name: "Day 1: Pull + Traps",
+  orderInProgram: 1,
+  exercises: [
+    {
+      id: "no-gym-day1-1",
+      sessionId: "no-gym-day1",
+      exerciseName: "Pull-Up",
+      orderInSession: 1,
+      targetSets: 6,
+      targetReps: 0, // AMRAP
+      restTimeSeconds: 180, // 3 min
+    },
+    {
+      id: "no-gym-day1-2",
+      sessionId: "no-gym-day1",
+      exerciseName: "Chin-Up",
+      orderInSession: 2,
+      targetSets: 4,
+      targetReps: 0, // AMRAP
+      restTimeSeconds: 120, // 2 min
+    },
+    {
+      id: "no-gym-day1-3",
+      sessionId: "no-gym-day1",
+      exerciseName: "Scapular Pull-Up",
+      orderInSession: 3,
+      targetSets: 3,
+      targetReps: 15,
+      restTimeSeconds: 90, // 90 sec
+    },
+    {
+      id: "no-gym-day1-4",
+      sessionId: "no-gym-day1",
+      exerciseName: "High Pull-Up Hold",
+      orderInSession: 4,
+      targetSets: 3,
+      targetDuration: 30, // 30 sec
+      restTimeSeconds: 90,
+    },
+    {
+      id: "no-gym-day1-5",
+      sessionId: "no-gym-day1",
+      exerciseName: "Dead Hang",
+      orderInSession: 5,
+      targetSets: 2,
+      targetDuration: 60, // 60 sec
+      restTimeSeconds: 60,
+    },
+  ],
+};
+
+/**
+ * Day 2: Legs + Hinge
+ * Focus: Single-leg strength, hip hinge, isometric holds
+ */
+const NO_GYM_DAY2_LEGS: ProgramSession = {
+  id: "no-gym-day2",
+  programId: "hunter-gatherer-no-gym",
+  name: "Day 2: Legs + Hinge",
+  orderInProgram: 2,
+  exercises: [
+    {
+      id: "no-gym-day2-1",
+      sessionId: "no-gym-day2",
+      exerciseName: "Bulgarian Split Squat",
+      orderInSession: 1,
+      targetSets: 5,
+      targetReps: 25, // Upper bound per leg
+      restTimeSeconds: 90,
+    },
+    {
+      id: "no-gym-day2-2",
+      sessionId: "no-gym-day2",
+      exerciseName: "Single-Leg Hip Thrust",
+      orderInSession: 2,
+      targetSets: 4,
+      targetReps: 20, // Upper bound per leg
+      restTimeSeconds: 90,
+    },
+    {
+      id: "no-gym-day2-3",
+      sessionId: "no-gym-day2",
+      exerciseName: "Hamstring Walkouts",
+      orderInSession: 3,
+      targetSets: 3,
+      targetReps: 15,
+      restTimeSeconds: 60,
+    },
+    {
+      id: "no-gym-day2-4",
+      sessionId: "no-gym-day2",
+      exerciseName: "Wall Sit",
+      orderInSession: 4,
+      targetSets: 2,
+      targetDuration: 0, // Max time (open-ended)
+      restTimeSeconds: 90,
+    },
+  ],
+};
+
+/**
+ * Day 3: Push + Shoulders
+ * Focus: Push-up progressions, pike variations, core stability
+ */
+const NO_GYM_DAY3_PUSH: ProgramSession = {
+  id: "no-gym-day3",
+  programId: "hunter-gatherer-no-gym",
+  name: "Day 3: Push + Shoulders",
+  orderInProgram: 3,
+  exercises: [
+    {
+      id: "no-gym-day3-1",
+      sessionId: "no-gym-day3",
+      exerciseName: "Push-Up (Feet Elevated)",
+      orderInSession: 1,
+      targetSets: 6,
+      targetReps: 20,
+      restTimeSeconds: 90,
+    },
+    {
+      id: "no-gym-day3-2",
+      sessionId: "no-gym-day3",
+      exerciseName: "Pike Push-Up",
+      orderInSession: 2,
+      targetSets: 5,
+      targetReps: 15,
+      restTimeSeconds: 90,
+    },
+    {
+      id: "no-gym-day3-3",
+      sessionId: "no-gym-day3",
+      exerciseName: "Pseudo-Planche Push-Up",
+      orderInSession: 3,
+      targetSets: 3,
+      targetReps: 10,
+      restTimeSeconds: 90,
+    },
+    {
+      id: "no-gym-day3-4",
+      sessionId: "no-gym-day3",
+      exerciseName: "Side Plank",
+      orderInSession: 4,
+      targetSets: 3,
+      targetDuration: 60, // 60 sec per side
+      restTimeSeconds: 45,
+    },
+  ],
+};
+
+/**
+ * Day 4: Conditioning
+ * Focus: Simple checkbox completion for cardio activities
+ */
+const NO_GYM_DAY4_CONDITIONING: ProgramSession = {
+  id: "no-gym-day4",
+  programId: "hunter-gatherer-no-gym",
+  name: "Day 4: Conditioning",
+  orderInProgram: 4,
+  exercises: [
+    {
+      id: "no-gym-day4-1",
+      sessionId: "no-gym-day4",
+      exerciseName: "Loaded Backpack Walk",
+      orderInSession: 1,
+      targetSets: 1,
+      targetReps: 1, // Simple checkbox - mark as complete
+      restTimeSeconds: 0,
+    },
+    {
+      id: "no-gym-day4-2",
+      sessionId: "no-gym-day4",
+      exerciseName: "Hill Sprints",
+      orderInSession: 2,
+      targetSets: 1,
+      targetReps: 1, // Simple checkbox - mark as complete
+      restTimeSeconds: 0,
+    },
+    {
+      id: "no-gym-day4-3",
+      sessionId: "no-gym-day4",
+      exerciseName: "Long Fast Walk",
+      orderInSession: 3,
+      targetSets: 1,
+      targetReps: 1, // Simple checkbox - mark as complete
+      restTimeSeconds: 0,
+    },
+  ],
+};
+
+export const HUNTER_GATHERER_NO_GYM: Program = {
+  id: "hunter-gatherer-no-gym",
+  name: "Hunter-Gatherer No-Gym",
+  description:
+    "4-day bodyweight program requiring only a pull-up bar. Focus on vertical pulling strength, single-leg work, advanced push-up progressions, and conditioning work. Emphasizes execution quality and injury prevention for returning lifters.",
+  sessions: [
+    NO_GYM_DAY1_PULL,
+    NO_GYM_DAY2_LEGS,
+    NO_GYM_DAY3_PUSH,
+    NO_GYM_DAY4_CONDITIONING,
+  ],
+};
+
+// ============================================================================
 // ALL PROGRAMS
 // ============================================================================
 
-export const PROGRAMS: Program[] = [HUNTER_GATHERER_BASIC];
+export const PROGRAMS: Program[] = [
+  HUNTER_GATHERER_BASIC,
+  HUNTER_GATHERER_NO_GYM,
+];
 
 // ============================================================================
 // HELPER FUNCTIONS

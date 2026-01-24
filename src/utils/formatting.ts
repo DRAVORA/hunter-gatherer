@@ -10,9 +10,9 @@ import { SALT_CONVERSIONS } from "../types";
 export function formatDate(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date;
 
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
+  const year = d.getUTCFullYear();
+  const month = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(d.getUTCDate()).padStart(2, "0");
 
   return `${year}-${month}-${day}`;
 }
@@ -52,8 +52,8 @@ export function getDateDaysAgo(days: number): string {
 export function formatTime(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date;
 
-  const hours = String(d.getHours()).padStart(2, "0");
-  const minutes = String(d.getMinutes()).padStart(2, "0");
+  const hours = String(d.getUTCHours()).padStart(2, "0");
+  const minutes = String(d.getUTCMinutes()).padStart(2, "0");
 
   return `${hours}:${minutes}`;
 }
@@ -64,9 +64,9 @@ export function formatTime(date: Date | string): string {
 export function formatTimeWithSeconds(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date;
 
-  const hours = String(d.getHours()).padStart(2, "0");
-  const minutes = String(d.getMinutes()).padStart(2, "0");
-  const seconds = String(d.getSeconds()).padStart(2, "0");
+  const hours = String(d.getUTCHours()).padStart(2, "0");
+  const minutes = String(d.getUTCMinutes()).padStart(2, "0");
+  const seconds = String(d.getUTCSeconds()).padStart(2, "0");
 
   return `${hours}:${minutes}:${seconds}`;
 }
@@ -183,13 +183,13 @@ export function formatSaltInTeaspoons(saltGrams: number): string {
     return "pinch of salt";
   }
   if (teaspoons < 0.5) {
-    return "Ã‚Â¼ tsp salt";
+    return "\u00BC tsp salt"; // Unicode for ¼
   }
   if (teaspoons < 0.75) {
-    return "Ã‚Â½ tsp salt";
+    return "\u00BD tsp salt"; // Unicode for ½
   }
   if (teaspoons < 1) {
-    return "Ã‚Â¾ tsp salt";
+    return "\u00BE tsp salt"; // Unicode for ¾
   }
   if (teaspoons === 1) {
     return "1 tsp salt";

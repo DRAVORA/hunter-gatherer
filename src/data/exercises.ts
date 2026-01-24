@@ -14,7 +14,7 @@ export const GLOBAL_RULES = {
       "Form can be repeated",
       "No compensation patterns",
     ],
-    emphasis: "If unsure â†’ it does NOT count.",
+    emphasis: "If unsure — it does NOT count.",
   },
 
   repDisqualification: {
@@ -56,8 +56,8 @@ export const GLOBAL_RULES = {
     subtitle: "Choosing Weight:",
     rules: [
       "Choose a load you can complete all prescribed reps with 2 clean reps in reserve",
-      "If rep speed slows dramatically â†’ load is too heavy",
-      "If form degrades before final set â†’ reduce load immediately",
+      "If rep speed slows dramatically — load is too heavy",
+      "If form degrades before final set — reduce load immediately",
       "Never increase load in the same session",
     ],
     emphasis: "This prevents ego-loading and protects execution quality.",
@@ -69,8 +69,8 @@ export const GLOBAL_RULES = {
     rules: [
       "Rest exactly the prescribed time",
       "Do not shorten rest to 'push conditioning'",
-      "If breathing is not calm by end of rest â†’ extend rest 30â€“60s",
-      "If rest must be extended repeatedly â†’ reduce volume next session",
+      "If breathing is not calm by end of rest — extend rest 30–60s",
+      "If rest must be extended repeatedly — reduce volume next session",
     ],
     emphasis: "Rest protects the nervous system and maintains quality.",
   },
@@ -86,7 +86,7 @@ export const GLOBAL_RULES = {
       "Movement feels smooth",
     ],
     emphasis:
-      "If first working set feels unstable â†’ stop and downgrade session.",
+      "If first working set feels unstable — stop and downgrade session.",
     emphasisSubtitle: "This prevents forcing training on bad days.",
   },
 };
@@ -183,7 +183,7 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
     ],
     scaling: {
       description: "Cluster sets or isometric holds",
-      options: ["Cluster sets: 2 reps + 20â€“30s rest", "Isometric holds: 5â€“10s"],
+      options: ["Cluster sets: 2 reps + 20–30s rest", "Isometric holds: 5–10s"],
     },
   },
 
@@ -248,7 +248,7 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
     category: ExerciseCategory.PULL,
     setup: [
       "Hip-width stance",
-      "Hinge at hips (45Â° torso angle)",
+      "Hinge at hips (45° torso angle)",
       "Neutral spine",
       "Overhand or underhand grip",
     ],
@@ -370,7 +370,7 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
     ],
     executionFocus: [
       "Lower chest to floor",
-      "Elbows 45Â° angle",
+      "Elbows 45° angle",
       "Push through full ROM",
       "Body stays rigid",
     ],
@@ -381,7 +381,7 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
     stopRules: [
       "Hips sag",
       "Hips pike up",
-      "Elbows flare wide (>45Â°)",
+      "Elbows flare wide (>45°)",
       "Neck cranes forward",
       "Shoulders shrug to ears",
     ],
@@ -409,7 +409,7 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
     stopRules: [
       "Hips sag",
       "Hips pike up",
-      "Elbows flare wide (>45Â°)",
+      "Elbows flare wide (>45°)",
       "Loss of control on descent",
       "Incomplete lockout",
     ],
@@ -440,6 +440,34 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       "Head tilts back",
       "Elbows flare wide",
       "Loss of balance",
+    ],
+  },
+
+  "Pseudo-Planche Push-Up": {
+    name: "Pseudo-Planche Push-Up",
+    category: ExerciseCategory.PUSH,
+    setup: [
+      "Hands at lower ribs level",
+      "Fingers pointed back or to sides",
+      "Body leans forward over hands",
+      "Shoulders protracted",
+    ],
+    executionFocus: [
+      "Maintain forward lean throughout",
+      "Lower chest to floor",
+      "Push back maintaining lean",
+      "Core locked entire time",
+    ],
+    breathing: {
+      inhale: "Lowering",
+      exhale: "Pushing up",
+    },
+    stopRules: [
+      "Forward lean lost",
+      "Elbows flare wide",
+      "Hips sag or pike",
+      "Wrist pain",
+      "Cannot maintain protraction",
     ],
   },
 
@@ -482,7 +510,7 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
     ],
     executionFocus: [
       "Lower bar to mid-chest",
-      "Elbows 45Â° angle",
+      "Elbows 45° angle",
       "Drive through full foot",
       "Lock out at top",
     ],
@@ -615,6 +643,34 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
     ],
   },
 
+  "Single-Leg Hip Thrust": {
+    name: "Single-Leg Hip Thrust",
+    category: ExerciseCategory.LEGS,
+    setup: [
+      "Upper back on bench",
+      "One foot flat, hip-width from bench",
+      "Other leg extended straight",
+      "Ribs down",
+    ],
+    executionFocus: [
+      "Drive through grounded heel only",
+      "Squeeze glute at top",
+      "Keep hips level",
+      "Maintain neutral spine",
+    ],
+    breathing: {
+      inhale: "Bottom position",
+      exhale: "Thrust up",
+    },
+    stopRules: [
+      "Hips shift sideways",
+      "Lumbar hyperextension",
+      "Working knee caves in",
+      "Ribs flare",
+      "Balance lost",
+    ],
+  },
+
   Lunges: {
     name: "Lunges",
     category: ExerciseCategory.LEGS,
@@ -668,6 +724,62 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       "Knees bend excessively",
       "Hips shift sideways",
       "Loss of neutral spine",
+    ],
+  },
+
+  "Hamstring Walkouts": {
+    name: "Hamstring Walkouts",
+    category: ExerciseCategory.LEGS,
+    setup: [
+      "Lie on back",
+      "Heels on smooth surface or sliders",
+      "Arms at sides for stability",
+      "Hips lifted off ground",
+    ],
+    executionFocus: [
+      "Walk heels away slowly",
+      "Keep hips elevated parallel to ground",
+      "Control the extension",
+      "Pull heels back in",
+    ],
+    breathing: {
+      inhale: "Walking out",
+      exhale: "Pulling back",
+    },
+    stopRules: [
+      "Hips drop below parallel",
+      "Hamstring cramps",
+      "Excessive back arch",
+      "Loss of control",
+      "Balance lost",
+    ],
+  },
+
+  "Wall Sit": {
+    name: "Wall Sit",
+    category: ExerciseCategory.LEGS,
+    setup: [
+      "Back flat against wall",
+      "Feet hip-width, ~60cm from wall",
+      "Thighs parallel to ground",
+      "90° knee angle",
+    ],
+    executionFocus: [
+      "Maintain position",
+      "Full back contact with wall",
+      "Weight through heels",
+      "Breathe steadily",
+    ],
+    breathing: {
+      inhale: "Steady, controlled",
+      exhale: "Do not hold breath",
+    },
+    stopRules: [
+      "Hips rise above parallel",
+      "Knees cave inward",
+      "Heels lift",
+      "Back arches off wall",
+      "Breathing becomes laboured",
     ],
   },
 
@@ -765,7 +877,7 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
     setup: [
       "Lie on back",
       "Lower back pressed to floor",
-      "Arms vertical, knees at 90Â°",
+      "Arms vertical, knees at 90°",
       "Ribs down",
     ],
     executionFocus: [
@@ -815,6 +927,34 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
     ],
   },
 
+  "Chin Tucks": {
+    name: "Chin Tucks",
+    category: ExerciseCategory.CORE,
+    setup: [
+      "Seated or standing tall",
+      "Shoulders relaxed down",
+      "Look straight ahead",
+      "Neck neutral",
+    ],
+    executionFocus: [
+      "Draw chin straight back",
+      "Create double chin",
+      "Hold 3-5 seconds",
+      "No tilting head",
+    ],
+    breathing: {
+      inhale: "Natural",
+      exhale: "Natural",
+    },
+    stopRules: [
+      "Head tilts up or down",
+      "Shoulders rise",
+      "Jaw clenches",
+      "Sharp pain",
+      "Dizziness",
+    ],
+  },
+
   "Hanging Leg Raise": {
     name: "Hanging Leg Raise",
     category: ExerciseCategory.CORE,
@@ -825,7 +965,7 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       "Legs straight or knees bent",
     ],
     executionFocus: [
-      "Raise legs to 90Â° (or knees to chest)",
+      "Raise legs to 90° (or knees to chest)",
       "No swinging",
       "Lower with control",
       "Maintain shoulder position",
@@ -841,6 +981,78 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       "Momentum used",
       "Grip fails",
     ],
+  },
+
+  // ==========================================================================
+  // CONDITIONING / CARDIO
+  // ==========================================================================
+
+  "Loaded Backpack Walk": {
+    name: "Loaded Backpack Walk",
+    category: ExerciseCategory.CARRY,
+    setup: [
+      "Backpack with 10-20kg load",
+      "Worn properly on both shoulders",
+      "60-90 minute duration",
+    ],
+    executionFocus: [
+      "Nasal breathing only",
+      "Steady sustainable pace",
+      "Maintain upright posture",
+    ],
+    breathing: {
+      inhale: "Through nose",
+      exhale: "Through nose",
+    },
+    stopRules: [
+      "Cannot maintain nasal breathing",
+      "Back discomfort",
+      "Posture degrades",
+    ],
+  },
+
+  "Hill Sprints": {
+    name: "Hill Sprints",
+    category: ExerciseCategory.CARRY,
+    setup: [
+      "Hill with 5-10% grade",
+      "8-12 sprints total",
+      "Full walk-back recovery between reps",
+    ],
+    executionFocus: [
+      "Full effort uphill",
+      "Walk back down completely",
+      "Start next rep when breathing recovered",
+    ],
+    breathing: {
+      inhale: "Natural, forceful",
+      exhale: "Natural, forceful",
+    },
+    stopRules: [
+      "Form breaks down",
+      "Cannot recover breathing",
+      "Dizziness or nausea",
+    ],
+  },
+
+  "Long Fast Walk": {
+    name: "Long Fast Walk",
+    category: ExerciseCategory.CARRY,
+    setup: [
+      "60 minute duration",
+      "No phone, no music",
+      "Brisk but sustainable pace",
+    ],
+    executionFocus: [
+      "Can talk but breathing elevated",
+      "Present and aware",
+      "Relaxed shoulders",
+    ],
+    breathing: {
+      inhale: "Natural",
+      exhale: "Natural",
+    },
+    stopRules: ["Pace becomes unsustainable", "Sharp pain", "Extreme fatigue"],
   },
 };
 
