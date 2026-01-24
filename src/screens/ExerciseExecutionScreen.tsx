@@ -12,7 +12,7 @@ import { RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "../../App";
 import { v4 as uuidv4 } from "uuid";
 
-import { StopRulesBox, RepCounter, RestTimer } from "../components";
+import { StopRulesBox, RepCounter, RestTimer, DurationTimer } from "../components";
 import { getDatabase } from "../database/init";
 import { getSessionById, ProgramExercise } from "../data/programs";
 import { getExerciseRules } from "../data/exercises";
@@ -46,6 +46,7 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [showSetupCues, setShowSetupCues] = useState(true);
   const [showRestTimer, setShowRestTimer] = useState(false);
+  const [holdDuration, setHoldDuration] = useState(0);
 
   // Load session data
   useEffect(() => {
@@ -134,6 +135,27 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
     startSet();
   }
 
+  function handleDurationStop(seconds: number) {
+    setHoldDuration(seconds);
+    
+    // Ask if the hold felt clean
+    Alert.alert(
+      "Hold Complete",
+      `Held for ${seconds} seconds. Did this hold feel clean?`,
+      [
+        {
+          text: "Yes - Clean",
+          onPress: () => completeSetWithDuration(seconds, true, StopReason.CLEAN_COMPLETION),
+        },
+        {
+          text: "No - Form Break",
+          onPress: () => completeSetWithDuration(seconds, false, StopReason.CORE_FAILURE),
+          style: "destructive",
+        },
+      ],
+    );
+  }
+
   async function handleStopSet() {
     Alert.alert(
       "Set Complete",
@@ -169,6 +191,33 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
     } else {
       // Rest between sets
       setShowRestTimer(true);
+    }
+  }
+
+  async function completeSetWithDuration(
+    durationSeconds: number,
+    feltClean: boolean,
+    stopReason: StopReason,
+  ) {
+    const result = await stopSet(
+      feltClean,
+      stopReason,
+      currentExercise?.restTimeSeconds,
+      durationSeconds, // Pass duration for timed exercises
+    );
+
+    if (result.sessionComplete) {
+      // Session finished!
+      handleSessionComplete();
+    } else if (result.movedToNextExercise) {
+      // New exercise - show setup cues
+      setShowSetupCues(true);
+      setShowRestTimer(false);
+      setHoldDuration(0); // Reset duration for next exercise
+    } else {
+      // Rest between sets
+      setShowRestTimer(true);
+      setHoldDuration(0); // Reset duration for next set
     }
   }
 
@@ -276,7 +325,7 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
               <StopRulesBox rules={exerciseRules.stopRules} />
             </View>
 
-            {/* Rep Counter */}
+            {/* Exercise Tracking - Duration Timer or Rep Counter */}
             {!isSetActive && (
               <TouchableOpacity
                 style={styles.startSetButton}
@@ -288,21 +337,34 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
 
             {isSetActive && (
               <>
-                <View style={styles.repCounterSection}>
-                  <RepCounter
-                    cleanReps={cleanReps}
-                    onIncrement={incrementReps}
-                    onDecrement={decrementReps}
-                  />
-                </View>
+                {/* Show Duration Timer for timed exercises (holds) */}
+                {currentExercise.targetDuration !== undefined ? (
+                  <View style={styles.durationTimerSection}>
+                    <DurationTimer
+                      targetSeconds={currentExercise.targetDuration}
+                      onStop={handleDurationStop}
+                    />
+                  </View>
+                ) : (
+                  /* Show Rep Counter for rep-based exercises */
+                  <View style={styles.repCounterSection}>
+                    <RepCounter
+                      cleanReps={cleanReps}
+                      onIncrement={incrementReps}
+                      onDecrement={decrementReps}
+                    />
+                  </View>
+                )}
 
-                {/* Stop Set Button */}
-                <TouchableOpacity
-                  style={styles.stopButton}
-                  onPress={handleStopSet}
-                >
-                  <Text style={styles.stopButtonText}>Stop Set</Text>
-                </TouchableOpacity>
+                {/* Stop Set Button - Only show for rep-based exercises */}
+                {currentExercise.targetDuration === undefined && (
+                  <TouchableOpacity
+                    style={styles.stopButton}
+                    onPress={handleStopSet}
+                  >
+                    <Text style={styles.stopButtonText}>Stop Set</Text>
+                  </TouchableOpacity>
+                )}
               </>
             )}
           </>
@@ -455,6 +517,9 @@ const styles = StyleSheet.create({
     color: "#FFF",
   },
   repCounterSection: {
+    marginBottom: 16,
+  },
+  durationTimerSection: {
     marginBottom: 16,
   },
   stopButton: {

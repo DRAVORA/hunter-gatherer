@@ -519,7 +519,7 @@ const NO_GYM_DAY4_CONDITIONING: ProgramSession = {
       exerciseName: "Loaded Backpack Walk",
       orderInSession: 1,
       targetSets: 1,
-      targetReps: 1, // Simple checkbox - mark as complete
+      targetDuration: 0, // Max time (60-90 min range, use DurationTimer)
       restTimeSeconds: 0,
     },
     {
@@ -528,7 +528,7 @@ const NO_GYM_DAY4_CONDITIONING: ProgramSession = {
       exerciseName: "Hill Sprints",
       orderInSession: 2,
       targetSets: 1,
-      targetReps: 1, // Simple checkbox - mark as complete
+      targetReps: 10, // 8-12 reps, use upper bound
       restTimeSeconds: 0,
     },
     {
@@ -537,7 +537,7 @@ const NO_GYM_DAY4_CONDITIONING: ProgramSession = {
       exerciseName: "Long Fast Walk",
       orderInSession: 3,
       targetSets: 1,
-      targetReps: 1, // Simple checkbox - mark as complete
+      targetDuration: 0, // Max time (60 min recommended, use DurationTimer)
       restTimeSeconds: 0,
     },
   ],

@@ -37,13 +37,15 @@ export default function RestTimer({
         setRemainingSeconds((prev) => {
           if (prev <= 1) {
             setIsRunning(false);
-            const actualRestTime = targetSeconds - prev + 1;
-            onComplete(actualRestTime);
             return 0;
           }
           return prev - 1;
         });
       }, 1000);
+    } else if (remainingSeconds === 0 && isRunning) {
+      // Timer just finished
+      setIsRunning(false);
+      onComplete(targetSeconds);
     }
 
     return () => {

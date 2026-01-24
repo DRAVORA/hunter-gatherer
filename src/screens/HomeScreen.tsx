@@ -8,6 +8,7 @@ import {
   Alert,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "../../App";
 import { v4 as uuidv4 } from "uuid";
 
@@ -16,9 +17,11 @@ import { formatDate, getTodayDate } from "../utils/formatting";
 import { getSessionById, getTotalVolumeForSession } from "../data/programs";
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, "Home">;
+type HomeScreenRouteProp = RouteProp<RootStackParamList, "Home">;
 
 interface Props {
   navigation: HomeScreenNavigationProp;
+  route: HomeScreenRouteProp;
 }
 
 // ============================================================================
@@ -80,13 +83,23 @@ const PROGRAM_DAYS = [
 // HOME SCREEN
 // ============================================================================
 
-export default function HomeScreen({ navigation }: Props) {
+export default function HomeScreen({ navigation, route }: Props) {
+  const { programId = "no-gym" } = route.params || {}; // Default to no-gym if undefined
   const [todayCheckIn, setTodayCheckIn] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     loadTodayCheckIn();
   }, []);
+
+  // Reload check-in when screen comes into focus
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      loadTodayCheckIn();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   async function loadTodayCheckIn() {
     try {
@@ -226,7 +239,9 @@ export default function HomeScreen({ navigation }: Props) {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Hunter-Gatherer</Text>
-          <Text style={styles.subtitle}>No-Gym Program</Text>
+          <Text style={styles.subtitle}>
+            {programId === "no-gym" ? "No-Gym Program" : "Training Program"}
+          </Text>
         </View>
 
         {/* Daily Check-In Status */}
@@ -311,42 +326,51 @@ export default function HomeScreen({ navigation }: Props) {
           {/* 1. Active Dead Hang */}
           <View style={styles.nonNegotiableSection}>
             <Text style={styles.nonNegotiableHeader}>
-              1. ACTIVE DEAD HANG — 60 SECONDS TOTAL
+              1. ACTIVE DEAD HANG "” 60 SECONDS TOTAL
             </Text>
 
             <Text style={styles.nonNegotiableSubheading}>Setup</Text>
             <Text style={styles.nonNegotiableText}>
-              • Overhand grip with full thumb wrap{"\n"}• Hands shoulder-width
-              or slightly wider{"\n"}• Arms fully straight{"\n"}• Let body
-              settle before starting
+              • Overhand grip with full thumb wrap{"\n"}
+              • Hands shoulder-width or slightly wider{"\n"}
+              • Arms fully straight{"\n"}
+              • Let body settle before starting
             </Text>
 
             <Text style={styles.nonNegotiableSubheading}>Body Position</Text>
             <Text style={styles.nonNegotiableText}>
-              • Ribs down (no flare){"\n"}• Glutes lightly engaged{"\n"}• Legs
-              together or slightly forward{"\n"}• Neck neutral{"\n"}
+              • Ribs down (no flare){"\n"}
+              • Glutes lightly engaged{"\n"}
+              • Legs together or slightly forward{"\n"}
+              • Neck neutral{"\n"}
               {"\n"}
-              You should feel long and supported — not collapsed.
+              You should feel long and supported "” not collapsed.
             </Text>
 
             <Text style={styles.nonNegotiableSubheading}>Execution</Text>
             <Text style={styles.nonNegotiableText}>
               • Maintain slight shoulder depression (shoulders not in ears)
-              {"\n"}• No swinging{"\n"}• No shrugging{"\n"}• Body stays quiet
               {"\n"}
+              • No swinging{"\n"}
+              • No shrugging{"\n"}
+              • Body stays quiet{"\n"}
               {"\n"}
               This is not a passive stretch.
             </Text>
 
             <Text style={styles.nonNegotiableSubheading}>Breathing</Text>
             <Text style={styles.nonNegotiableText}>
-              • Slow nasal breathing{"\n"}• Calm, steady rhythm
+              • Slow nasal breathing{"\n"}
+              • Calm, steady rhythm
             </Text>
 
             <Text style={styles.nonNegotiableSubheading}>Stop/Reset Rules</Text>
             <Text style={styles.nonNegotiableText}>
-              • Grip slipping{"\n"}• Lower back tightens{"\n"}• Shoulders
-              elevate{"\n"}• Hips shake{"\n"}• Swinging appears{"\n"}
+              • Grip slipping{"\n"}
+              • Lower back tightens{"\n"}
+              • Shoulders elevate{"\n"}
+              • Hips shake{"\n"}
+              • Swinging appears{"\n"}
               {"\n"}
               If 60 seconds cannot be held cleanly:{"\n"}
               Break into 2×30s or 3×20s
@@ -356,13 +380,16 @@ export default function HomeScreen({ navigation }: Props) {
           {/* 2. Scapular Pull-Ups */}
           <View style={styles.nonNegotiableSection}>
             <Text style={styles.nonNegotiableHeader}>
-              2. SCAPULAR PULL-UPS — 15 TOTAL REPS
+              2. SCAPULAR PULL-UPS "” 15 TOTAL REPS
             </Text>
 
             <Text style={styles.nonNegotiableSubheading}>Setup</Text>
             <Text style={styles.nonNegotiableText}>
-              • Overhand grip{"\n"}• Arms completely straight{"\n"}• Dead hang
-              start{"\n"}• Ribs down{"\n"}• Glutes lightly engaged{"\n"}
+              • Overhand grip{"\n"}
+              • Arms completely straight{"\n"}
+              • Dead hang start{"\n"}
+              • Ribs down{"\n"}
+              • Glutes lightly engaged{"\n"}
               {"\n"}
               Elbows must stay locked.
             </Text>
@@ -373,7 +400,7 @@ export default function HomeScreen({ navigation }: Props) {
             <Text style={styles.nonNegotiableText}>
               1. Pull shoulders down (depress){"\n"}
               2. Think "put shoulders in back pockets"{"\n"}
-              3. Body rises 2–3 cm only{"\n"}
+              3. Body rises 2"“3 cm only{"\n"}
               4. Pause 1 second at top{"\n"}
               5. Slowly return to full hang{"\n"}
               {"\n"}
@@ -383,39 +410,47 @@ export default function HomeScreen({ navigation }: Props) {
 
             <Text style={styles.nonNegotiableSubheading}>Breathing</Text>
             <Text style={styles.nonNegotiableText}>
-              • Exhale as shoulders depress{"\n"}• Inhale returning to hang
+              • Exhale as shoulders depress{"\n"}
+              • Inhale returning to hang
             </Text>
 
             <Text style={styles.nonNegotiableSubheading}>Stop Rules</Text>
             <Text style={styles.nonNegotiableText}>
-              • Elbows bend{"\n"}• Lower back arches{"\n"}• Hips swing{"\n"}•
-              Neck strains{"\n"}• Shoulders elevate instead of depress
+              • Elbows bend{"\n"}
+              • Lower back arches{"\n"}
+              • Hips swing{"\n"}
+              • Neck strains{"\n"}
+              • Shoulders elevate instead of depress
             </Text>
 
             <Text style={styles.nonNegotiableSubheading}>
               Scaling (If 15 clean reps not possible)
             </Text>
             <Text style={styles.nonNegotiableText}>
-              • Cluster sets: 2 reps, rest 20–30s, repeat until 15 total{"\n"}
-              OR{"\n"}• Isometric: Hold scap-down position 5–10s × 5–6 sets
+              • Cluster sets: 2 reps, rest 20"“30s, repeat until 15 total{"\n"}
+              OR{"\n"}
+              • Isometric: Hold scap-down position 5"“10s × 5"“6 sets
             </Text>
           </View>
 
           {/* 3. Chin Tucks */}
           <View style={styles.nonNegotiableSection}>
             <Text style={styles.nonNegotiableHeader}>
-              3. CHIN TUCKS — 20 CONTROLLED REPS
+              3. CHIN TUCKS "” 20 CONTROLLED REPS
             </Text>
 
             <Text style={styles.nonNegotiableSubheading}>
               Setup (Choose one)
             </Text>
             <Text style={styles.nonNegotiableText}>
-              Floor:{"\n"}• Lie on back{"\n"}• Knees bent{"\n"}• Back of head
-              resting on floor{"\n"}
+              Floor:{"\n"}
+              • Lie on back{"\n"}
+              • Knees bent{"\n"}
+              • Back of head resting on floor{"\n"}
               {"\n"}
-              Wall:{"\n"}• Stand with back against wall{"\n"}• Back of head
-              lightly touching wall
+              Wall:{"\n"}
+              • Stand with back against wall{"\n"}
+              • Back of head lightly touching wall
             </Text>
 
             <Text style={styles.nonNegotiableSubheading}>
@@ -425,7 +460,7 @@ export default function HomeScreen({ navigation }: Props) {
               1. Gently pull chin straight back{"\n"}
               2. Create a "double chin"{"\n"}
               3. Head stays level (no nodding){"\n"}
-              4. Hold 1–2 seconds{"\n"}
+              4. Hold 1"“2 seconds{"\n"}
               5. Relax and repeat{"\n"}
               {"\n"}
               This is a retraction, not a tilt.
@@ -433,19 +468,25 @@ export default function HomeScreen({ navigation }: Props) {
 
             <Text style={styles.nonNegotiableSubheading}>Execution Focus</Text>
             <Text style={styles.nonNegotiableText}>
-              • Neck stays long{"\n"}• Jaw relaxed{"\n"}• Shoulders stay down
-              {"\n"}• Minimal effort
+              • Neck stays long{"\n"}
+              • Jaw relaxed{"\n"}
+              • Shoulders stay down{"\n"}
+              • Minimal effort
             </Text>
 
             <Text style={styles.nonNegotiableSubheading}>Breathing</Text>
             <Text style={styles.nonNegotiableText}>
-              • Normal nasal breathing{"\n"}• Do not brace
+              • Normal nasal breathing{"\n"}
+              • Do not brace
             </Text>
 
             <Text style={styles.nonNegotiableSubheading}>Stop Rules</Text>
             <Text style={styles.nonNegotiableText}>
-              • Neck strain{"\n"}• Head tilts up or down{"\n"}• Jaw clenches
-              {"\n"}• Shoulders elevate{"\n"}• Head lifts off floor/wall
+              • Neck strain{"\n"}
+              • Head tilts up or down{"\n"}
+              • Jaw clenches{"\n"}
+              • Shoulders elevate{"\n"}
+              • Head lifts off floor/wall
             </Text>
           </View>
         </View>

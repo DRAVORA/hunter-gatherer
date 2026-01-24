@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -40,6 +40,29 @@ export default function PostSessionScreen({ navigation, route }: Props) {
   const [sessionFeel, setSessionFeel] = useState<SessionFeel | null>(null);
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [programId, setProgramId] = useState<string>("no-gym"); // Default to no-gym
+
+  // Load session data to get program info
+  useEffect(() => {
+    loadSessionData();
+  }, []);
+
+  async function loadSessionData() {
+    try {
+      const db = getDatabase();
+      const session = await db.getFirstAsync<any>(
+        "SELECT program_name FROM training_session WHERE id = ?",
+        [sessionId],
+      );
+      
+      // Determine programId from program_name
+      if (session?.program_name?.includes("No-Gym")) {
+        setProgramId("no-gym");
+      }
+    } catch (error) {
+      console.error("[PostSession] Failed to load session data:", error);
+    }
+  }
 
   const canSubmit = appetiteReturned !== null && sessionFeel !== null;
 
@@ -69,7 +92,7 @@ export default function PostSessionScreen({ navigation, route }: Props) {
       Alert.alert("Session Complete", "Your training session has been logged.", [
         {
           text: "OK",
-          onPress: () => navigation.navigate("DailyCheckIn"),
+          onPress: () => navigation.navigate("Home", { programId }),
         },
       ]);
     } catch (error) {

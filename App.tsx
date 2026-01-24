@@ -5,6 +5,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { initDatabase, checkDatabaseHealth } from "./src/database/init";
 
 // Import screens
+import ProgramSelectionScreen from "./src/screens/ProgramSelectionScreen";
 import HomeScreen from "./src/screens/HomeScreen";
 import DailyCheckInScreen from "./src/screens/DailyCheckInScreen";
 import SessionReadinessScreen from "./src/screens/SessionReadinessScreen";
@@ -17,7 +18,8 @@ import SessionHistoryScreen from "./src/screens/SessionHistoryScreen";
 // ============================================================================
 
 export type RootStackParamList = {
-  Home: undefined;
+  ProgramSelection: undefined;
+  Home: { programId?: string }; // Make optional
   DailyCheckIn: undefined;
   SessionReadiness: {
     sessionId: string;
@@ -100,7 +102,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Home"
+        initialRouteName="ProgramSelection"
         screenOptions={{
           headerStyle: {
             backgroundColor: "#2B2B2B",
@@ -112,6 +114,15 @@ export default function App() {
           headerBackTitleVisible: false,
         }}
       >
+        <Stack.Screen
+          name="ProgramSelection"
+          component={ProgramSelectionScreen}
+          options={{
+            title: "Select Program",
+            headerLeft: () => null, // No back button on program selection
+          }}
+        />
+
         <Stack.Screen
           name="Home"
           component={HomeScreen}

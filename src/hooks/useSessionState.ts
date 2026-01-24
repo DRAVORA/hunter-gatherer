@@ -126,6 +126,7 @@ export function useSessionState({
     feltClean: boolean,
     stopReason: StopReason,
     restTimeSeconds?: number,
+    duration?: number, // Optional duration for timed exercises (holds)
   ): Promise<StopSetResult> => {
     if (!isInitialized) {
       throw new Error("Session not initialized");
@@ -139,10 +140,11 @@ export function useSessionState({
       exerciseSessionId,
       setNumber: currentSetNumber,
       targetReps: currentExercise.targetReps,
-      cleanReps,
+      cleanReps: duration !== undefined ? 0 : cleanReps, // Set cleanReps to 0 for timed exercises
       feltClean,
       stopReason,
       restTimeSeconds,
+      duration, // Add duration for timed exercises
       timestamp: getCurrentTimestamp(),
     });
 
