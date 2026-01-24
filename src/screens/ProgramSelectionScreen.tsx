@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../App";
+import { UNICODE } from "../constants/unicode";
 
 type ProgramSelectionNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -102,7 +103,7 @@ export default function ProgramSelectionScreen({ navigation }: Props) {
                 <Text style={styles.requirementsTitle}>Requirements:</Text>
                 {program.requirements.map((req, index) => (
                   <Text key={index} style={styles.requirementItem}>
-                    • {req}
+                    {UNICODE.BULLET} {req}
                   </Text>
                 ))}
               </View>

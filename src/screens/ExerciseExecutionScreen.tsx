@@ -18,6 +18,7 @@ import { getSessionById, ProgramExercise } from "../data/programs";
 import { getExerciseRules } from "../data/exercises";
 import { useSessionState } from "../hooks/useSessionState";
 import { StopReason } from "../types";
+import { UNICODE } from "../constants/unicode";
 
 type ExerciseExecutionNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -285,7 +286,7 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
             <Text style={styles.setupTitle}>SETUP</Text>
             {exerciseRules.setup.map((cue, index) => (
               <Text key={index} style={styles.cueText}>
-                • {cue}
+                {UNICODE.BULLET} {cue}
               </Text>
             ))}
             <TouchableOpacity
@@ -304,7 +305,7 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
               <Text style={styles.focusTitle}>FOCUS ON</Text>
               {exerciseRules.executionFocus.map((cue, index) => (
                 <Text key={index} style={styles.cueText}>
-                  • {cue}
+                  {UNICODE.BULLET} {cue}
                 </Text>
               ))}
             </View>

@@ -14,6 +14,7 @@ import { RootStackParamList } from "../../App";
 import { ReadinessIndicator } from "../components";
 import { ReadinessStatus } from "../types";
 import { getDatabase } from "../database/init";
+import { UNICODE } from "../constants/unicode";
 
 type SessionReadinessNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -133,7 +134,7 @@ export default function SessionReadinessScreen({ navigation, route }: Props) {
                   waterConsumed && styles.checkboxBoxChecked,
                 ]}
               >
-                {waterConsumed && <Text style={styles.checkmark}>✓</Text>}
+                {waterConsumed && <Text style={styles.checkmark}>{UNICODE.CHECKMARK}</Text>}
               </View>
               <Text style={styles.checkboxLabel}>
                 Water consumed (500-750ml)
@@ -150,7 +151,7 @@ export default function SessionReadinessScreen({ navigation, route }: Props) {
                   notTrainingFasted && styles.checkboxBoxChecked,
                 ]}
               >
-                {notTrainingFasted && <Text style={styles.checkmark}>✓</Text>}
+                {notTrainingFasted && <Text style={styles.checkmark}>{UNICODE.CHECKMARK}</Text>}
               </View>
               <Text style={styles.checkboxLabel}>Not training fasted</Text>
             </TouchableOpacity>
@@ -165,7 +166,7 @@ export default function SessionReadinessScreen({ navigation, route }: Props) {
                   noDizziness && styles.checkboxBoxChecked,
                 ]}
               >
-                {noDizziness && <Text style={styles.checkmark}>✓</Text>}
+                {noDizziness && <Text style={styles.checkmark}>{UNICODE.CHECKMARK}</Text>}
               </View>
               <Text style={styles.checkboxLabel}>No dizziness</Text>
             </TouchableOpacity>

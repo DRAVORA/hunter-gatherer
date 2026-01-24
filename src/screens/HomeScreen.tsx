@@ -15,6 +15,7 @@ import { v4 as uuidv4 } from "uuid";
 import { getDatabase } from "../database/init";
 import { formatDate, getTodayDate } from "../utils/formatting";
 import { getSessionById, getTotalVolumeForSession } from "../data/programs";
+import { UNICODE } from "../constants/unicode";
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, "Home">;
 type HomeScreenRouteProp = RouteProp<RootStackParamList, "Home">;
@@ -301,7 +302,7 @@ export default function HomeScreen({ navigation, route }: Props) {
               <View style={styles.exerciseList}>
                 {day.exercises.map((exercise, index) => (
                   <Text key={index} style={styles.exerciseItem}>
-                    • {exercise}
+                    {UNICODE.BULLET} {exercise}
                   </Text>
                 ))}
               </View>
@@ -331,46 +332,46 @@ export default function HomeScreen({ navigation, route }: Props) {
 
             <Text style={styles.nonNegotiableSubheading}>Setup</Text>
             <Text style={styles.nonNegotiableText}>
-              • Overhand grip with full thumb wrap{"\n"}
-              • Hands shoulder-width or slightly wider{"\n"}
-              • Arms fully straight{"\n"}
-              • Let body settle before starting
+              {UNICODE.BULLET} Overhand grip with full thumb wrap{"\n"}
+              {UNICODE.BULLET} Hands shoulder-width or slightly wider{"\n"}
+              {UNICODE.BULLET} Arms fully straight{"\n"}
+              {UNICODE.BULLET} Let body settle before starting
             </Text>
 
             <Text style={styles.nonNegotiableSubheading}>Body Position</Text>
             <Text style={styles.nonNegotiableText}>
-              • Ribs down (no flare){"\n"}
-              • Glutes lightly engaged{"\n"}
-              • Legs together or slightly forward{"\n"}
-              • Neck neutral{"\n"}
+              {UNICODE.BULLET} Ribs down (no flare){"\n"}
+              {UNICODE.BULLET} Glutes lightly engaged{"\n"}
+              {UNICODE.BULLET} Legs together or slightly forward{"\n"}
+              {UNICODE.BULLET} Neck neutral{"\n"}
               {"\n"}
               You should feel long and supported "” not collapsed.
             </Text>
 
             <Text style={styles.nonNegotiableSubheading}>Execution</Text>
             <Text style={styles.nonNegotiableText}>
-              • Maintain slight shoulder depression (shoulders not in ears)
+              {UNICODE.BULLET} Maintain slight shoulder depression (shoulders not in ears)
               {"\n"}
-              • No swinging{"\n"}
-              • No shrugging{"\n"}
-              • Body stays quiet{"\n"}
+              {UNICODE.BULLET} No swinging{"\n"}
+              {UNICODE.BULLET} No shrugging{"\n"}
+              {UNICODE.BULLET} Body stays quiet{"\n"}
               {"\n"}
               This is not a passive stretch.
             </Text>
 
             <Text style={styles.nonNegotiableSubheading}>Breathing</Text>
             <Text style={styles.nonNegotiableText}>
-              • Slow nasal breathing{"\n"}
-              • Calm, steady rhythm
+              {UNICODE.BULLET} Slow nasal breathing{"\n"}
+              {UNICODE.BULLET} Calm, steady rhythm
             </Text>
 
             <Text style={styles.nonNegotiableSubheading}>Stop/Reset Rules</Text>
             <Text style={styles.nonNegotiableText}>
-              • Grip slipping{"\n"}
-              • Lower back tightens{"\n"}
-              • Shoulders elevate{"\n"}
-              • Hips shake{"\n"}
-              • Swinging appears{"\n"}
+              {UNICODE.BULLET} Grip slipping{"\n"}
+              {UNICODE.BULLET} Lower back tightens{"\n"}
+              {UNICODE.BULLET} Shoulders elevate{"\n"}
+              {UNICODE.BULLET} Hips shake{"\n"}
+              {UNICODE.BULLET} Swinging appears{"\n"}
               {"\n"}
               If 60 seconds cannot be held cleanly:{"\n"}
               Break into 2×30s or 3×20s
@@ -385,11 +386,11 @@ export default function HomeScreen({ navigation, route }: Props) {
 
             <Text style={styles.nonNegotiableSubheading}>Setup</Text>
             <Text style={styles.nonNegotiableText}>
-              • Overhand grip{"\n"}
-              • Arms completely straight{"\n"}
-              • Dead hang start{"\n"}
-              • Ribs down{"\n"}
-              • Glutes lightly engaged{"\n"}
+              {UNICODE.BULLET} Overhand grip{"\n"}
+              {UNICODE.BULLET} Arms completely straight{"\n"}
+              {UNICODE.BULLET} Dead hang start{"\n"}
+              {UNICODE.BULLET} Ribs down{"\n"}
+              {UNICODE.BULLET} Glutes lightly engaged{"\n"}
               {"\n"}
               Elbows must stay locked.
             </Text>
@@ -410,26 +411,26 @@ export default function HomeScreen({ navigation, route }: Props) {
 
             <Text style={styles.nonNegotiableSubheading}>Breathing</Text>
             <Text style={styles.nonNegotiableText}>
-              • Exhale as shoulders depress{"\n"}
-              • Inhale returning to hang
+              {UNICODE.BULLET} Exhale as shoulders depress{"\n"}
+              {UNICODE.BULLET} Inhale returning to hang
             </Text>
 
             <Text style={styles.nonNegotiableSubheading}>Stop Rules</Text>
             <Text style={styles.nonNegotiableText}>
-              • Elbows bend{"\n"}
-              • Lower back arches{"\n"}
-              • Hips swing{"\n"}
-              • Neck strains{"\n"}
-              • Shoulders elevate instead of depress
+              {UNICODE.BULLET} Elbows bend{"\n"}
+              {UNICODE.BULLET} Lower back arches{"\n"}
+              {UNICODE.BULLET} Hips swing{"\n"}
+              {UNICODE.BULLET} Neck strains{"\n"}
+              {UNICODE.BULLET} Shoulders elevate instead of depress
             </Text>
 
             <Text style={styles.nonNegotiableSubheading}>
               Scaling (If 15 clean reps not possible)
             </Text>
             <Text style={styles.nonNegotiableText}>
-              • Cluster sets: 2 reps, rest 20"“30s, repeat until 15 total{"\n"}
+              {UNICODE.BULLET} Cluster sets: 2 reps, rest 20"“30s, repeat until 15 total{"\n"}
               OR{"\n"}
-              • Isometric: Hold scap-down position 5"“10s × 5"“6 sets
+              {UNICODE.BULLET} Isometric: Hold scap-down position 5"“10s × 5"“6 sets
             </Text>
           </View>
 
@@ -444,13 +445,13 @@ export default function HomeScreen({ navigation, route }: Props) {
             </Text>
             <Text style={styles.nonNegotiableText}>
               Floor:{"\n"}
-              • Lie on back{"\n"}
-              • Knees bent{"\n"}
-              • Back of head resting on floor{"\n"}
+              {UNICODE.BULLET} Lie on back{"\n"}
+              {UNICODE.BULLET} Knees bent{"\n"}
+              {UNICODE.BULLET} Back of head resting on floor{"\n"}
               {"\n"}
               Wall:{"\n"}
-              • Stand with back against wall{"\n"}
-              • Back of head lightly touching wall
+              {UNICODE.BULLET} Stand with back against wall{"\n"}
+              {UNICODE.BULLET} Back of head lightly touching wall
             </Text>
 
             <Text style={styles.nonNegotiableSubheading}>
@@ -468,25 +469,25 @@ export default function HomeScreen({ navigation, route }: Props) {
 
             <Text style={styles.nonNegotiableSubheading}>Execution Focus</Text>
             <Text style={styles.nonNegotiableText}>
-              • Neck stays long{"\n"}
-              • Jaw relaxed{"\n"}
-              • Shoulders stay down{"\n"}
-              • Minimal effort
+              {UNICODE.BULLET} Neck stays long{"\n"}
+              {UNICODE.BULLET} Jaw relaxed{"\n"}
+              {UNICODE.BULLET} Shoulders stay down{"\n"}
+              {UNICODE.BULLET} Minimal effort
             </Text>
 
             <Text style={styles.nonNegotiableSubheading}>Breathing</Text>
             <Text style={styles.nonNegotiableText}>
-              • Normal nasal breathing{"\n"}
-              • Do not brace
+              {UNICODE.BULLET} Normal nasal breathing{"\n"}
+              {UNICODE.BULLET} Do not brace
             </Text>
 
             <Text style={styles.nonNegotiableSubheading}>Stop Rules</Text>
             <Text style={styles.nonNegotiableText}>
-              • Neck strain{"\n"}
-              • Head tilts up or down{"\n"}
-              • Jaw clenches{"\n"}
-              • Shoulders elevate{"\n"}
-              • Head lifts off floor/wall
+              {UNICODE.BULLET} Neck strain{"\n"}
+              {UNICODE.BULLET} Head tilts up or down{"\n"}
+              {UNICODE.BULLET} Jaw clenches{"\n"}
+              {UNICODE.BULLET} Shoulders elevate{"\n"}
+              {UNICODE.BULLET} Head lifts off floor/wall
             </Text>
           </View>
         </View>

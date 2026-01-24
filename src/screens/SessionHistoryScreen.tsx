@@ -12,6 +12,7 @@ import { RootStackParamList } from "../../App";
 
 import { getDatabase } from "../database/init";
 import { formatDate, formatMinutes } from "../utils/formatting";
+import { UNICODE } from "../constants/unicode";
 
 type SessionHistoryNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -267,7 +268,7 @@ export default function SessionHistoryScreen({ navigation }: Props) {
               <View style={styles.exerciseHeader}>
                 <Text style={styles.exerciseName}>{exerciseName}</Text>
                 <Text style={styles.exerciseStats}>
-                  {sets.length} sets • {isTimedExercise ? `${totalDuration}s total` : `${totalReps} reps`}
+                  {sets.length} sets {UNICODE.BULLET} {isTimedExercise ? `${totalDuration}s total` : `${totalReps} reps`}
                 </Text>
               </View>
 
@@ -291,7 +292,7 @@ export default function SessionHistoryScreen({ navigation }: Props) {
                   <View style={styles.setIndicators}>
                     {set.felt_clean === 1 ? (
                       <View style={styles.cleanBadge}>
-                        <Text style={styles.cleanBadgeText}>✓ Clean</Text>
+                        <Text style={styles.cleanBadgeText}>{UNICODE.CHECKMARK} Clean</Text>
                       </View>
                     ) : (
                       <View style={styles.dirtyBadge}>

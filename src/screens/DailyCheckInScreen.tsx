@@ -21,6 +21,7 @@ import { calculateReadiness } from "../utils/calculations";
 import { formatDate } from "../utils/formatting";
 import { validateSleepHours } from "../utils/validation";
 import { getDatabase } from "../database/init";
+import { UNICODE } from "../constants/unicode";
 
 type DailyCheckInScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -153,10 +154,10 @@ export default function DailyCheckInScreen({ navigation }: Props) {
                 morningHydration && styles.checkboxBoxChecked,
               ]}
             >
-              {morningHydration && <Text style={styles.checkmark}>✓</Text>}
+              {morningHydration && <Text style={styles.checkmark}>{UNICODE.CHECKMARK}</Text>}
             </View>
             <Text style={styles.checkboxLabel}>
-              Morning hydration complete (750ml + ¼ tsp salt)
+              Morning hydration complete (750ml + {UNICODE.QUARTER} tsp salt)
             </Text>
           </TouchableOpacity>
         </View>
@@ -211,7 +212,7 @@ export default function DailyCheckInScreen({ navigation }: Props) {
                 hasSharpPain && styles.checkboxBoxChecked,
               ]}
             >
-              {hasSharpPain && <Text style={styles.checkmark}>✓</Text>}
+              {hasSharpPain && <Text style={styles.checkmark}>{UNICODE.CHECKMARK}</Text>}
             </View>
             <Text style={styles.checkboxLabel}>Sharp pain present</Text>
           </TouchableOpacity>
