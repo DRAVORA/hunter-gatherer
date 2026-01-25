@@ -839,6 +839,34 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
     ],
   },
 
+  "Standing Calf Raise": {
+    name: "Standing Calf Raise",
+    category: ExerciseCategory.LEGS,
+    setup: [
+      "Balls of feet on edge of platform",
+      "Heels hanging off",
+      "Legs straight",
+      "Weight on shoulders or in hands",
+    ],
+    executionFocus: [
+      "Drive through balls of feet",
+      "Full range of motion",
+      "Squeeze at top",
+      "Controlled descent",
+    ],
+    breathing: {
+      inhale: "Bottom",
+      exhale: "Raise up",
+    },
+    stopRules: [
+      "Knees bend",
+      "Balance lost",
+      "Ankle rolls",
+      "Bouncing at bottom",
+      "Incomplete range",
+    ],
+  },
+
   // ==========================================================================
   // CORE / STABILITY
   // ==========================================================================

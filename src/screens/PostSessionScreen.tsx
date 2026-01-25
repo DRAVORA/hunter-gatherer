@@ -56,7 +56,9 @@ export default function PostSessionScreen({ navigation, route }: Props) {
       );
       
       // Determine programId from program_name
-      if (session?.program_name?.includes("No-Gym")) {
+      if (session?.program_name?.includes("Gym")) {
+        setProgramId("gym");
+      } else if (session?.program_name?.includes("No-Gym")) {
         setProgramId("no-gym");
       }
     } catch (error) {

@@ -557,12 +557,178 @@ export const HUNTER_GATHERER_NO_GYM: Program = {
 };
 
 // ============================================================================
+// PROGRAM: HUNTER-GATHERER GYM
+// ============================================================================
+
+/**
+ * Day 1 - Lower Body
+ */
+const GYM_DAY1_LOWER: ProgramSession = {
+  id: "gym-day1",
+  programId: "hunter-gatherer-gym",
+  name: "Day 1: Lower Body",
+  orderInProgram: 1,
+  exercises: [
+    {
+      id: "gym-day1-1",
+      sessionId: "gym-day1",
+      exerciseName: "Barbell Back Squat",
+      orderInSession: 1,
+      targetSets: 4,
+      targetReps: 5,
+      restTimeSeconds: 180, // 2-3 min
+    },
+    {
+      id: "gym-day1-2",
+      sessionId: "gym-day1",
+      exerciseName: "Romanian Deadlift",
+      orderInSession: 2,
+      targetSets: 3,
+      targetReps: 6,
+      restTimeSeconds: 120, // 2 min
+    },
+    {
+      id: "gym-day1-3",
+      sessionId: "gym-day1",
+      exerciseName: "Bulgarian Split Squat",
+      orderInSession: 3,
+      targetSets: 3,
+      targetReps: 6, // per leg
+      restTimeSeconds: 90,
+    },
+    {
+      id: "gym-day1-4",
+      sessionId: "gym-day1",
+      exerciseName: "Standing Calf Raise",
+      orderInSession: 4,
+      targetSets: 3,
+      targetReps: 12, // 10-12 range, use upper bound
+      restTimeSeconds: 75, // 60-90 sec average
+    },
+    {
+      id: "gym-day1-5",
+      sessionId: "gym-day1",
+      exerciseName: "Side Plank",
+      orderInSession: 5,
+      targetSets: 3,
+      targetDuration: 30, // 20-30s per side, use upper bound
+      restTimeSeconds: 60,
+    },
+  ],
+};
+
+/**
+ * Day 2 - Upper Pull
+ */
+const GYM_DAY2_PULL: ProgramSession = {
+  id: "gym-day2",
+  programId: "hunter-gatherer-gym",
+  name: "Day 2: Upper Pull",
+  orderInProgram: 2,
+  exercises: [
+    {
+      id: "gym-day2-1",
+      sessionId: "gym-day2",
+      exerciseName: "Pull-Up",
+      orderInSession: 1,
+      targetSets: 4,
+      targetReps: 6, // 4-6 range, use upper bound
+      restTimeSeconds: 180, // 2-3 min
+    },
+    {
+      id: "gym-day2-2",
+      sessionId: "gym-day2",
+      exerciseName: "Barbell Row",
+      orderInSession: 2,
+      targetSets: 3,
+      targetReps: 8, // 6-8 range, use upper bound
+      restTimeSeconds: 120, // 2 min
+    },
+    {
+      id: "gym-day2-3",
+      sessionId: "gym-day2",
+      exerciseName: "Shrugs",
+      orderInSession: 3,
+      targetSets: 3,
+      targetReps: 10,
+      restTimeSeconds: 90,
+    },
+    {
+      id: "gym-day2-4",
+      sessionId: "gym-day2",
+      exerciseName: "Farmer Carry",
+      orderInSession: 4,
+      targetSets: 4,
+      targetDistance: 40, // 20-40m, use upper bound
+      restTimeSeconds: 90,
+    },
+  ],
+};
+
+/**
+ * Day 3 - Upper Push
+ */
+const GYM_DAY3_PUSH: ProgramSession = {
+  id: "gym-day3",
+  programId: "hunter-gatherer-gym",
+  name: "Day 3: Upper Push",
+  orderInProgram: 3,
+  exercises: [
+    {
+      id: "gym-day3-1",
+      sessionId: "gym-day3",
+      exerciseName: "Overhead Press",
+      orderInSession: 1,
+      targetSets: 4,
+      targetReps: 5,
+      restTimeSeconds: 180, // 2-3 min
+    },
+    {
+      id: "gym-day3-2",
+      sessionId: "gym-day3",
+      exerciseName: "Bench Press",
+      orderInSession: 2,
+      targetSets: 3,
+      targetReps: 8, // 6-8 range, use upper bound
+      restTimeSeconds: 120, // 2 min
+    },
+    {
+      id: "gym-day3-3",
+      sessionId: "gym-day3",
+      exerciseName: "Dips",
+      orderInSession: 3,
+      targetSets: 3,
+      targetReps: 10, // 6-10 range, use upper bound
+      restTimeSeconds: 90,
+    },
+    {
+      id: "gym-day3-4",
+      sessionId: "gym-day3",
+      exerciseName: "Hollow Body Hold",
+      orderInSession: 4,
+      targetSets: 3,
+      targetDuration: 30, // 15-30s, use upper bound
+      restTimeSeconds: 60,
+    },
+  ],
+};
+
+export const HUNTER_GATHERER_GYM: Program = {
+  id: "hunter-gatherer-gym",
+  name: "Hunter-Gatherer Gym",
+  description:
+    "3-day gym program with barbell and dumbbell work. Focus on compound movements with controlled execution. Leave 2 reps in reserve on all main lifts. Requires squat rack, bench, pull-up bar, and dumbbells.",
+  sessions: [GYM_DAY1_LOWER, GYM_DAY2_PULL, GYM_DAY3_PUSH],
+};
+
+// ============================================================================
 // ALL PROGRAMS
 // ============================================================================
 
 export const PROGRAMS: Program[] = [
   HUNTER_GATHERER_BASIC,
   HUNTER_GATHERER_NO_GYM,
+  HUNTER_GATHERER_GYM,
 ];
 
 // ============================================================================

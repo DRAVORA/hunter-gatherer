@@ -29,7 +29,7 @@ interface Props {
 // PROGRAM DAYS CONFIGURATION
 // ============================================================================
 
-const PROGRAM_DAYS = [
+const NO_GYM_PROGRAM_DAYS = [
   {
     id: "no-gym-day1",
     dayNumber: 1,
@@ -80,6 +80,46 @@ const PROGRAM_DAYS = [
   },
 ];
 
+const GYM_PROGRAM_DAYS = [
+  {
+    id: "gym-day1",
+    dayNumber: 1,
+    name: "Day 1: Lower Body",
+    exercises: [
+      `Back Squat (4${UNICODE.MULTIPLY}5)`,
+      `Romanian Deadlift (3${UNICODE.MULTIPLY}6)`,
+      `Bulgarian Split Squat (3${UNICODE.MULTIPLY}6/leg)`,
+      `Standing Calf Raise (3${UNICODE.MULTIPLY}12)`,
+      `Side Plank (3${UNICODE.MULTIPLY}30s/side)`,
+    ],
+    estimatedDuration: "45-60 min",
+  },
+  {
+    id: "gym-day2",
+    dayNumber: 2,
+    name: "Day 2: Upper Pull",
+    exercises: [
+      `Pull-Ups (4${UNICODE.MULTIPLY}6)`,
+      `Barbell Row (3${UNICODE.MULTIPLY}8)`,
+      `Shrugs (3${UNICODE.MULTIPLY}10)`,
+      `Farmer Carries (4${UNICODE.MULTIPLY}40m)`,
+    ],
+    estimatedDuration: "45-60 min",
+  },
+  {
+    id: "gym-day3",
+    dayNumber: 3,
+    name: "Day 3: Upper Push",
+    exercises: [
+      `Overhead Press (4${UNICODE.MULTIPLY}5)`,
+      `Bench Press (3${UNICODE.MULTIPLY}8)`,
+      `Dips (3${UNICODE.MULTIPLY}10)`,
+      `Hollow Hold (3${UNICODE.MULTIPLY}30s)`,
+    ],
+    estimatedDuration: "45-60 min",
+  },
+];
+
 // ============================================================================
 // HOME SCREEN
 // ============================================================================
@@ -88,6 +128,9 @@ export default function HomeScreen({ navigation, route }: Props) {
   const { programId = "no-gym" } = route.params || {}; // Default to no-gym if undefined
   const [todayCheckIn, setTodayCheckIn] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Select program days based on programId
+  const PROGRAM_DAYS = programId === "gym" ? GYM_PROGRAM_DAYS : NO_GYM_PROGRAM_DAYS;
 
   useEffect(() => {
     loadTodayCheckIn();
@@ -194,7 +237,7 @@ export default function HomeScreen({ navigation, route }: Props) {
         [
           sessionId,
           today,
-          "Hunter-Gatherer No-Gym",
+          programId === "gym" ? "Hunter-Gatherer Gym" : "Hunter-Gatherer No-Gym",
           session.name,
           new Date().toISOString(),
           plannedVolume,
@@ -241,7 +284,7 @@ export default function HomeScreen({ navigation, route }: Props) {
         <View style={styles.header}>
           <Text style={styles.title}>Hunter-Gatherer</Text>
           <Text style={styles.subtitle}>
-            {programId === "no-gym" ? "No-Gym Program" : "Training Program"}
+            {programId === "gym" ? "Gym Program" : programId === "no-gym" ? "No-Gym Program" : "Training Program"}
           </Text>
         </View>
 

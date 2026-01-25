@@ -42,15 +42,15 @@ const AVAILABLE_PROGRAMS: ProgramOption[] = [
     duration: "35-45 min per session",
     frequency: "4 days per week",
   },
-  // Future programs can be added here:
-  // {
-  //   id: "minimal-equipment",
-  //   name: "Minimal Equipment",
-  //   description: "Program with dumbbells and resistance bands",
-  //   requirements: ["Pull-up bar", "Dumbbells", "Resistance bands"],
-  //   duration: "40-50 min per session",
-  //   frequency: "4 days per week",
-  // },
+  {
+    id: "gym",
+    name: "Gym Program",
+    description:
+      "3-day program with barbell and dumbbell work. Compound movements with 2 reps in reserve.",
+    requirements: ["Squat rack", "Bench press", "Pull-up bar", "Dumbbells", "Barbell"],
+    duration: "45-60 min per session",
+    frequency: "3 days per week",
+  },
 ];
 
 // ============================================================================

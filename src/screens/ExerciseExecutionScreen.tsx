@@ -71,10 +71,39 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
       }
 
       // Get program session from static data
-      const programSession = getSessionById(sessionRow.session_name.includes("Day 1") ? "no-gym-day1" :
-                                           sessionRow.session_name.includes("Day 2") ? "no-gym-day2" :
-                                           sessionRow.session_name.includes("Day 3") ? "no-gym-day3" :
-                                           "no-gym-day4");
+      // Determine session ID based on session_name
+      let sessionIdToLoad: string;
+      
+      const sessionName = sessionRow.session_name || "";
+      
+      // Check for gym program sessions (must match exact names from programs.ts)
+      if (sessionName.includes("Day 1: Lower Body")) {
+        sessionIdToLoad = "gym-day1";
+      } else if (sessionName.includes("Day 2: Upper Pull")) {
+        sessionIdToLoad = "gym-day2";
+      } else if (sessionName.includes("Day 3: Upper Push")) {
+        sessionIdToLoad = "gym-day3";
+      }
+      // Check for no-gym program sessions
+      else if (sessionName.includes("Day 1: Pull")) {
+        sessionIdToLoad = "no-gym-day1";
+      } else if (sessionName.includes("Day 2: Legs")) {
+        sessionIdToLoad = "no-gym-day2";
+      } else if (sessionName.includes("Day 3: Push")) {
+        sessionIdToLoad = "no-gym-day3";
+      } else if (sessionName.includes("Day 4:")) {
+        sessionIdToLoad = "no-gym-day4";
+      } else {
+        // Fallback - shouldn't happen
+        console.error(`[ExerciseExecution] Unknown session: ${sessionName}`);
+        Alert.alert("Error", `Unknown session type: ${sessionName}`);
+        navigation.goBack();
+        return;
+      }
+
+      console.log(`[ExerciseExecution] Loading session ID: ${sessionIdToLoad} for: ${sessionName}`);
+      
+      const programSession = getSessionById(sessionIdToLoad);
 
       if (!programSession) {
         Alert.alert("Error", "Program not found");
