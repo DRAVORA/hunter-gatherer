@@ -286,7 +286,7 @@ export default function SessionHistoryScreen({ navigation }: Props) {
                       {set.reps_completed} reps
                     </Text>
                   ) : (
-                    <Text style={styles.setValue}>—</Text>
+                    <Text style={styles.setValue}>{UNICODE.EM_DASH}</Text>
                   )}
 
                   <View style={styles.setIndicators}>

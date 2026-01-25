@@ -36,14 +36,17 @@ interface Props {
 // ============================================================================
 
 export default function SessionReadinessScreen({ navigation, route }: Props) {
-  const { sessionId, checkInId, readinessStatus, volumeAdjustmentPercent } = route.params;
+  const { sessionId, checkInId, readinessStatus, volumeAdjustmentPercent } =
+    route.params;
 
   const [waterConsumed, setWaterConsumed] = useState(false);
   const [notTrainingFasted, setNotTrainingFasted] = useState(false);
   const [noDizziness, setNoDizziness] = useState(false);
 
   const canBeginSession =
-    waterConsumed && notTrainingFasted && noDizziness &&
+    waterConsumed &&
+    notTrainingFasted &&
+    noDizziness &&
     (readinessStatus === ReadinessStatus.READY ||
       readinessStatus === ReadinessStatus.VOLUME_REDUCED);
 
@@ -104,7 +107,7 @@ export default function SessionReadinessScreen({ navigation, route }: Props) {
       [
         {
           text: "OK",
-          onPress: () => navigation.navigate("Home"),
+          onPress: () => navigation.goBack(),
         },
       ],
     );
@@ -134,7 +137,9 @@ export default function SessionReadinessScreen({ navigation, route }: Props) {
                   waterConsumed && styles.checkboxBoxChecked,
                 ]}
               >
-                {waterConsumed && <Text style={styles.checkmark}>{UNICODE.CHECKMARK}</Text>}
+                {waterConsumed && (
+                  <Text style={styles.checkmark}>{UNICODE.CHECKMARK}</Text>
+                )}
               </View>
               <Text style={styles.checkboxLabel}>
                 Water consumed (500-750ml)
@@ -151,7 +156,9 @@ export default function SessionReadinessScreen({ navigation, route }: Props) {
                   notTrainingFasted && styles.checkboxBoxChecked,
                 ]}
               >
-                {notTrainingFasted && <Text style={styles.checkmark}>{UNICODE.CHECKMARK}</Text>}
+                {notTrainingFasted && (
+                  <Text style={styles.checkmark}>{UNICODE.CHECKMARK}</Text>
+                )}
               </View>
               <Text style={styles.checkboxLabel}>Not training fasted</Text>
             </TouchableOpacity>
@@ -166,7 +173,9 @@ export default function SessionReadinessScreen({ navigation, route }: Props) {
                   noDizziness && styles.checkboxBoxChecked,
                 ]}
               >
-                {noDizziness && <Text style={styles.checkmark}>{UNICODE.CHECKMARK}</Text>}
+                {noDizziness && (
+                  <Text style={styles.checkmark}>{UNICODE.CHECKMARK}</Text>
+                )}
               </View>
               <Text style={styles.checkboxLabel}>No dizziness</Text>
             </TouchableOpacity>

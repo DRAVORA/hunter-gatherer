@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { UNICODE } from "../constants/unicode";
 
 // ============================================================================
 // STOP RULES BOX COMPONENT
@@ -23,7 +24,7 @@ export default function StopRulesBox({ rules }: StopRulesBoxProps) {
       <Text style={styles.title}>STOP SET IF:</Text>
       {rules.map((rule, index) => (
         <View key={index} style={styles.ruleRow}>
-          <Text style={styles.bullet}>•</Text>
+          <Text style={styles.bullet}>{UNICODE.BULLET}</Text>
           <Text style={styles.ruleText}>{rule}</Text>
         </View>
       ))}

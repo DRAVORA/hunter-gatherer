@@ -35,11 +35,11 @@ const PROGRAM_DAYS = [
     dayNumber: 1,
     name: "Pull + Traps",
     exercises: [
-      "Pull-Up (6×AMRAP)",
-      "Chin-Up (4×AMRAP)",
-      "Scapular Pull-Up (3×15)",
-      "High Pull-Up Hold (3×30s)",
-      "Dead Hang (2×60s)",
+      `Pull-Up (6${UNICODE.MULTIPLY}AMRAP)`,
+      `Chin-Up (4${UNICODE.MULTIPLY}AMRAP)`,
+      `Scapular Pull-Up (3${UNICODE.MULTIPLY}15)`,
+      `High Pull-Up Hold (3${UNICODE.MULTIPLY}30s)`,
+      `Dead Hang (2${UNICODE.MULTIPLY}60s)`,
     ],
     estimatedDuration: "35-45 min",
   },
@@ -48,10 +48,10 @@ const PROGRAM_DAYS = [
     dayNumber: 2,
     name: "Legs + Hinge",
     exercises: [
-      "Bulgarian Split Squat (5×25/leg)",
-      "Single-Leg Hip Thrust (4×20/leg)",
-      "Hamstring Walkouts (3×15)",
-      "Wall Sit (2×max time)",
+      `Bulgarian Split Squat (5${UNICODE.MULTIPLY}25/leg)`,
+      `Single-Leg Hip Thrust (4${UNICODE.MULTIPLY}20/leg)`,
+      `Hamstring Walkouts (3${UNICODE.MULTIPLY}15)`,
+      `Wall Sit (2${UNICODE.MULTIPLY}max time)`,
     ],
     estimatedDuration: "35-45 min",
   },
@@ -60,10 +60,10 @@ const PROGRAM_DAYS = [
     dayNumber: 3,
     name: "Push + Shoulders",
     exercises: [
-      "Push-Up Feet Elevated (6×20)",
-      "Pike Push-Up (5×15)",
-      "Pseudo-Planche Push-Up (3×10)",
-      "Side Plank (3×60s/side)",
+      `Push-Up Feet Elevated (6${UNICODE.MULTIPLY}20)`,
+      `Pike Push-Up (5${UNICODE.MULTIPLY}15)`,
+      `Pseudo-Planche Push-Up (3${UNICODE.MULTIPLY}10)`,
+      `Side Plank (3${UNICODE.MULTIPLY}60s/side)`,
     ],
     estimatedDuration: "35-45 min",
   },
@@ -95,7 +95,7 @@ export default function HomeScreen({ navigation, route }: Props) {
 
   // Reload check-in when screen comes into focus
   useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
+    const unsubscribe = navigation.addListener("focus", () => {
       loadTodayCheckIn();
     });
 
@@ -327,7 +327,7 @@ export default function HomeScreen({ navigation, route }: Props) {
           {/* 1. Active Dead Hang */}
           <View style={styles.nonNegotiableSection}>
             <Text style={styles.nonNegotiableHeader}>
-              1. ACTIVE DEAD HANG "” 60 SECONDS TOTAL
+              1. ACTIVE DEAD HANG {UNICODE.DASH} 60 SECONDS TOTAL
             </Text>
 
             <Text style={styles.nonNegotiableSubheading}>Setup</Text>
@@ -345,12 +345,13 @@ export default function HomeScreen({ navigation, route }: Props) {
               {UNICODE.BULLET} Legs together or slightly forward{"\n"}
               {UNICODE.BULLET} Neck neutral{"\n"}
               {"\n"}
-              You should feel long and supported "” not collapsed.
+              You should feel long and supported {UNICODE.DASH} not collapsed.
             </Text>
 
             <Text style={styles.nonNegotiableSubheading}>Execution</Text>
             <Text style={styles.nonNegotiableText}>
-              {UNICODE.BULLET} Maintain slight shoulder depression (shoulders not in ears)
+              {UNICODE.BULLET} Maintain slight shoulder depression (shoulders
+              not in ears)
               {"\n"}
               {UNICODE.BULLET} No swinging{"\n"}
               {UNICODE.BULLET} No shrugging{"\n"}
@@ -374,14 +375,14 @@ export default function HomeScreen({ navigation, route }: Props) {
               {UNICODE.BULLET} Swinging appears{"\n"}
               {"\n"}
               If 60 seconds cannot be held cleanly:{"\n"}
-              Break into 2×30s or 3×20s
+              Break into 2{UNICODE.MULTIPLY}30s or 3{UNICODE.MULTIPLY}20s
             </Text>
           </View>
 
           {/* 2. Scapular Pull-Ups */}
           <View style={styles.nonNegotiableSection}>
             <Text style={styles.nonNegotiableHeader}>
-              2. SCAPULAR PULL-UPS "” 15 TOTAL REPS
+              2. SCAPULAR PULL-UPS {UNICODE.DASH} 15 TOTAL REPS
             </Text>
 
             <Text style={styles.nonNegotiableSubheading}>Setup</Text>
@@ -401,7 +402,7 @@ export default function HomeScreen({ navigation, route }: Props) {
             <Text style={styles.nonNegotiableText}>
               1. Pull shoulders down (depress){"\n"}
               2. Think "put shoulders in back pockets"{"\n"}
-              3. Body rises 2"“3 cm only{"\n"}
+              3. Body rises 2{UNICODE.DASH}3 cm only{"\n"}
               4. Pause 1 second at top{"\n"}
               5. Slowly return to full hang{"\n"}
               {"\n"}
@@ -428,16 +429,18 @@ export default function HomeScreen({ navigation, route }: Props) {
               Scaling (If 15 clean reps not possible)
             </Text>
             <Text style={styles.nonNegotiableText}>
-              {UNICODE.BULLET} Cluster sets: 2 reps, rest 20"“30s, repeat until 15 total{"\n"}
+              {UNICODE.BULLET} Cluster sets: 2 reps, rest 20{UNICODE.DASH}30s,
+              repeat until 15 total{"\n"}
               OR{"\n"}
-              {UNICODE.BULLET} Isometric: Hold scap-down position 5"“10s × 5"“6 sets
+              {UNICODE.BULLET} Isometric: Hold scap-down position 5
+              {UNICODE.DASH}10s {UNICODE.MULTIPLY} 5{UNICODE.DASH}6 sets
             </Text>
           </View>
 
           {/* 3. Chin Tucks */}
           <View style={styles.nonNegotiableSection}>
             <Text style={styles.nonNegotiableHeader}>
-              3. CHIN TUCKS "” 20 CONTROLLED REPS
+              3. CHIN TUCKS {UNICODE.DASH} 20 CONTROLLED REPS
             </Text>
 
             <Text style={styles.nonNegotiableSubheading}>
@@ -461,7 +464,7 @@ export default function HomeScreen({ navigation, route }: Props) {
               1. Gently pull chin straight back{"\n"}
               2. Create a "double chin"{"\n"}
               3. Head stays level (no nodding){"\n"}
-              4. Hold 1"“2 seconds{"\n"}
+              4. Hold 1{UNICODE.DASH}2 seconds{"\n"}
               5. Relax and repeat{"\n"}
               {"\n"}
               This is a retraction, not a tilt.
