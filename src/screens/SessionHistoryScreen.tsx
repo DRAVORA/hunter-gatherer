@@ -13,6 +13,7 @@ import { RootStackParamList } from "../../App";
 import { getDatabase } from "../database/init";
 import { formatDate, formatMinutes } from "../utils/formatting";
 import { UNICODE } from "../constants/unicode";
+import { theme } from "../styles/theme";
 
 type SessionHistoryNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -399,7 +400,7 @@ export default function SessionHistoryScreen({ navigation }: Props) {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#2196F3" />
+        <ActivityIndicator size="large" color={theme.colors.accent.secondary} />
       </View>
     );
   }
@@ -430,170 +431,171 @@ export default function SessionHistoryScreen({ navigation }: Props) {
 }
 
 // ============================================================================
-// STYLES
+// THEMED STYLES
 // ============================================================================
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: theme.colors.background.primary,
   },
   listContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingHorizontal: theme.spacing[4],
+    paddingBottom: theme.spacing[4],
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F5F5F5",
+    backgroundColor: theme.colors.background.primary,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F5F5F5",
-    padding: 24,
+    backgroundColor: theme.colors.background.primary,
+    padding: theme.spacing[6],
   },
   emptyText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#666",
-    marginBottom: 8,
+    fontSize: theme.typography.fontSize.lg,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.tertiary,
+    marginBottom: theme.spacing[2],
   },
   emptySubtext: {
-    fontSize: 14,
-    color: "#999",
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.disabled,
     textAlign: "center",
   },
   sectionHeader: {
-    backgroundColor: "#F5F5F5",
-    paddingVertical: 12,
-    paddingTop: 16,
+    backgroundColor: theme.colors.background.secondary,
+    paddingVertical: theme.spacing[3],
+    paddingTop: theme.spacing[4],
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#666",
+    fontSize: theme.typography.fontSize.md,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.tertiary,
     textTransform: "uppercase",
-    letterSpacing: 0.5,
+    letterSpacing: theme.typography.letterSpacing.wider,
   },
   sessionCard: {
-    backgroundColor: "#FFF",
-    borderRadius: 8,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
+    backgroundColor: theme.colors.surface.base,
+    borderRadius: theme.borderRadius.md,
+    marginBottom: theme.spacing[3],
+    borderWidth: theme.borderWidth.hairline,
+    borderColor: theme.colors.border.subtle,
     overflow: "hidden",
   },
   sessionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    padding: 16,
+    padding: theme.spacing[4],
   },
   sessionInfo: {
     flex: 1,
-    marginRight: 12,
+    marginRight: theme.spacing[3],
   },
   sessionName: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#000",
-    marginBottom: 4,
+    fontSize: theme.typography.fontSize.md,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing[1],
   },
   sessionDate: {
-    fontSize: 13,
-    color: "#666",
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.tertiary,
   },
   sessionStats: {
     alignItems: "flex-end",
   },
   statsText: {
-    fontSize: 13,
-    color: "#333",
-    marginBottom: 2,
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.secondary,
+    marginBottom: theme.spacing[0.5],
   },
   expandIndicator: {
-    fontSize: 12,
-    color: "#2196F3",
-    marginTop: 4,
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.accent.secondary,
+    marginTop: theme.spacing[1],
   },
   sessionDetails: {
-    borderTopWidth: 1,
-    borderTopColor: "#E0E0E0",
-    backgroundColor: "#FAFAFA",
+    borderTopWidth: theme.borderWidth.hairline,
+    borderTopColor: theme.colors.border.subtle,
+    backgroundColor: theme.colors.surface.elevated,
   },
   summarySection: {
-    padding: 16,
-    paddingBottom: 12,
+    padding: theme.spacing[4],
+    paddingBottom: theme.spacing[3],
   },
   detailRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 6,
+    marginBottom: theme.spacing[2],
   },
   detailLabel: {
-    fontSize: 14,
-    color: "#666",
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.tertiary,
   },
   detailValue: {
-    fontSize: 14,
-    color: "#333",
-    fontWeight: "500",
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+    fontWeight: theme.typography.fontWeight.medium,
   },
   exerciseSection: {
-    paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingHorizontal: theme.spacing[4],
+    paddingBottom: theme.spacing[4],
   },
   exerciseSectionTitle: {
-    fontSize: 15,
-    fontWeight: "bold",
-    color: "#000",
-    marginBottom: 12,
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing[3],
+    letterSpacing: theme.typography.letterSpacing.wide,
   },
   noDataText: {
-    fontSize: 14,
-    color: "#999",
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.disabled,
     fontStyle: "italic",
   },
   exerciseBlock: {
-    backgroundColor: "#FFF",
-    borderRadius: 6,
-    padding: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
+    backgroundColor: theme.colors.surface.base,
+    borderRadius: theme.borderRadius.sm,
+    padding: theme.spacing[3],
+    marginBottom: theme.spacing[3],
+    borderWidth: theme.borderWidth.hairline,
+    borderColor: theme.colors.border.default,
   },
   exerciseHeader: {
-    marginBottom: 10,
+    marginBottom: theme.spacing[2],
   },
   exerciseName: {
-    fontSize: 15,
-    fontWeight: "bold",
-    color: "#000",
-    marginBottom: 4,
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing[1],
   },
   exerciseStats: {
-    fontSize: 13,
-    color: "#666",
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.tertiary,
   },
   setRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 6,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
+    paddingVertical: theme.spacing[2],
+    borderBottomWidth: theme.borderWidth.hairline,
+    borderBottomColor: theme.colors.border.subtle,
   },
   setNumber: {
-    fontSize: 13,
-    color: "#666",
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.tertiary,
     width: 60,
   },
   setValue: {
-    fontSize: 14,
-    color: "#333",
-    fontWeight: "500",
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+    fontWeight: theme.typography.fontWeight.medium,
     width: 80,
   },
   setIndicators: {
@@ -601,36 +603,36 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
   },
   cleanBadge: {
-    backgroundColor: "#4CAF50",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 4,
+    backgroundColor: theme.colors.execution.cleanRep,
+    paddingHorizontal: theme.spacing[2],
+    paddingVertical: theme.spacing[1],
+    borderRadius: theme.borderRadius.sm,
   },
   cleanBadgeText: {
-    fontSize: 11,
-    color: "#FFF",
-    fontWeight: "600",
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.primary,
+    fontWeight: theme.typography.fontWeight.semibold,
   },
   dirtyBadge: {
-    backgroundColor: "#FF9800",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 4,
+    backgroundColor: theme.colors.execution.dirtyRep,
+    paddingHorizontal: theme.spacing[2],
+    paddingVertical: theme.spacing[1],
+    borderRadius: theme.borderRadius.sm,
   },
   dirtyBadgeText: {
-    fontSize: 11,
-    color: "#FFF",
-    fontWeight: "600",
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.primary,
+    fontWeight: theme.typography.fontWeight.semibold,
   },
   exerciseSummary: {
-    marginTop: 8,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: "#F0F0F0",
+    marginTop: theme.spacing[2],
+    paddingTop: theme.spacing[2],
+    borderTopWidth: theme.borderWidth.hairline,
+    borderTopColor: theme.colors.border.subtle,
   },
   summaryText: {
-    fontSize: 13,
-    color: "#666",
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.tertiary,
     fontStyle: "italic",
   },
 });

@@ -1,5 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { UNICODE } from "../constants/unicode";
+import { theme } from "../styles/theme";
 
 // ============================================================================
 // HYDRATION TRACKER COMPONENT
@@ -69,7 +71,7 @@ function HydrationItem({ label, completed, onToggle }: HydrationItemProps) {
   return (
     <TouchableOpacity style={styles.item} onPress={onToggle}>
       <View style={[styles.checkbox, completed && styles.checkboxChecked]}>
-        {completed && <Text style={styles.checkmark}>✓</Text>}
+        {completed && <Text style={styles.checkmark}>{UNICODE.CHECKMARK}</Text>}
       </View>
       <Text style={styles.label}>{label}</Text>
     </TouchableOpacity>
@@ -77,49 +79,52 @@ function HydrationItem({ label, completed, onToggle }: HydrationItemProps) {
 }
 
 // ============================================================================
-// BASIC STYLES (NO THEMING YET)
+// THEMED STYLES
 // ============================================================================
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
-    backgroundColor: "#F0F0F0",
-    borderRadius: 4,
+    padding: theme.spacing[4],
+    backgroundColor: theme.colors.surface.base,
+    borderRadius: theme.borderRadius.base,
+    borderWidth: theme.borderWidth.hairline,
+    borderColor: theme.colors.border.subtle,
   },
   title: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 12,
-    color: "#000",
+    fontSize: theme.typography.fontSize.md,
+    fontWeight: theme.typography.fontWeight.semibold,
+    marginBottom: theme.spacing[3],
+    color: theme.colors.text.emphasis,
+    letterSpacing: theme.typography.letterSpacing.wide,
   },
   item: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 8,
+    paddingVertical: theme.spacing[2],
   },
   checkbox: {
     width: 24,
     height: 24,
-    borderWidth: 2,
-    borderColor: "#757575",
-    borderRadius: 4,
-    marginRight: 12,
+    borderWidth: theme.borderWidth.thin,
+    borderColor: theme.colors.border.default,
+    borderRadius: theme.borderRadius.sm,
+    marginRight: theme.spacing[3],
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.surface.elevated,
   },
   checkboxChecked: {
-    backgroundColor: "#4CAF50",
-    borderColor: "#4CAF50",
+    backgroundColor: theme.colors.state.success,
+    borderColor: theme.colors.state.success,
   },
   checkmark: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#FFF",
+    fontSize: 16,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.text.primary,
   },
   label: {
-    fontSize: 14,
-    color: "#333",
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
     flex: 1,
   },
 });

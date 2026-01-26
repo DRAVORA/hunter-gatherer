@@ -15,6 +15,7 @@ import { ReadinessIndicator } from "../components";
 import { ReadinessStatus } from "../types";
 import { getDatabase } from "../database/init";
 import { UNICODE } from "../constants/unicode";
+import { theme } from "../styles/theme";
 
 type SessionReadinessNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -208,86 +209,96 @@ export default function SessionReadinessScreen({ navigation, route }: Props) {
 }
 
 // ============================================================================
-// BASIC STYLES (NO THEMING YET)
+// THEMED STYLES
 // ============================================================================
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: theme.colors.background.primary,
   },
   content: {
-    padding: 16,
+    padding: theme.spacing[4],
   },
   section: {
-    backgroundColor: "#FFF",
-    borderRadius: 4,
-    padding: 16,
-    marginTop: 16,
+    backgroundColor: theme.colors.surface.base,
+    borderRadius: theme.borderRadius.md,
+    borderWidth: theme.borderWidth.hairline,
+    borderColor: theme.colors.border.subtle,
+    padding: theme.spacing[4],
+    marginTop: theme.spacing[4],
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 16,
-    color: "#000",
+    fontSize: theme.typography.fontSize.lg,
+    fontWeight: theme.typography.fontWeight.semibold,
+    marginBottom: theme.spacing[4],
+    color: theme.colors.text.emphasis,
+    letterSpacing: theme.typography.letterSpacing.wide,
   },
   checkbox: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 8,
+    paddingVertical: theme.spacing[2],
   },
   checkboxBox: {
     width: 24,
     height: 24,
-    borderWidth: 2,
-    borderColor: "#757575",
-    borderRadius: 4,
-    marginRight: 12,
+    borderWidth: theme.borderWidth.thin,
+    borderColor: theme.colors.border.default,
+    borderRadius: theme.borderRadius.sm,
+    marginRight: theme.spacing[3],
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.surface.elevated,
   },
   checkboxBoxChecked: {
-    backgroundColor: "#4CAF50",
-    borderColor: "#4CAF50",
+    backgroundColor: theme.colors.state.success,
+    borderColor: theme.colors.state.success,
   },
   checkmark: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#FFF",
+    fontSize: 16,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.text.primary,
   },
   checkboxLabel: {
-    fontSize: 16,
-    color: "#333",
+    fontSize: theme.typography.fontSize.base,
+    color: theme.colors.text.secondary,
     flex: 1,
   },
   buttonContainer: {
-    marginTop: 24,
+    marginTop: theme.spacing[6],
   },
   beginButton: {
-    backgroundColor: "#4CAF50",
-    paddingVertical: 16,
-    borderRadius: 4,
+    backgroundColor: theme.colors.accent.secondary,
+    paddingVertical: theme.spacing[4],
+    borderRadius: theme.borderRadius.base,
+    borderWidth: theme.borderWidth.thin,
+    borderColor: theme.colors.accent.secondaryDark,
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: theme.spacing[3],
   },
   beginButtonDisabled: {
-    backgroundColor: "#BDBDBD",
+    backgroundColor: theme.colors.surface.base,
+    borderColor: theme.colors.border.subtle,
   },
   beginButtonText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#FFF",
+    fontSize: theme.typography.fontSize.lg,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.text.primary,
+    letterSpacing: theme.typography.letterSpacing.wide,
   },
   restButton: {
-    backgroundColor: "#757575",
-    paddingVertical: 16,
-    borderRadius: 4,
+    backgroundColor: theme.colors.surface.interactive,
+    borderWidth: theme.borderWidth.thin,
+    borderColor: theme.colors.border.default,
+    paddingVertical: theme.spacing[4],
+    borderRadius: theme.borderRadius.base,
     alignItems: "center",
   },
   restButtonText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#FFF",
+    fontSize: theme.typography.fontSize.lg,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.text.primary,
+    letterSpacing: theme.typography.letterSpacing.wide,
   },
 });

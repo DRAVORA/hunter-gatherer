@@ -1,13 +1,14 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { UNICODE } from "../constants/unicode";
+import { theme } from "../styles/theme";
 
 // ============================================================================
 // STOP RULES BOX COMPONENT
 // ============================================================================
 // Displays safety warnings during exercise execution
 // ALWAYS VISIBLE during sets
-// Amber background to draw attention
+// Warm dark brown background with amber border to draw attention
 // ============================================================================
 
 interface StopRulesBoxProps {
@@ -33,35 +34,37 @@ export default function StopRulesBox({ rules }: StopRulesBoxProps) {
 }
 
 // ============================================================================
-// BASIC STYLES (NO THEMING YET)
+// THEMED STYLES
 // ============================================================================
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#FFD580", // Amber warning color
-    padding: 16,
-    borderRadius: 4,
-    borderWidth: 2,
-    borderColor: "#FF8C00", // Dark orange border
+    backgroundColor: theme.colors.stopRules.background,
+    padding: theme.spacing[4],
+    borderRadius: theme.borderRadius.md,
+    borderWidth: theme.borderWidth.thick,
+    borderColor: theme.colors.stopRules.border,
   },
   title: {
-    fontSize: 14,
-    fontWeight: "bold",
-    marginBottom: 8,
-    color: "#000",
+    fontSize: theme.typography.fontSize.sm,
+    fontWeight: theme.typography.fontWeight.bold,
+    marginBottom: theme.spacing[2],
+    color: theme.colors.stopRules.text,
+    letterSpacing: theme.typography.letterSpacing.widest,
   },
   ruleRow: {
     flexDirection: "row",
-    marginBottom: 4,
+    marginBottom: theme.spacing[1],
   },
   bullet: {
-    fontSize: 14,
-    marginRight: 8,
-    color: "#000",
+    fontSize: theme.typography.fontSize.sm,
+    marginRight: theme.spacing[2],
+    color: theme.colors.stopRules.text,
   },
   ruleText: {
-    fontSize: 14,
+    fontSize: theme.typography.fontSize.sm,
     flex: 1,
-    color: "#000",
+    color: theme.colors.stopRules.text,
+    lineHeight: theme.typography.fontSize.sm * theme.typography.lineHeight.normal,
   },
 });

@@ -1,14 +1,13 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { ReadinessStatus } from "../types";
+import { theme } from "../styles/theme";
 
 // ============================================================================
 // READINESS INDICATOR COMPONENT
 // ============================================================================
 // Shows training readiness status with color-coded indicator
-// Red = Rest Day / No Progression
-// Amber = Volume Reduced
-// Green = Ready
+// Uses theme-specific readiness colors
 // ============================================================================
 
 interface ReadinessIndicatorProps {
@@ -23,14 +22,15 @@ export default function ReadinessIndicator({
   const getStatusColor = (): string => {
     switch (status) {
       case ReadinessStatus.READY:
-        return "#4CAF50"; // Green
+        return theme.colors.readiness.ready;
       case ReadinessStatus.VOLUME_REDUCED:
-        return "#FFA500"; // Amber/Orange
+        return theme.colors.readiness.volumeReduced;
       case ReadinessStatus.NO_PROGRESSION:
+        return theme.colors.readiness.noProgression;
       case ReadinessStatus.REST_DAY:
-        return "#D32F2F"; // Red
+        return theme.colors.readiness.restDay;
       default:
-        return "#757575"; // Grey fallback
+        return theme.colors.surface.base;
     }
   };
 
@@ -65,33 +65,36 @@ export default function ReadinessIndicator({
 }
 
 // ============================================================================
-// BASIC STYLES (NO THEMING YET)
+// THEMED STYLES
 // ============================================================================
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
-    backgroundColor: "#F5F5F5",
-    borderRadius: 4,
+    padding: theme.spacing[4],
+    backgroundColor: theme.colors.surface.base,
+    borderRadius: theme.borderRadius.md,
+    borderWidth: theme.borderWidth.hairline,
+    borderColor: theme.colors.border.subtle,
   },
   indicator: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 4,
-    marginBottom: 12,
+    paddingVertical: theme.spacing[3],
+    paddingHorizontal: theme.spacing[4],
+    borderRadius: theme.borderRadius.base,
+    marginBottom: theme.spacing[3],
   },
   statusLabel: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#FFF",
+    fontSize: theme.typography.fontSize.lg,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.text.primary,
     textAlign: "center",
+    letterSpacing: theme.typography.letterSpacing.wider,
   },
   messageContainer: {
-    paddingHorizontal: 8,
+    paddingHorizontal: theme.spacing[2],
   },
   message: {
-    fontSize: 16,
-    color: "#333",
-    lineHeight: 24,
+    fontSize: theme.typography.fontSize.base,
+    color: theme.colors.text.secondary,
+    lineHeight: theme.typography.fontSize.base * theme.typography.lineHeight.normal,
   },
 });

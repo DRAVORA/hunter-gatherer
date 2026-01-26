@@ -7,6 +7,7 @@ import {
   Alert,
 } from "react-native";
 import { formatRestTime } from "../utils/formatting";
+import { theme } from "../styles/theme";
 
 // ============================================================================
 // REST TIMER COMPONENT
@@ -88,7 +89,9 @@ export default function RestTimer({
       <Text style={styles.title}>Rest Timer (Fixed)</Text>
       <Text style={styles.subtitle}>{targetSeconds} seconds prescribed</Text>
 
-      <Text style={styles.timer}>{formatRestTime(remainingSeconds)}</Text>
+      <Text style={[styles.timer, isRunning && styles.timerActive]}>
+        {formatRestTime(remainingSeconds)}
+      </Text>
 
       <View style={styles.buttonRow}>
         {!isRunning ? (
@@ -120,54 +123,65 @@ export default function RestTimer({
 }
 
 // ============================================================================
-// BASIC STYLES (NO THEMING YET)
+// THEMED STYLES
 // ============================================================================
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
-    backgroundColor: "#E0E0E0",
-    borderRadius: 4,
+    padding: theme.spacing[4],
+    backgroundColor: theme.colors.surface.elevated,
+    borderRadius: theme.borderRadius.md,
+    borderWidth: theme.borderWidth.thin,
+    borderColor: theme.colors.timer.rest,
   },
   title: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 4,
+    fontSize: theme.typography.fontSize.md,
+    fontWeight: theme.typography.fontWeight.semibold,
+    marginBottom: theme.spacing[1],
     textAlign: "center",
-    color: "#000",
+    color: theme.colors.text.primary,
+    letterSpacing: theme.typography.letterSpacing.wide,
   },
   subtitle: {
-    fontSize: 14,
-    color: "#666",
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.tertiary,
     textAlign: "center",
-    marginBottom: 12,
+    marginBottom: theme.spacing[3],
   },
   timer: {
     fontSize: 64,
-    fontWeight: "bold",
+    fontWeight: theme.typography.fontWeight.heavy,
     textAlign: "center",
-    marginVertical: 16,
-    color: "#000",
+    marginVertical: theme.spacing[4],
+    color: theme.colors.timer.rest,
+    fontFamily: theme.typography.fontFamily.mono,
+  },
+  timerActive: {
+    color: theme.colors.timer.active,
   },
   buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 12,
+    marginTop: theme.spacing[3],
+    gap: theme.spacing[2],
   },
   button: {
     flex: 1,
-    backgroundColor: "#2196F3",
-    paddingVertical: 12,
-    borderRadius: 4,
-    marginHorizontal: 4,
+    backgroundColor: theme.colors.accent.secondary,
+    paddingVertical: theme.spacing[3],
+    borderRadius: theme.borderRadius.base,
+    borderWidth: theme.borderWidth.hairline,
+    borderColor: theme.colors.accent.secondaryDark,
   },
   secondaryButton: {
-    backgroundColor: "#757575",
+    backgroundColor: theme.colors.surface.interactive,
+    borderColor: theme.colors.border.default,
   },
   buttonText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#FFF",
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.primary,
     textAlign: "center",
+    letterSpacing: theme.typography.letterSpacing.wide,
   },
 });

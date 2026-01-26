@@ -22,6 +22,7 @@ import { formatDate } from "../utils/formatting";
 import { validateSleepHours } from "../utils/validation";
 import { getDatabase } from "../database/init";
 import { UNICODE } from "../constants/unicode";
+import { theme } from "../styles/theme";
 
 type DailyCheckInScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -139,6 +140,7 @@ export default function DailyCheckInScreen({ navigation }: Props) {
             onChangeText={setSleepHours}
             keyboardType="decimal-pad"
             placeholder="8.0"
+            placeholderTextColor={theme.colors.text.disabled}
           />
         </View>
 
@@ -234,45 +236,46 @@ export default function DailyCheckInScreen({ navigation }: Props) {
 }
 
 // ============================================================================
-// BASIC STYLES (NO THEMING YET)
+// THEMED STYLES
 // ============================================================================
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: theme.colors.background.primary,
   },
   content: {
-    padding: 16,
+    padding: theme.spacing[4],
   },
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 8,
-    color: "#000",
+    fontSize: theme.typography.fontSize['3xl'],
+    fontWeight: theme.typography.fontWeight.bold,
+    marginBottom: theme.spacing[2],
+    color: theme.colors.text.primary,
   },
   instructions: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 24,
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.tertiary,
+    marginBottom: theme.spacing[6],
   },
   section: {
-    marginBottom: 24,
+    marginBottom: theme.spacing[6],
   },
   label: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 8,
-    color: "#000",
+    fontSize: theme.typography.fontSize.md,
+    fontWeight: theme.typography.fontWeight.semibold,
+    marginBottom: theme.spacing[2],
+    color: theme.colors.text.emphasis,
+    letterSpacing: theme.typography.letterSpacing.wide,
   },
   input: {
-    backgroundColor: "#FFF",
-    borderWidth: 1,
-    borderColor: "#CCC",
-    borderRadius: 4,
-    padding: 12,
-    fontSize: 16,
-    color: "#000",
+    backgroundColor: theme.colors.surface.base,
+    borderWidth: theme.borderWidth.thin,
+    borderColor: theme.colors.border.subtle,
+    borderRadius: theme.borderRadius.base,
+    padding: theme.spacing[3],
+    fontSize: theme.typography.fontSize.md,
+    color: theme.colors.text.primary,
   },
   checkbox: {
     flexDirection: "row",
@@ -281,67 +284,71 @@ const styles = StyleSheet.create({
   checkboxBox: {
     width: 24,
     height: 24,
-    borderWidth: 2,
-    borderColor: "#757575",
-    borderRadius: 4,
-    marginRight: 12,
+    borderWidth: theme.borderWidth.thin,
+    borderColor: theme.colors.border.default,
+    borderRadius: theme.borderRadius.sm,
+    marginRight: theme.spacing[3],
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.surface.base,
   },
   checkboxBoxChecked: {
-    backgroundColor: "#4CAF50",
-    borderColor: "#4CAF50",
+    backgroundColor: theme.colors.state.success,
+    borderColor: theme.colors.state.success,
   },
   checkmark: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#FFF",
+    fontSize: 16,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.text.primary,
   },
   checkboxLabel: {
-    fontSize: 14,
-    color: "#333",
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
     flex: 1,
   },
   radio: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 8,
+    paddingVertical: theme.spacing[2],
   },
   radioCircle: {
     width: 24,
     height: 24,
     borderRadius: 12,
-    borderWidth: 2,
-    borderColor: "#757575",
-    marginRight: 12,
+    borderWidth: theme.borderWidth.thin,
+    borderColor: theme.colors.border.default,
+    marginRight: theme.spacing[3],
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.surface.base,
   },
   radioCircleSelected: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: "#2196F3",
+    backgroundColor: theme.colors.accent.secondary,
   },
   radioLabel: {
-    fontSize: 16,
-    color: "#333",
+    fontSize: theme.typography.fontSize.base,
+    color: theme.colors.text.secondary,
   },
   submitButton: {
-    backgroundColor: "#2196F3",
-    paddingVertical: 16,
-    borderRadius: 4,
+    backgroundColor: theme.colors.accent.secondary,
+    paddingVertical: theme.spacing[4],
+    borderRadius: theme.borderRadius.base,
     alignItems: "center",
-    marginTop: 16,
+    marginTop: theme.spacing[4],
+    borderWidth: theme.borderWidth.thin,
+    borderColor: theme.colors.accent.secondaryDark,
   },
   submitButtonDisabled: {
-    backgroundColor: "#BDBDBD",
+    backgroundColor: theme.colors.surface.base,
+    borderColor: theme.colors.border.subtle,
   },
   submitButtonText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#FFF",
+    fontSize: theme.typography.fontSize.lg,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.text.primary,
+    letterSpacing: theme.typography.letterSpacing.wide,
   },
 });

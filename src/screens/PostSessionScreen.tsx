@@ -14,6 +14,7 @@ import { RootStackParamList } from "../../App";
 
 import { SessionFeel } from "../types";
 import { getDatabase } from "../database/init";
+import { theme } from "../styles/theme";
 
 type PostSessionNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -28,7 +29,7 @@ interface Props {
 }
 
 // ============================================================================
-// POST-SESSION SCREEN (PLACEHOLDER)
+// POST-SESSION SCREEN
 // ============================================================================
 
 export default function PostSessionScreen({ navigation, route }: Props) {
@@ -40,7 +41,7 @@ export default function PostSessionScreen({ navigation, route }: Props) {
   const [sessionFeel, setSessionFeel] = useState<SessionFeel | null>(null);
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [programId, setProgramId] = useState<string>("no-gym"); // Default to no-gym
+  const [programId, setProgramId] = useState<string>("no-gym");
 
   // Load session data to get program info
   useEffect(() => {
@@ -178,6 +179,7 @@ export default function PostSessionScreen({ navigation, route }: Props) {
             value={notes}
             onChangeText={setNotes}
             placeholder="Any observations or concerns..."
+            placeholderTextColor={theme.colors.text.disabled}
             multiline
             numberOfLines={4}
           />
@@ -202,106 +204,112 @@ export default function PostSessionScreen({ navigation, route }: Props) {
 }
 
 // ============================================================================
-// BASIC STYLES (NO THEMING YET)
+// THEMED STYLES
 // ============================================================================
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: theme.colors.background.primary,
   },
   content: {
-    padding: 16,
+    padding: theme.spacing[4],
   },
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 24,
-    color: "#000",
+    fontSize: theme.typography.fontSize['3xl'],
+    fontWeight: theme.typography.fontWeight.bold,
+    marginBottom: theme.spacing[6],
+    color: theme.colors.text.primary,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: theme.spacing[6],
   },
   label: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 12,
-    color: "#000",
+    fontSize: theme.typography.fontSize.md,
+    fontWeight: theme.typography.fontWeight.semibold,
+    marginBottom: theme.spacing[3],
+    color: theme.colors.text.emphasis,
+    letterSpacing: theme.typography.letterSpacing.wide,
   },
   buttonRow: {
     flexDirection: "row",
-    gap: 12,
+    gap: theme.spacing[3],
   },
   choiceButton: {
     flex: 1,
-    backgroundColor: "#FFF",
-    borderWidth: 2,
-    borderColor: "#CCC",
-    borderRadius: 4,
-    paddingVertical: 12,
+    backgroundColor: theme.colors.surface.base,
+    borderWidth: theme.borderWidth.thin,
+    borderColor: theme.colors.border.default,
+    borderRadius: theme.borderRadius.base,
+    paddingVertical: theme.spacing[3],
     alignItems: "center",
   },
   choiceButtonSelected: {
-    backgroundColor: "#2196F3",
-    borderColor: "#2196F3",
+    backgroundColor: theme.colors.accent.secondary,
+    borderColor: theme.colors.accent.secondaryDark,
   },
   choiceButtonText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.secondary,
   },
   choiceButtonTextSelected: {
-    color: "#FFF",
+    color: theme.colors.text.primary,
   },
   radio: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 8,
+    paddingVertical: theme.spacing[2],
   },
   radioCircle: {
     width: 24,
     height: 24,
     borderRadius: 12,
-    borderWidth: 2,
-    borderColor: "#757575",
-    marginRight: 12,
+    borderWidth: theme.borderWidth.thin,
+    borderColor: theme.colors.border.default,
+    marginRight: theme.spacing[3],
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#FFF",
+    backgroundColor: theme.colors.surface.base,
   },
   radioCircleSelected: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: "#2196F3",
+    backgroundColor: theme.colors.accent.secondary,
   },
   radioLabel: {
-    fontSize: 16,
-    color: "#333",
+    fontSize: theme.typography.fontSize.base,
+    color: theme.colors.text.secondary,
   },
   textInput: {
-    backgroundColor: "#FFF",
-    borderWidth: 1,
-    borderColor: "#CCC",
-    borderRadius: 4,
-    padding: 12,
-    fontSize: 16,
-    color: "#000",
+    backgroundColor: theme.colors.surface.base,
+    borderWidth: theme.borderWidth.thin,
+    borderColor: theme.colors.border.subtle,
+    borderRadius: theme.borderRadius.base,
+    padding: theme.spacing[3],
+    fontSize: theme.typography.fontSize.base,
+    color: theme.colors.text.primary,
     textAlignVertical: "top",
+    minHeight: 120,
   },
   submitButton: {
-    backgroundColor: "#4CAF50",
-    paddingVertical: 16,
-    borderRadius: 4,
+    backgroundColor: theme.colors.accent.secondary,
+    paddingVertical: theme.spacing[4],
+    borderRadius: theme.borderRadius.base,
+    borderWidth: theme.borderWidth.thin,
+    borderColor: theme.colors.accent.secondaryDark,
     alignItems: "center",
-    marginTop: 16,
+    marginTop: theme.spacing[4],
   },
   submitButtonDisabled: {
-    backgroundColor: "#BDBDBD",
+    backgroundColor: theme.colors.surface.base,
+    borderColor: theme.colors.border.subtle,
   },
   submitButtonText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#FFF",
+    fontSize: theme.typography.fontSize.lg,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.text.primary,
+    letterSpacing: theme.typography.letterSpacing.wide,
   },
 });

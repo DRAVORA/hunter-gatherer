@@ -7,6 +7,7 @@ import {
   StyleSheet,
   TouchableWithoutFeedback,
 } from "react-native";
+import { theme } from "../styles/theme";
 
 // ============================================================================
 // CONFIRMATION DIALOG COMPONENT
@@ -73,61 +74,66 @@ export default function ConfirmationDialog({
 }
 
 // ============================================================================
-// BASIC STYLES (NO THEMING YET)
+// THEMED STYLES
 // ============================================================================
 
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: theme.colors.overlay.heavy,
     justifyContent: "center",
     alignItems: "center",
   },
   dialog: {
-    backgroundColor: "#FFF",
-    borderRadius: 8,
-    padding: 24,
+    backgroundColor: theme.colors.surface.elevated,
+    borderRadius: theme.borderRadius.md,
+    borderWidth: theme.borderWidth.hairline,
+    borderColor: theme.colors.border.default,
+    padding: theme.spacing[6],
     width: "80%",
     maxWidth: 400,
+    ...theme.shadows.lg,
   },
   title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 12,
-    color: "#000",
+    fontSize: theme.typography.fontSize.xl,
+    fontWeight: theme.typography.fontWeight.bold,
+    marginBottom: theme.spacing[3],
+    color: theme.colors.text.primary,
   },
   message: {
-    fontSize: 16,
-    marginBottom: 24,
-    color: "#333",
-    lineHeight: 24,
+    fontSize: theme.typography.fontSize.base,
+    marginBottom: theme.spacing[6],
+    color: theme.colors.text.secondary,
+    lineHeight: theme.typography.fontSize.base * theme.typography.lineHeight.normal,
   },
   buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
+    gap: theme.spacing[3],
   },
   button: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: 4,
-    marginHorizontal: 4,
+    paddingVertical: theme.spacing[3],
+    borderRadius: theme.borderRadius.base,
   },
   cancelButton: {
-    backgroundColor: "#E0E0E0",
+    backgroundColor: theme.colors.surface.interactive,
+    borderWidth: theme.borderWidth.thin,
+    borderColor: theme.colors.border.default,
   },
   confirmButton: {
-    backgroundColor: "#D32F2F",
+    backgroundColor: theme.colors.accent.primary,
   },
   cancelButtonText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#000",
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.primary,
     textAlign: "center",
   },
   confirmButtonText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#FFF",
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.primary,
     textAlign: "center",
   },
 });

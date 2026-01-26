@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { formatRestTime } from "../utils/formatting";
+import { theme } from "../styles/theme";
 
 // ============================================================================
 // DURATION TIMER COMPONENT
@@ -53,7 +54,9 @@ export default function DurationTimer({
       <Text style={styles.title}>Hold Duration</Text>
       <Text style={styles.subtitle}>{targetDisplay}</Text>
 
-      <Text style={styles.timer}>{formatRestTime(elapsedSeconds)}</Text>
+      <Text style={[styles.timer, isRunning && styles.timerActive]}>
+        {formatRestTime(elapsedSeconds)}
+      </Text>
 
       <View style={styles.buttonRow}>
         {!isRunning ? (
@@ -83,64 +86,70 @@ export default function DurationTimer({
 }
 
 // ============================================================================
-// STYLES
+// THEMED STYLES
 // ============================================================================
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
-    backgroundColor: "#E8F5E9",
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: "#4CAF50",
+    padding: theme.spacing[4],
+    backgroundColor: theme.colors.surface.elevated,
+    borderRadius: theme.borderRadius.md,
+    borderWidth: theme.borderWidth.thin,
+    borderColor: theme.colors.timer.active,
   },
   title: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 4,
+    fontSize: theme.typography.fontSize.md,
+    fontWeight: theme.typography.fontWeight.semibold,
+    marginBottom: theme.spacing[1],
     textAlign: "center",
-    color: "#000",
+    color: theme.colors.text.primary,
+    letterSpacing: theme.typography.letterSpacing.wide,
   },
   subtitle: {
-    fontSize: 14,
-    color: "#666",
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.tertiary,
     textAlign: "center",
-    marginBottom: 12,
+    marginBottom: theme.spacing[3],
   },
   timer: {
-    fontSize: 72,
-    fontWeight: "bold",
+    fontSize: 64,
+    fontWeight: theme.typography.fontWeight.heavy,
     textAlign: "center",
-    marginVertical: 20,
-    color: "#2E7D32",
+    marginVertical: theme.spacing[5],
+    color: theme.colors.timer.rest,
+    fontFamily: theme.typography.fontFamily.mono,
+  },
+  timerActive: {
+    color: theme.colors.timer.active,
   },
   buttonRow: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 12,
+    marginTop: theme.spacing[3],
   },
   button: {
     flex: 1,
-    paddingVertical: 16,
-    borderRadius: 8,
+    paddingVertical: theme.spacing[4],
+    borderRadius: theme.borderRadius.base,
     alignItems: "center",
   },
   startButton: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: theme.colors.accent.secondary,
   },
   stopButton: {
-    backgroundColor: "#F44336",
+    backgroundColor: theme.colors.accent.primary,
   },
   buttonText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#FFF",
+    fontSize: theme.typography.fontSize.lg,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.text.primary,
+    letterSpacing: theme.typography.letterSpacing.wide,
   },
   completedText: {
-    fontSize: 16,
-    color: "#2E7D32",
+    fontSize: theme.typography.fontSize.base,
+    color: theme.colors.timer.complete,
     textAlign: "center",
-    marginTop: 12,
-    fontWeight: "600",
+    marginTop: theme.spacing[3],
+    fontWeight: theme.typography.fontWeight.semibold,
   },
 });
