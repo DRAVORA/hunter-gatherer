@@ -27,13 +27,11 @@ export default function RepCounter({
 
       <View style={styles.counterRow}>
         <TouchableOpacity
-          style={[styles.button, cleanReps === 0 && styles.buttonDisabled]}
+          style={styles.button}
           onPress={onDecrement}
           disabled={cleanReps === 0}
         >
-          <Text style={[styles.buttonText, cleanReps === 0 && styles.buttonTextDisabled]}>
-            −
-          </Text>
+          <Text style={styles.buttonText}>−</Text>
         </TouchableOpacity>
 
         <View style={styles.countContainer}>
@@ -54,7 +52,7 @@ export default function RepCounter({
 
 const styles = StyleSheet.create({
   container: {
-    padding: theme.spacing[4],
+    padding: theme.spacing['4'],
     backgroundColor: theme.colors.surface.elevated,
     borderRadius: theme.borderRadius.md,
     borderWidth: theme.borderWidth.thin,
@@ -62,12 +60,11 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: theme.typography.fontSize.sm,
-    fontWeight: theme.typography.fontWeight.semibold,
-    marginBottom: theme.spacing[3],
+    fontWeight: theme.typography.fontWeight.bold,
+    marginBottom: theme.spacing['3'],
     textAlign: "center",
-    color: theme.colors.text.emphasis,
-    letterSpacing: theme.typography.letterSpacing.wider,
-    textTransform: "uppercase",
+    color: theme.colors.text.primary,
+    letterSpacing: theme.typography.letterSpacing.wide,
   },
   counterRow: {
     flexDirection: "row",
@@ -75,36 +72,28 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   button: {
-    width: 64,
-    height: 64,
+    width: 60,
+    height: 60,
     backgroundColor: theme.colors.accent.secondary,
     borderRadius: theme.borderRadius.base,
-    borderWidth: theme.borderWidth.thin,
-    borderColor: theme.colors.accent.secondaryDark,
     alignItems: "center",
     justifyContent: "center",
-  },
-  buttonDisabled: {
-    backgroundColor: theme.colors.surface.base,
-    borderColor: theme.colors.border.subtle,
+    borderWidth: theme.borderWidth.hairline,
+    borderColor: theme.colors.accent.secondaryDark,
   },
   buttonText: {
-    fontSize: 40,
+    fontSize: 32,
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.text.primary,
   },
-  buttonTextDisabled: {
-    color: theme.colors.text.disabled,
-  },
   countContainer: {
-    width: 96,
+    width: 80,
     alignItems: "center",
     justifyContent: "center",
   },
   count: {
-    fontSize: 56,
-    fontWeight: theme.typography.fontWeight.heavy,
+    fontSize: 48,
+    fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.text.primary,
-    fontFamily: theme.typography.fontFamily.mono,
   },
 });

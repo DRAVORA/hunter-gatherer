@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { formatRestTime } from "../utils/formatting";
 import { theme } from "../styles/theme";
 
@@ -60,7 +54,7 @@ export default function RestTimer({
       setHasCompleted(false);
       onComplete(targetSeconds);
       Alert.alert("Rest Complete", "Time to start your next set", [
-        { text: "OK", onPress: () => onSkip() }
+        { text: "OK", onPress: () => onSkip() },
       ]);
     }
   }, [hasCompleted, targetSeconds, onComplete, onSkip]);
@@ -89,9 +83,7 @@ export default function RestTimer({
       <Text style={styles.title}>Rest Timer (Fixed)</Text>
       <Text style={styles.subtitle}>{targetSeconds} seconds prescribed</Text>
 
-      <Text style={[styles.timer, isRunning && styles.timerActive]}>
-        {formatRestTime(remainingSeconds)}
-      </Text>
+      <Text style={styles.timer}>{formatRestTime(remainingSeconds)}</Text>
 
       <View style={styles.buttonRow}>
         {!isRunning ? (
@@ -128,16 +120,16 @@ export default function RestTimer({
 
 const styles = StyleSheet.create({
   container: {
-    padding: theme.spacing[4],
+    padding: theme.spacing["4"],
     backgroundColor: theme.colors.surface.elevated,
     borderRadius: theme.borderRadius.md,
     borderWidth: theme.borderWidth.thin,
-    borderColor: theme.colors.timer.rest,
+    borderColor: theme.colors.border.default,
   },
   title: {
-    fontSize: theme.typography.fontSize.md,
-    fontWeight: theme.typography.fontWeight.semibold,
-    marginBottom: theme.spacing[1],
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.bold,
+    marginBottom: theme.spacing["1"],
     textAlign: "center",
     color: theme.colors.text.primary,
     letterSpacing: theme.typography.letterSpacing.wide,
@@ -146,30 +138,26 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.text.tertiary,
     textAlign: "center",
-    marginBottom: theme.spacing[3],
+    marginBottom: theme.spacing["3"],
   },
   timer: {
     fontSize: 64,
-    fontWeight: theme.typography.fontWeight.heavy,
+    fontWeight: theme.typography.fontWeight.bold,
     textAlign: "center",
-    marginVertical: theme.spacing[4],
-    color: theme.colors.timer.rest,
-    fontFamily: theme.typography.fontFamily.mono,
-  },
-  timerActive: {
+    marginVertical: theme.spacing["4"],
     color: theme.colors.timer.active,
   },
   buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: theme.spacing[3],
-    gap: theme.spacing[2],
+    marginTop: theme.spacing["3"],
   },
   button: {
     flex: 1,
     backgroundColor: theme.colors.accent.secondary,
-    paddingVertical: theme.spacing[3],
+    paddingVertical: theme.spacing["3"],
     borderRadius: theme.borderRadius.base,
+    marginHorizontal: theme.spacing["1"],
     borderWidth: theme.borderWidth.hairline,
     borderColor: theme.colors.accent.secondaryDark,
   },
@@ -179,7 +167,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: theme.typography.fontSize.base,
-    fontWeight: theme.typography.fontWeight.semibold,
+    fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.text.primary,
     textAlign: "center",
     letterSpacing: theme.typography.letterSpacing.wide,

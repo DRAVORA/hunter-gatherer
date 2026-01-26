@@ -54,9 +54,7 @@ export default function DurationTimer({
       <Text style={styles.title}>Hold Duration</Text>
       <Text style={styles.subtitle}>{targetDisplay}</Text>
 
-      <Text style={[styles.timer, isRunning && styles.timerActive]}>
-        {formatRestTime(elapsedSeconds)}
-      </Text>
+      <Text style={styles.timer}>{formatRestTime(elapsedSeconds)}</Text>
 
       <View style={styles.buttonRow}>
         {!isRunning ? (
@@ -91,16 +89,16 @@ export default function DurationTimer({
 
 const styles = StyleSheet.create({
   container: {
-    padding: theme.spacing[4],
-    backgroundColor: theme.colors.surface.elevated,
+    padding: theme.spacing['4'],
+    backgroundColor: theme.colors.execution.setup,
     borderRadius: theme.borderRadius.md,
-    borderWidth: theme.borderWidth.thin,
-    borderColor: theme.colors.timer.active,
+    borderWidth: theme.borderWidth.thick,
+    borderColor: theme.colors.accent.tertiary,
   },
   title: {
-    fontSize: theme.typography.fontSize.md,
-    fontWeight: theme.typography.fontWeight.semibold,
-    marginBottom: theme.spacing[1],
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.bold,
+    marginBottom: theme.spacing['1'],
     textAlign: "center",
     color: theme.colors.text.primary,
     letterSpacing: theme.typography.letterSpacing.wide,
@@ -109,35 +107,34 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.text.tertiary,
     textAlign: "center",
-    marginBottom: theme.spacing[3],
+    marginBottom: theme.spacing['3'],
   },
   timer: {
-    fontSize: 64,
-    fontWeight: theme.typography.fontWeight.heavy,
+    fontSize: 72,
+    fontWeight: theme.typography.fontWeight.bold,
     textAlign: "center",
-    marginVertical: theme.spacing[5],
-    color: theme.colors.timer.rest,
-    fontFamily: theme.typography.fontFamily.mono,
-  },
-  timerActive: {
-    color: theme.colors.timer.active,
+    marginVertical: theme.spacing['5'],
+    color: theme.colors.accent.tertiary,
   },
   buttonRow: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: theme.spacing[3],
+    marginTop: theme.spacing['3'],
   },
   button: {
     flex: 1,
-    paddingVertical: theme.spacing[4],
-    borderRadius: theme.borderRadius.base,
+    paddingVertical: theme.spacing['4'],
+    borderRadius: theme.borderRadius.md,
     alignItems: "center",
+    borderWidth: theme.borderWidth.hairline,
   },
   startButton: {
     backgroundColor: theme.colors.accent.secondary,
+    borderColor: theme.colors.accent.secondaryDark,
   },
   stopButton: {
     backgroundColor: theme.colors.accent.primary,
+    borderColor: theme.colors.accent.primaryDark,
   },
   buttonText: {
     fontSize: theme.typography.fontSize.lg,
@@ -147,9 +144,9 @@ const styles = StyleSheet.create({
   },
   completedText: {
     fontSize: theme.typography.fontSize.base,
-    color: theme.colors.timer.complete,
+    color: theme.colors.accent.tertiary,
     textAlign: "center",
-    marginTop: theme.spacing[3],
+    marginTop: theme.spacing['3'],
     fontWeight: theme.typography.fontWeight.semibold,
   },
 });
