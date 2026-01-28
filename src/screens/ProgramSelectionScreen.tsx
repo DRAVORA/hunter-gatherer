@@ -48,7 +48,13 @@ const AVAILABLE_PROGRAMS: ProgramOption[] = [
     name: "Gym Program",
     description:
       "3-day program with barbell and dumbbell work. Compound movements with 2 reps in reserve.",
-    requirements: ["Squat rack", "Bench press", "Pull-up bar", "Dumbbells", "Barbell"],
+    requirements: [
+      "Squat rack",
+      "Bench press",
+      "Pull-up bar",
+      "Dumbbells",
+      "Barbell",
+    ],
     duration: "45-60 min per session",
     frequency: "3 days per week",
   },
@@ -73,11 +79,14 @@ export default function ProgramSelectionScreen({ navigation }: Props) {
       <View style={styles.content}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Hunter-Gatherer</Text>
+          <Text style={styles.title}>ATAVIA</Text>
           <Text style={styles.subtitle}>Select Your Training Program</Text>
         </View>
 
-        <TouchableOpacity style={styles.manualButton} onPress={handleOpenManual}>
+        <TouchableOpacity
+          style={styles.manualButton}
+          onPress={handleOpenManual}
+        >
           <Text style={styles.manualButtonText}>Read the Training Manual</Text>
         </TouchableOpacity>
 
@@ -205,7 +214,8 @@ const styles = StyleSheet.create({
   programDescription: {
     fontSize: theme.typography.fontSize.base,
     color: theme.colors.text.secondary,
-    lineHeight: theme.typography.fontSize.base * theme.typography.lineHeight.relaxed,
+    lineHeight:
+      theme.typography.fontSize.base * theme.typography.lineHeight.relaxed,
     marginBottom: theme.spacing[4],
   },
   programDetails: {
@@ -278,6 +288,7 @@ const styles = StyleSheet.create({
   infoText: {
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.text.secondary,
-    lineHeight: theme.typography.fontSize.sm * theme.typography.lineHeight.relaxed,
+    lineHeight:
+      theme.typography.fontSize.sm * theme.typography.lineHeight.relaxed,
   },
 });

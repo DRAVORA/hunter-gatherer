@@ -129,8 +129,7 @@ export default function App() {
           name="Home"
           component={HomeScreen}
           options={{
-            title: "Hunter-Gatherer",
-            headerLeft: () => null, // No back button on home
+            title: "ATAVIA",
           }}
         />
 

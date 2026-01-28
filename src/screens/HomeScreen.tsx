@@ -131,7 +131,8 @@ export default function HomeScreen({ navigation, route }: Props) {
   const [isLoading, setIsLoading] = useState(true);
 
   // Select program days based on programId
-  const PROGRAM_DAYS = programId === "gym" ? GYM_PROGRAM_DAYS : NO_GYM_PROGRAM_DAYS;
+  const PROGRAM_DAYS =
+    programId === "gym" ? GYM_PROGRAM_DAYS : NO_GYM_PROGRAM_DAYS;
 
   useEffect(() => {
     loadTodayCheckIn();
@@ -238,7 +239,9 @@ export default function HomeScreen({ navigation, route }: Props) {
         [
           sessionId,
           today,
-          programId === "gym" ? "Hunter-Gatherer Gym" : "Hunter-Gatherer No-Gym",
+          programId === "gym"
+            ? "Hunter-Gatherer Gym"
+            : "Hunter-Gatherer No-Gym",
           session.name,
           new Date().toISOString(),
           plannedVolume,
@@ -289,11 +292,18 @@ export default function HomeScreen({ navigation, route }: Props) {
         <View style={styles.header}>
           <Text style={styles.title}>Hunter-Gatherer</Text>
           <Text style={styles.subtitle}>
-            {programId === "gym" ? "Gym Program" : programId === "no-gym" ? "No-Gym Program" : "Training Program"}
+            {programId === "gym"
+              ? "Gym Program"
+              : programId === "no-gym"
+                ? "No-Gym Program"
+                : "Training Program"}
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.manualButton} onPress={handleOpenManual}>
+        <TouchableOpacity
+          style={styles.manualButton}
+          onPress={handleOpenManual}
+        >
           <Text style={styles.manualButtonText}>Open Training Manual</Text>
         </TouchableOpacity>
 
@@ -585,7 +595,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing[6],
   },
   title: {
-    fontSize: theme.typography.fontSize['4xl'],
+    fontSize: theme.typography.fontSize["4xl"],
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.text.primary,
     marginBottom: theme.spacing[1],
@@ -736,7 +746,8 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.text.secondary,
     marginBottom: theme.spacing[2],
-    lineHeight: theme.typography.fontSize.sm * theme.typography.lineHeight.relaxed,
+    lineHeight:
+      theme.typography.fontSize.sm * theme.typography.lineHeight.relaxed,
   },
   nonNegotiablesWarning: {
     fontSize: theme.typography.fontSize.sm,
@@ -770,7 +781,8 @@ const styles = StyleSheet.create({
   nonNegotiableText: {
     fontSize: theme.typography.fontSize.xs,
     color: theme.colors.text.secondary,
-    lineHeight: theme.typography.fontSize.xs * theme.typography.lineHeight.relaxed,
+    lineHeight:
+      theme.typography.fontSize.xs * theme.typography.lineHeight.relaxed,
     marginBottom: theme.spacing[2],
   },
   historyButton: {
