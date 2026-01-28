@@ -64,6 +64,10 @@ export default function ProgramSelectionScreen({ navigation }: Props) {
     navigation.navigate("Home", { programId });
   }
 
+  function handleOpenManual() {
+    navigation.navigate("TrainingManual");
+  }
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
@@ -72,6 +76,10 @@ export default function ProgramSelectionScreen({ navigation }: Props) {
           <Text style={styles.title}>Hunter-Gatherer</Text>
           <Text style={styles.subtitle}>Select Your Training Program</Text>
         </View>
+
+        <TouchableOpacity style={styles.manualButton} onPress={handleOpenManual}>
+          <Text style={styles.manualButtonText}>Read the Training Manual</Text>
+        </TouchableOpacity>
 
         {/* Program Cards */}
         <View style={styles.programList}>
@@ -149,7 +157,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: theme.typography.fontSize["4xl"],
-    fontWeight: theme.typography.fontWeight.heavy,
+    fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.accent.tertiary,
     marginBottom: theme.spacing[2],
     letterSpacing: theme.typography.letterSpacing.wide,
@@ -157,6 +165,21 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: theme.typography.fontSize.lg,
     color: theme.colors.text.secondary,
+  },
+  manualButton: {
+    backgroundColor: theme.colors.surface.interactive,
+    borderWidth: theme.borderWidth.thin,
+    borderColor: theme.colors.border.default,
+    paddingVertical: theme.spacing[3],
+    borderRadius: theme.borderRadius.base,
+    alignItems: "center",
+    marginBottom: theme.spacing[6],
+  },
+  manualButtonText: {
+    fontSize: theme.typography.fontSize.md,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.text.primary,
+    letterSpacing: theme.typography.letterSpacing.wide,
   },
   programList: {
     marginBottom: theme.spacing[6],

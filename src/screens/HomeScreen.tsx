@@ -270,6 +270,10 @@ export default function HomeScreen({ navigation, route }: Props) {
     navigation.navigate("DailyCheckIn");
   }
 
+  function handleOpenManual() {
+    navigation.navigate("TrainingManual");
+  }
+
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
@@ -288,6 +292,10 @@ export default function HomeScreen({ navigation, route }: Props) {
             {programId === "gym" ? "Gym Program" : programId === "no-gym" ? "No-Gym Program" : "Training Program"}
           </Text>
         </View>
+
+        <TouchableOpacity style={styles.manualButton} onPress={handleOpenManual}>
+          <Text style={styles.manualButtonText}>Open Training Manual</Text>
+        </TouchableOpacity>
 
         {/* Daily Check-In Status */}
         <View style={styles.statusCard}>
@@ -586,6 +594,21 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: theme.typography.fontSize.lg,
     color: theme.colors.text.secondary,
+  },
+  manualButton: {
+    backgroundColor: theme.colors.surface.interactive,
+    borderWidth: theme.borderWidth.thin,
+    borderColor: theme.colors.border.default,
+    paddingVertical: theme.spacing[3],
+    borderRadius: theme.borderRadius.base,
+    alignItems: "center",
+    marginBottom: theme.spacing[4],
+  },
+  manualButtonText: {
+    fontSize: theme.typography.fontSize.md,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.text.primary,
+    letterSpacing: theme.typography.letterSpacing.wide,
   },
   statusCard: {
     backgroundColor: theme.colors.surface.base,

@@ -12,6 +12,7 @@ import SessionReadinessScreen from "./src/screens/SessionReadinessScreen";
 import ExerciseExecutionScreen from "./src/screens/ExerciseExecutionScreen";
 import PostSessionScreen from "./src/screens/PostSessionScreen";
 import SessionHistoryScreen from "./src/screens/SessionHistoryScreen";
+import TrainingManualScreen from "./src/screens/TrainingManualScreen";
 
 // ============================================================================
 // NAVIGATION TYPES
@@ -20,6 +21,7 @@ import SessionHistoryScreen from "./src/screens/SessionHistoryScreen";
 export type RootStackParamList = {
   ProgramSelection: undefined;
   Home: { programId?: string }; // Make optional
+  TrainingManual: undefined;
   DailyCheckIn: undefined;
   SessionReadiness: {
     sessionId: string;
@@ -91,8 +93,8 @@ export default function App() {
         <Text style={styles.errorTitle}>Database Error</Text>
         <Text style={styles.errorMessage}>{dbError}</Text>
         <Text style={styles.errorHint}>
-          Try restarting the app. If the problem persists, the database may
-          need to be reset.
+          Try restarting the app. If the problem persists, the database may need
+          to be reset.
         </Text>
       </View>
     );
@@ -111,7 +113,7 @@ export default function App() {
           headerTitleStyle: {
             fontWeight: "bold",
           },
-          headerBackTitleVisible: false,
+          headerBackTitle: "Back",
         }}
       >
         <Stack.Screen
@@ -129,6 +131,14 @@ export default function App() {
           options={{
             title: "Hunter-Gatherer",
             headerLeft: () => null, // No back button on home
+          }}
+        />
+
+        <Stack.Screen
+          name="TrainingManual"
+          component={TrainingManualScreen}
+          options={{
+            title: "Training Manual",
           }}
         />
 
