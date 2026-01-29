@@ -32,6 +32,7 @@ interface SessionSummary {
   planned_volume: number;
   duration_minutes: number | null;
   session_feel: string | null;
+  notes: string | null;
 }
 
 interface ExerciseSet {
@@ -81,6 +82,7 @@ export default function SessionHistoryScreen({ navigation }: Props) {
         SELECT 
           id, date, session_name, completed_volume, planned_volume,
           session_feel,
+          notes,
           CAST((julianday(end_time) - julianday(start_time)) * 24 * 60 AS INTEGER) as duration_minutes
         FROM training_session
         WHERE end_time IS NOT NULL
@@ -334,6 +336,7 @@ export default function SessionHistoryScreen({ navigation }: Props) {
     const plannedVol = Number(item.planned_volume) || 0;
     const durationMins = item.duration_minutes;
     const sessionFeel = item.session_feel;
+    const sessionNotes = item.notes?.trim();
 
     return (
       <View style={styles.sessionCard}>
@@ -377,6 +380,12 @@ export default function SessionHistoryScreen({ navigation }: Props) {
                 <View style={styles.detailRow}>
                   <Text style={styles.detailLabel}>Duration:</Text>
                   <Text style={styles.detailValue}>Not recorded</Text>
+                </View>
+              ) : null}
+              {sessionNotes ? (
+                <View style={styles.notesSection}>
+                  <Text style={styles.notesLabel}>Notes:</Text>
+                  <Text style={styles.notesValue}>{sessionNotes}</Text>
                 </View>
               ) : null}
             </View>
@@ -542,6 +551,18 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.text.secondary,
     fontWeight: theme.typography.fontWeight.medium,
+  },
+  notesSection: {
+    marginTop: theme.spacing[2],
+  },
+  notesLabel: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.tertiary,
+    marginBottom: theme.spacing[1],
+  },
+  notesValue: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
   },
   exerciseSection: {
     paddingHorizontal: theme.spacing[4],
