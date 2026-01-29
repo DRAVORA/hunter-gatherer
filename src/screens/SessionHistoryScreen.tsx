@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -59,6 +59,8 @@ interface ExerciseHistoryRow {
   session_id: string;
   date: string;
   volume_adjustment_applied: number;
+  planned_sets: number;
+  completed_sets: number;
   total_sets: number;
   total_clean_reps: number;
   clean_sets: number;
@@ -72,6 +74,8 @@ interface ExerciseHistoryEntry {
   sessionId: string;
   date: string;
   volumeAdjustmentApplied: number;
+  plannedSets: number;
+  completedSets: number;
   totalSets: number;
   totalCleanReps: number;
   cleanSets: number;
@@ -88,155 +92,6 @@ interface ProgressionStatus {
 }
 
 type ExerciseMetricType = "load" | "hold" | "rep";
-
-interface SimpleLineChartProps {
-  data: Array<number | null>;
-  validity?: boolean[];
-  height?: number;
-  lineColor: string;
-  dotColor: string;
-  invalidDotColor?: string;
-  label: string;
-  emptyLabel: string;
-  domain?: {
-    min: number;
-    max: number;
-  };
-  valueFormatter?: (value: number) => string;
-}
-
-function SimpleLineChart({
-  data,
-  validity,
-  height = 160,
-  lineColor,
-  dotColor,
-  invalidDotColor = theme.colors.text.disabled,
-  label,
-  emptyLabel,
-  domain,
-  valueFormatter,
-}: SimpleLineChartProps) {
-  const [width, setWidth] = useState(0);
-  const padding = theme.spacing[3];
-
-  const { points, minValue, maxValue } = useMemo(() => {
-    const values = data.filter((value): value is number => value !== null);
-    if (values.length === 0 || width === 0) {
-      return {
-        points: [] as Array<{ x: number; y: number } | null>,
-        minValue: 0,
-        maxValue: 0,
-      };
-    }
-
-    const min = domain?.min ?? Math.min(...values);
-    const max = domain?.max ?? Math.max(...values);
-    const range = max - min === 0 ? 1 : max - min;
-    const chartWidth = width - padding * 2;
-    const chartHeight = height - padding * 2;
-
-    const mapped = data.map((value, index) => {
-      if (value === null) {
-        return null;
-      }
-      const x = padding + (chartWidth * index) / Math.max(data.length - 1, 1);
-      const normalized = (value - min) / range;
-      const y = padding + chartHeight - normalized * chartHeight;
-      return { x, y };
-    });
-
-    return { points: mapped, minValue: min, maxValue: max };
-  }, [data, domain, height, padding, width]);
-
-  const chartContent =
-    width === 0 ? null : points.some((point) => point !== null);
-
-  return (
-    <View style={styles.chartCard}>
-      <Text style={styles.chartTitle}>{label}</Text>
-      <View
-        style={[styles.chartContainer, { height }]}
-        onLayout={(event) => setWidth(event.nativeEvent.layout.width)}
-      >
-        {chartContent ? (
-          <View style={styles.chartLayer}>
-            {points.map((point, index) => {
-              if (!point || index === 0) return null;
-              const prev = points[index - 1];
-              if (!prev) return null;
-              const isValid =
-                validity?.[index] ?? (data[index] !== null);
-              const isPrevValid =
-                validity?.[index - 1] ?? (data[index - 1] !== null);
-              if (!isValid || !isPrevValid) return null;
-              const horizontalWidth = Math.max(point.x - prev.x, 0);
-              const verticalHeight = Math.abs(point.y - prev.y);
-              return (
-                <React.Fragment key={`segment-${index}`}>
-                  <View
-                    style={[
-                      styles.chartLine,
-                      {
-                        left: prev.x,
-                        top: prev.y,
-                        width: horizontalWidth,
-                        backgroundColor: lineColor,
-                      },
-                    ]}
-                  />
-                  <View
-                    style={[
-                      styles.chartLineVertical,
-                      {
-                        left: point.x - 1,
-                        top: Math.min(prev.y, point.y),
-                        height: verticalHeight,
-                        backgroundColor: lineColor,
-                      },
-                    ]}
-                  />
-                </React.Fragment>
-              );
-            })}
-            {points.map((point, index) => {
-              if (!point) return null;
-              const isValid =
-                validity?.[index] ?? (data[index] !== null);
-              return (
-                <View
-                  key={`dot-${index}`}
-                  style={[
-                    styles.chartDot,
-                    {
-                      left: point.x - 3,
-                      top: point.y - 3,
-                      backgroundColor: isValid ? dotColor : invalidDotColor,
-                    },
-                  ]}
-                />
-              );
-            })}
-          </View>
-        ) : (
-          <View style={styles.chartEmptyState}>
-            <Text style={styles.chartEmptyText}>{emptyLabel}</Text>
-          </View>
-        )}
-      </View>
-      {chartContent ? (
-        <View style={styles.chartMeta}>
-          <Text style={styles.chartMetaText}>
-            Low: {valueFormatter ? valueFormatter(minValue) : minValue}
-          </Text>
-          <Text style={styles.chartMetaText}>
-            High: {valueFormatter ? valueFormatter(maxValue) : maxValue}
-          </Text>
-        </View>
-      ) : null}
-    </View>
-  );
-}
 
 // ============================================================================
 // SESSION HISTORY SCREEN
@@ -358,6 +213,8 @@ export default function SessionHistoryScreen({ navigation }: Props) {
             ts.id as session_id,
             ts.date,
             ts.volume_adjustment_applied,
+            MAX(es.planned_sets) as planned_sets,
+            MAX(es.completed_sets) as completed_sets,
             COUNT(ex.id) as total_sets,
             SUM(ex.clean_reps) as total_clean_reps,
             SUM(CASE WHEN ex.felt_clean = 1 THEN 1 ELSE 0 END) as clean_sets,
@@ -380,6 +237,8 @@ export default function SessionHistoryScreen({ navigation }: Props) {
         sessionId: row.session_id,
         date: row.date,
         volumeAdjustmentApplied: Number(row.volume_adjustment_applied) || 0,
+        plannedSets: Number(row.planned_sets) || 0,
+        completedSets: Number(row.completed_sets) || 0,
         totalSets: Number(row.total_sets) || 0,
         totalCleanReps: Number(row.total_clean_reps) || 0,
         cleanSets: Number(row.clean_sets) || 0,
@@ -528,12 +387,6 @@ export default function SessionHistoryScreen({ navigation }: Props) {
     return "rep";
   }
 
-  function getMetricLabel(metricType: ExerciseMetricType): string {
-    if (metricType === "hold") return "Time";
-    if (metricType === "rep") return "Reps";
-    return "Load";
-  }
-
   function formatMetricValue(
     entry: ExerciseHistoryEntry,
     metricType: ExerciseMetricType,
@@ -552,23 +405,22 @@ export default function SessionHistoryScreen({ navigation }: Props) {
 
   function getInvalidReasons(entry: ExerciseHistoryEntry): string[] {
     const reasons: string[] = [];
+    if (entry.plannedSets > 0 && entry.completedSets < entry.plannedSets) {
+      reasons.push("Sets incomplete");
+    }
     if (entry.totalSets === 0) {
       reasons.push("No completed sets");
     }
     if (entry.cleanSets < entry.totalSets) {
-      reasons.push("Execution breakdown");
+      reasons.push("Clean execution not repeatable");
     }
     if (entry.stopFlagCount > 0) {
-      reasons.push("Stop rule");
+      reasons.push("Stop rule triggered");
     }
     if (entry.volumeAdjustmentApplied > 0) {
       reasons.push("Volume reduction");
     }
     return reasons;
-  }
-
-  function isSessionValid(entry: ExerciseHistoryEntry): boolean {
-    return getInvalidReasons(entry).length === 0;
   }
 
   function getCleanPercentage(entry: ExerciseHistoryEntry): number {
@@ -577,51 +429,61 @@ export default function SessionHistoryScreen({ navigation }: Props) {
   }
 
   function getProgressionStatus(
-    entries: ExerciseHistoryEntry[],
-  ): ProgressionStatus | null {
-    if (entries.length === 0) {
+    entry: ExerciseHistoryEntry | null,
+  ): ProgressionStatus {
+    if (!entry) {
       return {
         label: "Hold Load",
         description: "No sessions logged for this exercise yet.",
         tone: "hold",
       };
     }
-    const recent = entries.slice(-4);
-    const recentCount = recent.length;
-    const recentInvalid = recent.filter((entry) => !isSessionValid(entry));
-    const recentValidCount = recentCount - recentInvalid.length;
-    const recentStopOrVolume = recent.filter(
-      (entry) => entry.stopFlagCount > 0 || entry.volumeAdjustmentApplied > 0,
-    ).length;
-    const lastEntry = entries[entries.length - 1];
-    const lastTwo = entries.slice(-2);
-    const lastTwoValid =
-      lastTwo.length === 2 && lastTwo.every((entry) => isSessionValid(entry));
 
-    if (lastTwoValid) {
-      return {
-        label: "Eligible to Progress",
-        description: "Last two sessions met all progression rules.",
-        tone: "stable",
-      };
-    }
-
-    if (
-      recentStopOrVolume >= 2 ||
-      (lastEntry &&
-        (lastEntry.stopFlagCount > 0 || lastEntry.volumeAdjustmentApplied > 0))
-    ) {
+    if (entry.stopFlagCount > 0) {
       return {
         label: "Regress",
-        description: `Stop rules or volume reductions in ${recentStopOrVolume} of last ${recentCount} sessions.`,
+        description: "Stop rule triggered in last session.",
         tone: "regress",
       };
     }
 
+    if (entry.volumeAdjustmentApplied > 0) {
+      return {
+        label: "Regress",
+        description: "Volume reduction applied in last session.",
+        tone: "regress",
+      };
+    }
+
+    if (entry.plannedSets > 0 && entry.completedSets < entry.plannedSets) {
+      return {
+        label: "Hold Load",
+        description: "Prescribed sets not completed.",
+        tone: "hold",
+      };
+    }
+
+    if (entry.totalSets === 0) {
+      return {
+        label: "Hold Load",
+        description: "No completed sets recorded.",
+        tone: "hold",
+      };
+    }
+
+    if (entry.cleanSets < entry.totalSets) {
+      return {
+        label: "Hold Load",
+        description: "Clean execution not repeatable.",
+        tone: "hold",
+      };
+    }
+
     return {
-      label: "Hold Load",
-      description: `Only ${recentValidCount} of last ${recentCount} sessions met all progression rules.`,
-      tone: "hold",
+      label: "Eligible to Progress",
+      description:
+        "All prescribed sets completed cleanly with no stop rules or volume reductions.",
+      tone: "stable",
     };
   }
 
@@ -645,9 +507,20 @@ export default function SessionHistoryScreen({ navigation }: Props) {
     const flags: string[] = [];
     const invalidReasons = getInvalidReasons(entry);
     if (invalidReasons.length > 0) {
-      flags.push(`Invalid: ${invalidReasons.join(", ")}`);
+      flags.push(...invalidReasons);
     }
     return flags.length > 0 ? flags.join(", ") : "Clear";
+  }
+
+  function formatAuthorityFlags(entry: ExerciseHistoryEntry): string {
+    const flags: string[] = [];
+    if (entry.stopFlagCount > 0) {
+      flags.push("Stop rule");
+    }
+    if (entry.volumeAdjustmentApplied > 0) {
+      flags.push("Volume reduction");
+    }
+    return flags.length > 0 ? flags.join(", ") : "None";
   }
 
   function renderExerciseInsights() {
@@ -673,28 +546,60 @@ export default function SessionHistoryScreen({ navigation }: Props) {
       );
     }
 
-    const progressionStatus = getProgressionStatus(exerciseHistory);
+    const lastEntry =
+      exerciseHistory.length > 0
+        ? exerciseHistory[exerciseHistory.length - 1]
+        : null;
+    const progressionStatus = getProgressionStatus(lastEntry);
     const metricType = getExerciseMetricType(exerciseHistory);
-    const metricTrend = exerciseHistory.map((entry) => {
-      if (metricType === "hold") return entry.topCleanDuration;
-      if (metricType === "rep") return entry.topCleanReps;
-      return entry.topCleanLoad;
-    });
-    const metricValidity = exerciseHistory.map((entry) =>
-      isSessionValid(entry),
-    );
-    const cleanTrend = exerciseHistory.map((entry) =>
-      entry.totalSets > 0
-        ? Math.round((entry.cleanSets / entry.totalSets) * 100)
-        : null,
-    );
-    const cleanValidity = exerciseHistory.map((entry) =>
-      isSessionValid(entry),
-    );
     const tableEntries = [...exerciseHistory].reverse();
+    const lastEntryFlags = lastEntry
+      ? formatAuthorityFlags(lastEntry)
+      : UNICODE.EM_DASH;
 
     return (
       <View style={styles.exerciseInsights}>
+        <View style={styles.authorityCard}>
+          <Text style={styles.authorityTitle}>Last Session Authority</Text>
+          {lastEntry ? (
+            <View style={styles.authorityGrid}>
+              <View style={styles.authorityRow}>
+                <Text style={styles.authorityLabel}>Date</Text>
+                <Text style={styles.authorityValue}>
+                  {formatSessionDate(lastEntry.date)}
+                </Text>
+              </View>
+              <View style={styles.authorityRow}>
+                <Text style={styles.authorityLabel}>
+                  Load / Time / Reps
+                </Text>
+                <Text style={styles.authorityValue}>
+                  {formatMetricValue(lastEntry, metricType)}
+                </Text>
+              </View>
+              <View style={styles.authorityRow}>
+                <Text style={styles.authorityLabel}>Sets × reps</Text>
+                <Text style={styles.authorityValue}>
+                  {formatSetsReps(lastEntry)}
+                </Text>
+              </View>
+              <View style={styles.authorityRow}>
+                <Text style={styles.authorityLabel}>Clean rep %</Text>
+                <Text style={styles.authorityValue}>
+                  {formatPercentage(getCleanPercentage(lastEntry))}
+                </Text>
+              </View>
+              <View style={styles.authorityRow}>
+                <Text style={styles.authorityLabel}>Flags</Text>
+                <Text style={styles.authorityValue}>{lastEntryFlags}</Text>
+              </View>
+            </View>
+          ) : (
+            <Text style={styles.authorityEmptyText}>
+              No completed sessions for this exercise yet.
+            </Text>
+          )}
+        </View>
         <View style={styles.statusHeader}>
           <Text style={styles.statusLabel}>Progression Verdict</Text>
           {progressionStatus ? (
@@ -720,43 +625,16 @@ export default function SessionHistoryScreen({ navigation }: Props) {
           </Text>
         ) : null}
         <View style={styles.rulesCard}>
-          <Text style={styles.rulesTitle}>Progression rules used</Text>
+          <Text style={styles.rulesTitle}>Progression rules</Text>
           <Text style={styles.rulesText}>
-            All prescribed sets completed, all counted reps clean, no stop
-            rules, final set held 1–2 reps in reserve, and no volume reductions.
-            Any violation blocks progression.
+            Progression is allowed only when the most recent session completes
+            all prescribed sets, counts only clean reps, triggers no stop rules,
+            maintains 1–2 reps in reserve on the final working set, and applies
+            no volume reductions. Any violation blocks progression.
           </Text>
         </View>
 
-        <SimpleLineChart
-          data={metricTrend}
-          validity={metricValidity}
-          label={`Clean ${getMetricLabel(metricType)} per session`}
-          emptyLabel="No clean session metrics recorded yet."
-          lineColor={theme.colors.accent.secondary}
-          dotColor={theme.colors.text.primary}
-          invalidDotColor={theme.colors.text.disabled}
-          valueFormatter={
-            metricType === "load"
-              ? formatWeight
-              : metricType === "hold"
-                ? (value) => formatDurationSeconds(value)
-                : (value) => `${Math.round(value)} reps`
-          }
-        />
-
-        <SimpleLineChart
-          data={cleanTrend}
-          validity={cleanValidity}
-          label="Clean set percentage"
-          emptyLabel="No clean set data recorded yet."
-          lineColor={theme.colors.text.secondary}
-          dotColor={theme.colors.text.primary}
-          invalidDotColor={theme.colors.text.disabled}
-          domain={{ min: 0, max: 100 }}
-          valueFormatter={(value) => formatPercentage(value)}
-        />
-
+        <Text style={styles.historyTitle}>Historical Sessions</Text>
         <View style={styles.historyTable}>
           <View style={styles.tableHeaderRow}>
             <Text style={[styles.tableHeaderText, styles.tableDate]}>Date</Text>
@@ -779,69 +657,26 @@ export default function SessionHistoryScreen({ navigation }: Props) {
             </View>
           ) : (
             tableEntries.map((entry) => {
-              const isValid = isSessionValid(entry);
               return (
                 <View
                   key={entry.sessionId}
-                  style={[
-                    styles.tableRow,
-                    !isValid && styles.tableRowInvalid,
-                  ]}
+                  style={styles.tableRow}
                 >
                   <View style={[styles.tableDate, styles.tableDateCell]}>
-                    <Text
-                      style={[
-                        styles.tableCellText,
-                        !isValid && styles.tableCellTextInvalid,
-                      ]}
-                    >
+                    <Text style={styles.tableCellText}>
                       {formatSessionDate(entry.date)}
                     </Text>
-                    <Text
-                      style={[
-                        styles.tableValidityText,
-                        isValid
-                          ? styles.tableValidityValid
-                          : styles.tableValidityInvalid,
-                      ]}
-                    >
-                      {isValid ? "Valid for progression" : "Invalid for progression"}
-                    </Text>
                   </View>
-                  <Text
-                    style={[
-                      styles.tableCellText,
-                      styles.tableLoad,
-                      !isValid && styles.tableCellTextInvalid,
-                    ]}
-                  >
+                  <Text style={[styles.tableCellText, styles.tableLoad]}>
                     {formatMetricValue(entry, metricType)}
                   </Text>
-                  <Text
-                    style={[
-                      styles.tableCellText,
-                      styles.tableSets,
-                      !isValid && styles.tableCellTextInvalid,
-                    ]}
-                  >
+                  <Text style={[styles.tableCellText, styles.tableSets]}>
                     {formatSetsReps(entry)}
                   </Text>
-                  <Text
-                    style={[
-                      styles.tableCellText,
-                      styles.tableClean,
-                      !isValid && styles.tableCellTextInvalid,
-                    ]}
-                  >
+                  <Text style={[styles.tableCellText, styles.tableClean]}>
                     {formatPercentage(getCleanPercentage(entry))}
                   </Text>
-                  <Text
-                    style={[
-                      styles.tableCellText,
-                      styles.tableFlags,
-                      !isValid && styles.tableCellTextInvalid,
-                    ]}
-                  >
+                  <Text style={[styles.tableCellText, styles.tableFlags]}>
                     {formatFlags(entry)}
                   </Text>
                 </View>
@@ -1208,6 +1043,46 @@ const styles = StyleSheet.create({
   exerciseInsights: {
     marginBottom: theme.spacing[4],
   },
+  authorityCard: {
+    backgroundColor: theme.colors.surface.base,
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing[3],
+    borderWidth: theme.borderWidth.hairline,
+    borderColor: theme.colors.border.subtle,
+    marginBottom: theme.spacing[3],
+  },
+  authorityTitle: {
+    fontSize: theme.typography.fontSize.sm,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing[2],
+  },
+  authorityGrid: {
+    gap: theme.spacing[2],
+  },
+  authorityRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: theme.spacing[3],
+  },
+  authorityLabel: {
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.tertiary,
+    textTransform: "uppercase",
+    letterSpacing: theme.typography.letterSpacing.wide,
+    flex: 1,
+  },
+  authorityValue: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+    fontWeight: theme.typography.fontWeight.semibold,
+    textAlign: "right",
+    flex: 1,
+  },
+  authorityEmptyText: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.disabled,
+  },
   statusHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -1267,59 +1142,11 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.text.secondary,
   },
-  chartCard: {
-    backgroundColor: theme.colors.surface.base,
-    borderRadius: theme.borderRadius.md,
-    padding: theme.spacing[3],
-    borderWidth: theme.borderWidth.hairline,
-    borderColor: theme.colors.border.subtle,
-    marginBottom: theme.spacing[3],
-  },
-  chartTitle: {
+  historyTitle: {
     fontSize: theme.typography.fontSize.sm,
     fontWeight: theme.typography.fontWeight.semibold,
     color: theme.colors.text.primary,
     marginBottom: theme.spacing[2],
-  },
-  chartContainer: {
-    borderRadius: theme.borderRadius.sm,
-    backgroundColor: theme.colors.background.secondary,
-    overflow: "hidden",
-  },
-  chartLayer: {
-    flex: 1,
-  },
-  chartLine: {
-    position: "absolute",
-    height: 2,
-  },
-  chartLineVertical: {
-    position: "absolute",
-    width: 2,
-  },
-  chartDot: {
-    position: "absolute",
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
-  chartEmptyState: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  chartEmptyText: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.text.disabled,
-  },
-  chartMeta: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: theme.spacing[2],
-  },
-  chartMetaText: {
-    fontSize: theme.typography.fontSize.xs,
-    color: theme.colors.text.tertiary,
   },
   historyTable: {
     backgroundColor: theme.colors.surface.base,
@@ -1347,15 +1174,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: theme.borderWidth.hairline,
     borderBottomColor: theme.colors.border.subtle,
   },
-  tableRowInvalid: {
-    backgroundColor: theme.colors.background.secondary,
-  },
   tableCellText: {
     fontSize: theme.typography.fontSize.xs,
     color: theme.colors.text.secondary,
-  },
-  tableCellTextInvalid: {
-    color: theme.colors.text.disabled,
   },
   tableDate: {
     flex: 1.2,
@@ -1378,17 +1199,6 @@ const styles = StyleSheet.create({
   tableFlags: {
     flex: 1.2,
     textAlign: "right",
-  },
-  tableValidityText: {
-    fontSize: theme.typography.fontSize.xs,
-    fontWeight: theme.typography.fontWeight.semibold,
-    marginTop: theme.spacing[0.5],
-  },
-  tableValidityValid: {
-    color: theme.colors.state.success,
-  },
-  tableValidityInvalid: {
-    color: theme.colors.state.error,
   },
   tableEmptyRow: {
     paddingVertical: theme.spacing[3],
