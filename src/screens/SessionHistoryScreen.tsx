@@ -63,6 +63,8 @@ interface ExerciseHistoryRow {
   total_clean_reps: number;
   clean_sets: number;
   top_clean_load: number | null;
+  top_clean_duration: number | null;
+  top_clean_reps: number | null;
   stop_flag_count: number;
 }
 
@@ -74,6 +76,8 @@ interface ExerciseHistoryEntry {
   totalCleanReps: number;
   cleanSets: number;
   topCleanLoad: number | null;
+  topCleanDuration: number | null;
+  topCleanReps: number | null;
   stopFlagCount: number;
 }
 
@@ -83,11 +87,15 @@ interface ProgressionStatus {
   tone: "stable" | "hold" | "regress";
 }
 
+type ExerciseMetricType = "load" | "hold" | "rep";
+
 interface SimpleLineChartProps {
   data: Array<number | null>;
+  validity?: boolean[];
   height?: number;
   lineColor: string;
   dotColor: string;
+  invalidDotColor?: string;
   label: string;
   emptyLabel: string;
   domain?: {
@@ -99,9 +107,11 @@ interface SimpleLineChartProps {
 
 function SimpleLineChart({
   data,
+  validity,
   height = 160,
   lineColor,
   dotColor,
+  invalidDotColor = theme.colors.text.disabled,
   label,
   emptyLabel,
   domain,
@@ -155,6 +165,11 @@ function SimpleLineChart({
               if (!point || index === 0) return null;
               const prev = points[index - 1];
               if (!prev) return null;
+              const isValid =
+                validity?.[index] ?? (data[index] !== null);
+              const isPrevValid =
+                validity?.[index - 1] ?? (data[index - 1] !== null);
+              if (!isValid || !isPrevValid) return null;
               const horizontalWidth = Math.max(point.x - prev.x, 0);
               const verticalHeight = Math.abs(point.y - prev.y);
               return (
@@ -186,6 +201,8 @@ function SimpleLineChart({
             })}
             {points.map((point, index) => {
               if (!point) return null;
+              const isValid =
+                validity?.[index] ?? (data[index] !== null);
               return (
                 <View
                   key={`dot-${index}`}
@@ -194,7 +211,7 @@ function SimpleLineChart({
                     {
                       left: point.x - 3,
                       top: point.y - 3,
-                      backgroundColor: dotColor,
+                      backgroundColor: isValid ? dotColor : invalidDotColor,
                     },
                   ]}
                 />
@@ -241,15 +258,14 @@ export default function SessionHistoryScreen({ navigation }: Props) {
 
   useEffect(() => {
     loadExerciseOptions();
-    loadSessionHistory(null);
   }, []);
 
   // Reload history when screen comes into focus
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       loadExerciseOptions();
-      loadSessionHistory(selectedExercise);
       if (selectedExercise) {
+        loadSessionHistory(selectedExercise);
         loadExerciseHistory(selectedExercise);
       }
     });
@@ -258,11 +274,12 @@ export default function SessionHistoryScreen({ navigation }: Props) {
   }, [navigation, selectedExercise]);
 
   useEffect(() => {
-    loadSessionHistory(selectedExercise);
     if (selectedExercise) {
+      loadSessionHistory(selectedExercise);
       loadExerciseHistory(selectedExercise);
     } else {
       setExerciseHistory([]);
+      setSections([]);
     }
     setExpandedSession(null);
   }, [selectedExercise]);
@@ -276,6 +293,11 @@ export default function SessionHistoryScreen({ navigation }: Props) {
         ORDER BY exercise_name ASC
       `);
       setExerciseOptions(results.map((row) => row.exercise_name));
+      if (results.length > 0 && !selectedExercise) {
+        setSelectedExercise(results[0].exercise_name);
+      } else if (results.length === 0) {
+        setIsLoading(false);
+      }
     } catch (error) {
       console.error("[SessionHistory] Failed to load exercise options:", error);
     }
@@ -340,6 +362,8 @@ export default function SessionHistoryScreen({ navigation }: Props) {
             SUM(ex.clean_reps) as total_clean_reps,
             SUM(CASE WHEN ex.felt_clean = 1 THEN 1 ELSE 0 END) as clean_sets,
             MAX(CASE WHEN ex.felt_clean = 1 THEN ex.weight ELSE NULL END) as top_clean_load,
+            MAX(CASE WHEN ex.felt_clean = 1 THEN ex.duration ELSE NULL END) as top_clean_duration,
+            MAX(CASE WHEN ex.felt_clean = 1 THEN ex.clean_reps ELSE NULL END) as top_clean_reps,
             SUM(CASE WHEN ex.stop_reason != ? THEN 1 ELSE 0 END) as stop_flag_count
           FROM training_session ts
           JOIN exercise_session es ON ts.id = es.session_id
@@ -360,6 +384,9 @@ export default function SessionHistoryScreen({ navigation }: Props) {
         totalCleanReps: Number(row.total_clean_reps) || 0,
         cleanSets: Number(row.clean_sets) || 0,
         topCleanLoad: row.top_clean_load === null ? null : Number(row.top_clean_load),
+        topCleanDuration:
+          row.top_clean_duration === null ? null : Number(row.top_clean_duration),
+        topCleanReps: row.top_clean_reps === null ? null : Number(row.top_clean_reps),
         stopFlagCount: Number(row.stop_flag_count) || 0,
       }));
 
@@ -477,6 +504,73 @@ export default function SessionHistoryScreen({ navigation }: Props) {
     return date.toLocaleDateString("en-US", options);
   }
 
+  function formatDurationSeconds(seconds: number | null): string {
+    if (seconds === null || Number.isNaN(seconds)) {
+      return UNICODE.EM_DASH;
+    }
+    if (seconds < 60) {
+      return `${Math.round(seconds)}s`;
+    }
+    const minutes = Math.floor(seconds / 60);
+    const remaining = Math.round(seconds % 60);
+    return `${minutes}m ${remaining}s`;
+  }
+
+  function getExerciseMetricType(
+    entries: ExerciseHistoryEntry[],
+  ): ExerciseMetricType {
+    if (entries.some((entry) => entry.topCleanDuration !== null)) {
+      return "hold";
+    }
+    if (entries.some((entry) => entry.topCleanLoad !== null)) {
+      return "load";
+    }
+    return "rep";
+  }
+
+  function getMetricLabel(metricType: ExerciseMetricType): string {
+    if (metricType === "hold") return "Time";
+    if (metricType === "rep") return "Reps";
+    return "Load";
+  }
+
+  function formatMetricValue(
+    entry: ExerciseHistoryEntry,
+    metricType: ExerciseMetricType,
+  ): string {
+    if (metricType === "hold") {
+      return formatDurationSeconds(entry.topCleanDuration);
+    }
+    if (metricType === "rep") {
+      if (entry.topCleanReps === null || Number.isNaN(entry.topCleanReps)) {
+        return UNICODE.EM_DASH;
+      }
+      return `${Math.round(entry.topCleanReps)} reps`;
+    }
+    return formatTopCleanLoad(entry.topCleanLoad);
+  }
+
+  function getInvalidReasons(entry: ExerciseHistoryEntry): string[] {
+    const reasons: string[] = [];
+    if (entry.totalSets === 0) {
+      reasons.push("No completed sets");
+    }
+    if (entry.cleanSets < entry.totalSets) {
+      reasons.push("Execution breakdown");
+    }
+    if (entry.stopFlagCount > 0) {
+      reasons.push("Stop rule");
+    }
+    if (entry.volumeAdjustmentApplied > 0) {
+      reasons.push("Volume reduction");
+    }
+    return reasons;
+  }
+
+  function isSessionValid(entry: ExerciseHistoryEntry): boolean {
+    return getInvalidReasons(entry).length === 0;
+  }
+
   function getCleanPercentage(entry: ExerciseHistoryEntry): number {
     if (entry.totalSets === 0) return 0;
     return Math.round((entry.cleanSets / entry.totalSets) * 100);
@@ -485,42 +579,48 @@ export default function SessionHistoryScreen({ navigation }: Props) {
   function getProgressionStatus(
     entries: ExerciseHistoryEntry[],
   ): ProgressionStatus | null {
-    if (entries.length === 0) return null;
-    const recent = entries.slice(-3);
-    const breakdownCount = recent.filter(
-      (entry) => getCleanPercentage(entry) < 70 || entry.stopFlagCount > 0,
-    ).length;
-    const hasCostViolation = recent.some(
-      (entry) => entry.volumeAdjustmentApplied > 0,
-    );
-    const isStable =
-      recent.length >= 3 &&
-      recent.every(
-        (entry) =>
-          getCleanPercentage(entry) >= 90 &&
-          entry.stopFlagCount === 0 &&
-          entry.volumeAdjustmentApplied === 0,
-      );
-
-    if (breakdownCount >= 2 || hasCostViolation) {
+    if (entries.length === 0) {
       return {
-        label: "Regress",
-        description: "Repeated form breakdown or session cost violations",
-        tone: "regress",
+        label: "Hold Load",
+        description: "No sessions logged for this exercise yet.",
+        tone: "hold",
+      };
+    }
+    const recent = entries.slice(-4);
+    const recentCount = recent.length;
+    const recentInvalid = recent.filter((entry) => !isSessionValid(entry));
+    const recentValidCount = recentCount - recentInvalid.length;
+    const recentStopOrVolume = recent.filter(
+      (entry) => entry.stopFlagCount > 0 || entry.volumeAdjustmentApplied > 0,
+    ).length;
+    const lastEntry = entries[entries.length - 1];
+    const lastTwo = entries.slice(-2);
+    const lastTwoValid =
+      lastTwo.length === 2 && lastTwo.every((entry) => isSessionValid(entry));
+
+    if (lastTwoValid) {
+      return {
+        label: "Eligible to Progress",
+        description: "Last two sessions met all progression rules.",
+        tone: "stable",
       };
     }
 
-    if (isStable) {
+    if (
+      recentStopOrVolume >= 2 ||
+      (lastEntry &&
+        (lastEntry.stopFlagCount > 0 || lastEntry.volumeAdjustmentApplied > 0))
+    ) {
       return {
-        label: "Eligible to Progress",
-        description: "Clean execution stable across multiple sessions",
-        tone: "stable",
+        label: "Regress",
+        description: `Stop rules or volume reductions in ${recentStopOrVolume} of last ${recentCount} sessions.`,
+        tone: "regress",
       };
     }
 
     return {
       label: "Hold Load",
-      description: "Execution acceptable but inconsistent",
+      description: `Only ${recentValidCount} of last ${recentCount} sessions met all progression rules.`,
       tone: "hold",
     };
   }
@@ -543,13 +643,11 @@ export default function SessionHistoryScreen({ navigation }: Props) {
 
   function formatFlags(entry: ExerciseHistoryEntry): string {
     const flags: string[] = [];
-    if (entry.volumeAdjustmentApplied > 0) {
-      flags.push(`Volume -${Math.round(entry.volumeAdjustmentApplied)}%`);
+    const invalidReasons = getInvalidReasons(entry);
+    if (invalidReasons.length > 0) {
+      flags.push(`Invalid: ${invalidReasons.join(", ")}`);
     }
-    if (entry.stopFlagCount > 0) {
-      flags.push("Stop rule");
-    }
-    return flags.length > 0 ? flags.join(", ") : UNICODE.EM_DASH;
+    return flags.length > 0 ? flags.join(", ") : "Clear";
   }
 
   function renderExerciseInsights() {
@@ -557,8 +655,8 @@ export default function SessionHistoryScreen({ navigation }: Props) {
       return (
         <View style={styles.emptyInsights}>
           <Text style={styles.emptyInsightsText}>
-            Select an exercise to view clean-set progression and execution
-            trends.
+            Select an exercise to view progression eligibility and session
+            validity for that movement only.
           </Text>
         </View>
       );
@@ -576,18 +674,29 @@ export default function SessionHistoryScreen({ navigation }: Props) {
     }
 
     const progressionStatus = getProgressionStatus(exerciseHistory);
-    const loadTrend = exerciseHistory.map((entry) => entry.topCleanLoad);
+    const metricType = getExerciseMetricType(exerciseHistory);
+    const metricTrend = exerciseHistory.map((entry) => {
+      if (metricType === "hold") return entry.topCleanDuration;
+      if (metricType === "rep") return entry.topCleanReps;
+      return entry.topCleanLoad;
+    });
+    const metricValidity = exerciseHistory.map((entry) =>
+      isSessionValid(entry),
+    );
     const cleanTrend = exerciseHistory.map((entry) =>
       entry.totalSets > 0
         ? Math.round((entry.cleanSets / entry.totalSets) * 100)
-        : 0,
+        : null,
+    );
+    const cleanValidity = exerciseHistory.map((entry) =>
+      isSessionValid(entry),
     );
     const tableEntries = [...exerciseHistory].reverse();
 
     return (
       <View style={styles.exerciseInsights}>
         <View style={styles.statusHeader}>
-          <Text style={styles.statusLabel}>Progression Status</Text>
+          <Text style={styles.statusLabel}>Progression Verdict</Text>
           {progressionStatus ? (
             <View
               style={[
@@ -610,22 +719,40 @@ export default function SessionHistoryScreen({ navigation }: Props) {
             {progressionStatus.description}
           </Text>
         ) : null}
+        <View style={styles.rulesCard}>
+          <Text style={styles.rulesTitle}>Progression rules used</Text>
+          <Text style={styles.rulesText}>
+            All prescribed sets completed, all counted reps clean, no stop
+            rules, final set held 1–2 reps in reserve, and no volume reductions.
+            Any violation blocks progression.
+          </Text>
+        </View>
 
         <SimpleLineChart
-          data={loadTrend}
-          label="Top clean set load"
-          emptyLabel="No clean set loads recorded yet."
+          data={metricTrend}
+          validity={metricValidity}
+          label={`Clean ${getMetricLabel(metricType)} per session`}
+          emptyLabel="No clean session metrics recorded yet."
           lineColor={theme.colors.accent.secondary}
           dotColor={theme.colors.text.primary}
-          valueFormatter={formatWeight}
+          invalidDotColor={theme.colors.text.disabled}
+          valueFormatter={
+            metricType === "load"
+              ? formatWeight
+              : metricType === "hold"
+                ? (value) => formatDurationSeconds(value)
+                : (value) => `${Math.round(value)} reps`
+          }
         />
 
         <SimpleLineChart
           data={cleanTrend}
-          label="Clean rep percentage"
-          emptyLabel="No clean rep data recorded yet."
+          validity={cleanValidity}
+          label="Clean set percentage"
+          emptyLabel="No clean set data recorded yet."
           lineColor={theme.colors.text.secondary}
           dotColor={theme.colors.text.primary}
+          invalidDotColor={theme.colors.text.disabled}
           domain={{ min: 0, max: 100 }}
           valueFormatter={(value) => formatPercentage(value)}
         />
@@ -633,7 +760,9 @@ export default function SessionHistoryScreen({ navigation }: Props) {
         <View style={styles.historyTable}>
           <View style={styles.tableHeaderRow}>
             <Text style={[styles.tableHeaderText, styles.tableDate]}>Date</Text>
-            <Text style={[styles.tableHeaderText, styles.tableLoad]}>Load</Text>
+            <Text style={[styles.tableHeaderText, styles.tableLoad]}>
+              Load / Time / Reps
+            </Text>
             <Text style={[styles.tableHeaderText, styles.tableSets]}>
               Sets × reps
             </Text>
@@ -649,25 +778,75 @@ export default function SessionHistoryScreen({ navigation }: Props) {
               </Text>
             </View>
           ) : (
-            tableEntries.map((entry) => (
-              <View key={entry.sessionId} style={styles.tableRow}>
-                <Text style={[styles.tableCellText, styles.tableDate]}>
-                  {formatSessionDate(entry.date)}
-                </Text>
-                <Text style={[styles.tableCellText, styles.tableLoad]}>
-                  {formatTopCleanLoad(entry.topCleanLoad)}
-                </Text>
-                <Text style={[styles.tableCellText, styles.tableSets]}>
-                  {formatSetsReps(entry)}
-                </Text>
-                <Text style={[styles.tableCellText, styles.tableClean]}>
-                  {formatPercentage(getCleanPercentage(entry))}
-                </Text>
-                <Text style={[styles.tableCellText, styles.tableFlags]}>
-                  {formatFlags(entry)}
-                </Text>
-              </View>
-            ))
+            tableEntries.map((entry) => {
+              const isValid = isSessionValid(entry);
+              return (
+                <View
+                  key={entry.sessionId}
+                  style={[
+                    styles.tableRow,
+                    !isValid && styles.tableRowInvalid,
+                  ]}
+                >
+                  <View style={[styles.tableDate, styles.tableDateCell]}>
+                    <Text
+                      style={[
+                        styles.tableCellText,
+                        !isValid && styles.tableCellTextInvalid,
+                      ]}
+                    >
+                      {formatSessionDate(entry.date)}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.tableValidityText,
+                        isValid
+                          ? styles.tableValidityValid
+                          : styles.tableValidityInvalid,
+                      ]}
+                    >
+                      {isValid ? "Valid for progression" : "Invalid for progression"}
+                    </Text>
+                  </View>
+                  <Text
+                    style={[
+                      styles.tableCellText,
+                      styles.tableLoad,
+                      !isValid && styles.tableCellTextInvalid,
+                    ]}
+                  >
+                    {formatMetricValue(entry, metricType)}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.tableCellText,
+                      styles.tableSets,
+                      !isValid && styles.tableCellTextInvalid,
+                    ]}
+                  >
+                    {formatSetsReps(entry)}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.tableCellText,
+                      styles.tableClean,
+                      !isValid && styles.tableCellTextInvalid,
+                    ]}
+                  >
+                    {formatPercentage(getCleanPercentage(entry))}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.tableCellText,
+                      styles.tableFlags,
+                      !isValid && styles.tableCellTextInvalid,
+                    ]}
+                  >
+                    {formatFlags(entry)}
+                  </Text>
+                </View>
+              );
+            })
           )}
         </View>
       </View>
@@ -686,22 +865,6 @@ export default function SessionHistoryScreen({ navigation }: Props) {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.filterList}
           >
-            <TouchableOpacity
-              onPress={() => setSelectedExercise(null)}
-              style={[
-                styles.filterPill,
-                selectedExercise === null && styles.filterPillActive,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.filterPillText,
-                  selectedExercise === null && styles.filterPillTextActive,
-                ]}
-              >
-                All
-              </Text>
-            </TouchableOpacity>
             {exerciseOptions.map((exerciseName) => (
               <TouchableOpacity
                 key={exerciseName}
@@ -958,12 +1121,12 @@ export default function SessionHistoryScreen({ navigation }: Props) {
             <Text style={styles.emptyText}>
               {selectedExercise
                 ? "No sessions for this exercise yet."
-                : "No training sessions yet."}
+                : "Select an exercise to view history."}
             </Text>
             <Text style={styles.emptySubtext}>
               {selectedExercise
-                ? "Complete a session with this exercise to see progression here."
-                : "Complete your first session to see it here."}
+                ? "Complete a session with this exercise to see execution history here."
+                : "Choose an exercise to see session validity and progression rules."}
             </Text>
           </View>
         }
@@ -1084,6 +1247,26 @@ const styles = StyleSheet.create({
     color: theme.colors.text.tertiary,
     marginBottom: theme.spacing[3],
   },
+  rulesCard: {
+    backgroundColor: theme.colors.surface.base,
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing[3],
+    borderWidth: theme.borderWidth.hairline,
+    borderColor: theme.colors.border.subtle,
+    marginBottom: theme.spacing[3],
+  },
+  rulesTitle: {
+    fontSize: theme.typography.fontSize.xs,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.tertiary,
+    textTransform: "uppercase",
+    letterSpacing: theme.typography.letterSpacing.wide,
+    marginBottom: theme.spacing[1],
+  },
+  rulesText: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+  },
   chartCard: {
     backgroundColor: theme.colors.surface.base,
     borderRadius: theme.borderRadius.md,
@@ -1164,12 +1347,21 @@ const styles = StyleSheet.create({
     borderBottomWidth: theme.borderWidth.hairline,
     borderBottomColor: theme.colors.border.subtle,
   },
+  tableRowInvalid: {
+    backgroundColor: theme.colors.background.secondary,
+  },
   tableCellText: {
     fontSize: theme.typography.fontSize.xs,
     color: theme.colors.text.secondary,
   },
+  tableCellTextInvalid: {
+    color: theme.colors.text.disabled,
+  },
   tableDate: {
     flex: 1.2,
+  },
+  tableDateCell: {
+    justifyContent: "flex-start",
   },
   tableLoad: {
     flex: 1,
@@ -1186,6 +1378,17 @@ const styles = StyleSheet.create({
   tableFlags: {
     flex: 1.2,
     textAlign: "right",
+  },
+  tableValidityText: {
+    fontSize: theme.typography.fontSize.xs,
+    fontWeight: theme.typography.fontWeight.semibold,
+    marginTop: theme.spacing[0.5],
+  },
+  tableValidityValid: {
+    color: theme.colors.state.success,
+  },
+  tableValidityInvalid: {
+    color: theme.colors.state.error,
   },
   tableEmptyRow: {
     paddingVertical: theme.spacing[3],
