@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -6,14 +6,16 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  ScrollView,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../App";
 
 import { getDatabase } from "../database/init";
-import { formatDate, formatMinutes } from "../utils/formatting";
+import { formatMinutes, formatPercentage, formatWeight } from "../utils/formatting";
 import { UNICODE } from "../constants/unicode";
 import { theme } from "../styles/theme";
+import { StopReason } from "../types";
 
 type SessionHistoryNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -49,6 +51,176 @@ interface SessionSection {
   data: SessionSummary[];
 }
 
+interface ExerciseOptionRow {
+  exercise_name: string;
+}
+
+interface ExerciseHistoryRow {
+  session_id: string;
+  date: string;
+  volume_adjustment_applied: number;
+  total_sets: number;
+  total_clean_reps: number;
+  clean_sets: number;
+  top_clean_load: number | null;
+  stop_flag_count: number;
+}
+
+interface ExerciseHistoryEntry {
+  sessionId: string;
+  date: string;
+  volumeAdjustmentApplied: number;
+  totalSets: number;
+  totalCleanReps: number;
+  cleanSets: number;
+  topCleanLoad: number | null;
+  stopFlagCount: number;
+}
+
+interface ProgressionStatus {
+  label: string;
+  description: string;
+  tone: "stable" | "hold" | "regress";
+}
+
+interface SimpleLineChartProps {
+  data: Array<number | null>;
+  height?: number;
+  lineColor: string;
+  dotColor: string;
+  label: string;
+  emptyLabel: string;
+  domain?: {
+    min: number;
+    max: number;
+  };
+  valueFormatter?: (value: number) => string;
+}
+
+function SimpleLineChart({
+  data,
+  height = 160,
+  lineColor,
+  dotColor,
+  label,
+  emptyLabel,
+  domain,
+  valueFormatter,
+}: SimpleLineChartProps) {
+  const [width, setWidth] = useState(0);
+  const padding = theme.spacing[3];
+
+  const { points, minValue, maxValue } = useMemo(() => {
+    const values = data.filter((value): value is number => value !== null);
+    if (values.length === 0 || width === 0) {
+      return {
+        points: [] as Array<{ x: number; y: number } | null>,
+        minValue: 0,
+        maxValue: 0,
+      };
+    }
+
+    const min = domain?.min ?? Math.min(...values);
+    const max = domain?.max ?? Math.max(...values);
+    const range = max - min === 0 ? 1 : max - min;
+    const chartWidth = width - padding * 2;
+    const chartHeight = height - padding * 2;
+
+    const mapped = data.map((value, index) => {
+      if (value === null) {
+        return null;
+      }
+      const x = padding + (chartWidth * index) / Math.max(data.length - 1, 1);
+      const normalized = (value - min) / range;
+      const y = padding + chartHeight - normalized * chartHeight;
+      return { x, y };
+    });
+
+    return { points: mapped, minValue: min, maxValue: max };
+  }, [data, domain, height, padding, width]);
+
+  const chartContent =
+    width === 0 ? null : points.some((point) => point !== null);
+
+  return (
+    <View style={styles.chartCard}>
+      <Text style={styles.chartTitle}>{label}</Text>
+      <View
+        style={[styles.chartContainer, { height }]}
+        onLayout={(event) => setWidth(event.nativeEvent.layout.width)}
+      >
+        {chartContent ? (
+          <View style={styles.chartLayer}>
+            {points.map((point, index) => {
+              if (!point || index === 0) return null;
+              const prev = points[index - 1];
+              if (!prev) return null;
+              const horizontalWidth = Math.max(point.x - prev.x, 0);
+              const verticalHeight = Math.abs(point.y - prev.y);
+              return (
+                <React.Fragment key={`segment-${index}`}>
+                  <View
+                    style={[
+                      styles.chartLine,
+                      {
+                        left: prev.x,
+                        top: prev.y,
+                        width: horizontalWidth,
+                        backgroundColor: lineColor,
+                      },
+                    ]}
+                  />
+                  <View
+                    style={[
+                      styles.chartLineVertical,
+                      {
+                        left: point.x - 1,
+                        top: Math.min(prev.y, point.y),
+                        height: verticalHeight,
+                        backgroundColor: lineColor,
+                      },
+                    ]}
+                  />
+                </React.Fragment>
+              );
+            })}
+            {points.map((point, index) => {
+              if (!point) return null;
+              return (
+                <View
+                  key={`dot-${index}`}
+                  style={[
+                    styles.chartDot,
+                    {
+                      left: point.x - 3,
+                      top: point.y - 3,
+                      backgroundColor: dotColor,
+                    },
+                  ]}
+                />
+              );
+            })}
+          </View>
+        ) : (
+          <View style={styles.chartEmptyState}>
+            <Text style={styles.chartEmptyText}>{emptyLabel}</Text>
+          </View>
+        )}
+      </View>
+      {chartContent ? (
+        <View style={styles.chartMeta}>
+          <Text style={styles.chartMetaText}>
+            Low: {valueFormatter ? valueFormatter(minValue) : minValue}
+          </Text>
+          <Text style={styles.chartMetaText}>
+            High: {valueFormatter ? valueFormatter(maxValue) : maxValue}
+          </Text>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
 // ============================================================================
 // SESSION HISTORY SCREEN
 // ============================================================================
@@ -60,35 +232,87 @@ export default function SessionHistoryScreen({ navigation }: Props) {
   const [sessionExercises, setSessionExercises] = useState<{
     [key: string]: ExerciseSet[];
   }>({});
+  const [exerciseOptions, setExerciseOptions] = useState<string[]>([]);
+  const [selectedExercise, setSelectedExercise] = useState<string | null>(null);
+  const [exerciseHistory, setExerciseHistory] = useState<ExerciseHistoryEntry[]>(
+    [],
+  );
+  const [exerciseHistoryLoading, setExerciseHistoryLoading] = useState(false);
 
   useEffect(() => {
-    loadSessionHistory();
+    loadExerciseOptions();
+    loadSessionHistory(null);
   }, []);
 
   // Reload history when screen comes into focus
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      loadSessionHistory();
+      loadExerciseOptions();
+      loadSessionHistory(selectedExercise);
+      if (selectedExercise) {
+        loadExerciseHistory(selectedExercise);
+      }
     });
 
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, selectedExercise]);
 
-  async function loadSessionHistory() {
+  useEffect(() => {
+    loadSessionHistory(selectedExercise);
+    if (selectedExercise) {
+      loadExerciseHistory(selectedExercise);
+    } else {
+      setExerciseHistory([]);
+    }
+    setExpandedSession(null);
+  }, [selectedExercise]);
+
+  async function loadExerciseOptions() {
+    try {
+      const db = getDatabase();
+      const results = await db.getAllAsync<ExerciseOptionRow>(`
+        SELECT DISTINCT exercise_name
+        FROM exercise_session
+        ORDER BY exercise_name ASC
+      `);
+      setExerciseOptions(results.map((row) => row.exercise_name));
+    } catch (error) {
+      console.error("[SessionHistory] Failed to load exercise options:", error);
+    }
+  }
+
+  async function loadSessionHistory(exerciseName: string | null) {
     try {
       const db = getDatabase();
 
-      const results = await db.getAllAsync<SessionSummary>(`
-        SELECT 
-          id, date, session_name, completed_volume, planned_volume,
-          session_feel,
-          notes,
-          CAST((julianday(end_time) - julianday(start_time)) * 24 * 60 AS INTEGER) as duration_minutes
-        FROM training_session
-        WHERE end_time IS NOT NULL
-        ORDER BY date DESC, start_time DESC
-        LIMIT 50
-      `);
+      const results = exerciseName
+        ? await db.getAllAsync<SessionSummary>(
+            `
+              SELECT DISTINCT
+                ts.id, ts.date, ts.session_name, ts.completed_volume, ts.planned_volume,
+                ts.session_feel,
+                ts.notes,
+                CAST((julianday(ts.end_time) - julianday(ts.start_time)) * 24 * 60 AS INTEGER) as duration_minutes
+              FROM training_session ts
+              JOIN exercise_session es ON ts.id = es.session_id
+              WHERE ts.end_time IS NOT NULL
+                AND es.exercise_name = ?
+              ORDER BY ts.date DESC, ts.start_time DESC
+              LIMIT 50
+            `,
+            [exerciseName],
+          )
+        : await db.getAllAsync<SessionSummary>(`
+            SELECT 
+              id, date, session_name, completed_volume, planned_volume,
+              session_feel,
+              notes,
+              CAST((julianday(end_time) - julianday(start_time)) * 24 * 60 AS INTEGER) as duration_minutes
+            FROM training_session
+            WHERE end_time IS NOT NULL
+            ORDER BY date DESC, start_time DESC
+            LIMIT 50
+          `);
 
       // Group sessions by date category
       const grouped = groupSessionsByDate(results);
@@ -99,6 +323,51 @@ export default function SessionHistoryScreen({ navigation }: Props) {
       console.error("[SessionHistory] Failed to load:", error);
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function loadExerciseHistory(exerciseName: string) {
+    try {
+      setExerciseHistoryLoading(true);
+      const db = getDatabase();
+      const results = await db.getAllAsync<ExerciseHistoryRow>(
+        `
+          SELECT
+            ts.id as session_id,
+            ts.date,
+            ts.volume_adjustment_applied,
+            COUNT(ex.id) as total_sets,
+            SUM(ex.clean_reps) as total_clean_reps,
+            SUM(CASE WHEN ex.felt_clean = 1 THEN 1 ELSE 0 END) as clean_sets,
+            MAX(CASE WHEN ex.felt_clean = 1 THEN ex.weight ELSE NULL END) as top_clean_load,
+            SUM(CASE WHEN ex.stop_reason != ? THEN 1 ELSE 0 END) as stop_flag_count
+          FROM training_session ts
+          JOIN exercise_session es ON ts.id = es.session_id
+          JOIN exercise_set ex ON es.id = ex.exercise_session_id
+          WHERE ts.end_time IS NOT NULL
+            AND es.exercise_name = ?
+          GROUP BY ts.id, ts.date, ts.volume_adjustment_applied
+          ORDER BY ts.date ASC, ts.start_time ASC
+        `,
+        [StopReason.CLEAN_COMPLETION, exerciseName],
+      );
+
+      const mapped: ExerciseHistoryEntry[] = results.map((row) => ({
+        sessionId: row.session_id,
+        date: row.date,
+        volumeAdjustmentApplied: Number(row.volume_adjustment_applied) || 0,
+        totalSets: Number(row.total_sets) || 0,
+        totalCleanReps: Number(row.total_clean_reps) || 0,
+        cleanSets: Number(row.clean_sets) || 0,
+        topCleanLoad: row.top_clean_load === null ? null : Number(row.top_clean_load),
+        stopFlagCount: Number(row.stop_flag_count) || 0,
+      }));
+
+      setExerciseHistory(mapped);
+    } catch (error) {
+      console.error("[SessionHistory] Failed to load exercise history:", error);
+    } finally {
+      setExerciseHistoryLoading(false);
     }
   }
 
@@ -206,6 +475,266 @@ export default function SessionHistoryScreen({ navigation }: Props) {
       day: "numeric",
     };
     return date.toLocaleDateString("en-US", options);
+  }
+
+  function getCleanPercentage(entry: ExerciseHistoryEntry): number {
+    if (entry.totalSets === 0) return 0;
+    return Math.round((entry.cleanSets / entry.totalSets) * 100);
+  }
+
+  function getProgressionStatus(
+    entries: ExerciseHistoryEntry[],
+  ): ProgressionStatus | null {
+    if (entries.length === 0) return null;
+    const recent = entries.slice(-3);
+    const breakdownCount = recent.filter(
+      (entry) => getCleanPercentage(entry) < 70 || entry.stopFlagCount > 0,
+    ).length;
+    const hasCostViolation = recent.some(
+      (entry) => entry.volumeAdjustmentApplied > 0,
+    );
+    const isStable =
+      recent.length >= 3 &&
+      recent.every(
+        (entry) =>
+          getCleanPercentage(entry) >= 90 &&
+          entry.stopFlagCount === 0 &&
+          entry.volumeAdjustmentApplied === 0,
+      );
+
+    if (breakdownCount >= 2 || hasCostViolation) {
+      return {
+        label: "Regress",
+        description: "Repeated form breakdown or session cost violations",
+        tone: "regress",
+      };
+    }
+
+    if (isStable) {
+      return {
+        label: "Eligible to Progress",
+        description: "Clean execution stable across multiple sessions",
+        tone: "stable",
+      };
+    }
+
+    return {
+      label: "Hold Load",
+      description: "Execution acceptable but inconsistent",
+      tone: "hold",
+    };
+  }
+
+  function formatTopCleanLoad(load: number | null): string {
+    if (load === null || Number.isNaN(load)) {
+      return UNICODE.EM_DASH;
+    }
+    return formatWeight(load);
+  }
+
+  function formatSetsReps(entry: ExerciseHistoryEntry): string {
+    if (entry.totalSets === 0) return UNICODE.EM_DASH;
+    const averageReps =
+      entry.totalSets > 0
+        ? Math.round(entry.totalCleanReps / entry.totalSets)
+        : 0;
+    return `${entry.totalSets} × ${averageReps}`;
+  }
+
+  function formatFlags(entry: ExerciseHistoryEntry): string {
+    const flags: string[] = [];
+    if (entry.volumeAdjustmentApplied > 0) {
+      flags.push(`Volume -${Math.round(entry.volumeAdjustmentApplied)}%`);
+    }
+    if (entry.stopFlagCount > 0) {
+      flags.push("Stop rule");
+    }
+    return flags.length > 0 ? flags.join(", ") : UNICODE.EM_DASH;
+  }
+
+  function renderExerciseInsights() {
+    if (!selectedExercise) {
+      return (
+        <View style={styles.emptyInsights}>
+          <Text style={styles.emptyInsightsText}>
+            Select an exercise to view clean-set progression and execution
+            trends.
+          </Text>
+        </View>
+      );
+    }
+
+    if (exerciseHistoryLoading) {
+      return (
+        <View style={styles.loadingInline}>
+          <ActivityIndicator
+            size="small"
+            color={theme.colors.accent.secondary}
+          />
+        </View>
+      );
+    }
+
+    const progressionStatus = getProgressionStatus(exerciseHistory);
+    const loadTrend = exerciseHistory.map((entry) => entry.topCleanLoad);
+    const cleanTrend = exerciseHistory.map((entry) =>
+      entry.totalSets > 0
+        ? Math.round((entry.cleanSets / entry.totalSets) * 100)
+        : 0,
+    );
+    const tableEntries = [...exerciseHistory].reverse();
+
+    return (
+      <View style={styles.exerciseInsights}>
+        <View style={styles.statusHeader}>
+          <Text style={styles.statusLabel}>Progression Status</Text>
+          {progressionStatus ? (
+            <View
+              style={[
+                styles.statusBadge,
+                progressionStatus.tone === "stable"
+                  ? styles.statusBadgeStable
+                  : progressionStatus.tone === "regress"
+                    ? styles.statusBadgeRegress
+                    : styles.statusBadgeHold,
+              ]}
+            >
+              <Text style={styles.statusBadgeText}>
+                {progressionStatus.label}
+              </Text>
+            </View>
+          ) : null}
+        </View>
+        {progressionStatus ? (
+          <Text style={styles.statusDescription}>
+            {progressionStatus.description}
+          </Text>
+        ) : null}
+
+        <SimpleLineChart
+          data={loadTrend}
+          label="Top clean set load"
+          emptyLabel="No clean set loads recorded yet."
+          lineColor={theme.colors.accent.secondary}
+          dotColor={theme.colors.text.primary}
+          valueFormatter={formatWeight}
+        />
+
+        <SimpleLineChart
+          data={cleanTrend}
+          label="Clean rep percentage"
+          emptyLabel="No clean rep data recorded yet."
+          lineColor={theme.colors.text.secondary}
+          dotColor={theme.colors.text.primary}
+          domain={{ min: 0, max: 100 }}
+          valueFormatter={(value) => formatPercentage(value)}
+        />
+
+        <View style={styles.historyTable}>
+          <View style={styles.tableHeaderRow}>
+            <Text style={[styles.tableHeaderText, styles.tableDate]}>Date</Text>
+            <Text style={[styles.tableHeaderText, styles.tableLoad]}>Load</Text>
+            <Text style={[styles.tableHeaderText, styles.tableSets]}>
+              Sets × reps
+            </Text>
+            <Text style={[styles.tableHeaderText, styles.tableClean]}>
+              Clean %
+            </Text>
+            <Text style={[styles.tableHeaderText, styles.tableFlags]}>Flags</Text>
+          </View>
+          {tableEntries.length === 0 ? (
+            <View style={styles.tableEmptyRow}>
+              <Text style={styles.tableEmptyText}>
+                No sessions logged for this exercise yet.
+              </Text>
+            </View>
+          ) : (
+            tableEntries.map((entry) => (
+              <View key={entry.sessionId} style={styles.tableRow}>
+                <Text style={[styles.tableCellText, styles.tableDate]}>
+                  {formatSessionDate(entry.date)}
+                </Text>
+                <Text style={[styles.tableCellText, styles.tableLoad]}>
+                  {formatTopCleanLoad(entry.topCleanLoad)}
+                </Text>
+                <Text style={[styles.tableCellText, styles.tableSets]}>
+                  {formatSetsReps(entry)}
+                </Text>
+                <Text style={[styles.tableCellText, styles.tableClean]}>
+                  {formatPercentage(getCleanPercentage(entry))}
+                </Text>
+                <Text style={[styles.tableCellText, styles.tableFlags]}>
+                  {formatFlags(entry)}
+                </Text>
+              </View>
+            ))
+          )}
+        </View>
+      </View>
+    );
+  }
+
+  function renderExerciseFilter() {
+    return (
+      <View style={styles.filterSection}>
+        <Text style={styles.filterLabel}>Filter by exercise</Text>
+        {exerciseOptions.length === 0 ? (
+          <Text style={styles.filterEmptyText}>No exercise data yet.</Text>
+        ) : (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filterList}
+          >
+            <TouchableOpacity
+              onPress={() => setSelectedExercise(null)}
+              style={[
+                styles.filterPill,
+                selectedExercise === null && styles.filterPillActive,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.filterPillText,
+                  selectedExercise === null && styles.filterPillTextActive,
+                ]}
+              >
+                All
+              </Text>
+            </TouchableOpacity>
+            {exerciseOptions.map((exerciseName) => (
+              <TouchableOpacity
+                key={exerciseName}
+                onPress={() => setSelectedExercise(exerciseName)}
+                style={[
+                  styles.filterPill,
+                  selectedExercise === exerciseName && styles.filterPillActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.filterPillText,
+                    selectedExercise === exerciseName &&
+                      styles.filterPillTextActive,
+                  ]}
+                >
+                  {exerciseName}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        )}
+      </View>
+    );
+  }
+
+  function renderHistoryHeader() {
+    return (
+      <View>
+        {renderExerciseFilter()}
+        {renderExerciseInsights()}
+      </View>
+    );
   }
 
   async function toggleExpanded(sessionId: string) {
@@ -414,17 +943,6 @@ export default function SessionHistoryScreen({ navigation }: Props) {
     );
   }
 
-  if (sections.length === 0) {
-    return (
-      <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>No training sessions yet.</Text>
-        <Text style={styles.emptySubtext}>
-          Complete your first session to see it here.
-        </Text>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
       <SectionList
@@ -434,6 +952,21 @@ export default function SessionHistoryScreen({ navigation }: Props) {
         renderSectionHeader={renderSectionHeader}
         contentContainerStyle={styles.listContent}
         stickySectionHeadersEnabled={true}
+        ListHeaderComponent={renderHistoryHeader()}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>
+              {selectedExercise
+                ? "No sessions for this exercise yet."
+                : "No training sessions yet."}
+            </Text>
+            <Text style={styles.emptySubtext}>
+              {selectedExercise
+                ? "Complete a session with this exercise to see progression here."
+                : "Complete your first session to see it here."}
+            </Text>
+          </View>
+        }
       />
     </View>
   );
@@ -451,6 +984,216 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: theme.spacing[4],
     paddingBottom: theme.spacing[4],
+  },
+  filterSection: {
+    paddingTop: theme.spacing[4],
+    paddingBottom: theme.spacing[3],
+  },
+  filterLabel: {
+    fontSize: theme.typography.fontSize.sm,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.tertiary,
+    marginBottom: theme.spacing[2],
+    textTransform: "uppercase",
+    letterSpacing: theme.typography.letterSpacing.wide,
+  },
+  filterEmptyText: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.disabled,
+  },
+  filterList: {
+    gap: theme.spacing[2],
+    paddingRight: theme.spacing[2],
+  },
+  filterPill: {
+    paddingVertical: theme.spacing[1],
+    paddingHorizontal: theme.spacing[3],
+    borderRadius: theme.borderRadius.full,
+    borderWidth: theme.borderWidth.hairline,
+    borderColor: theme.colors.border.subtle,
+    backgroundColor: theme.colors.surface.base,
+  },
+  filterPillActive: {
+    borderColor: theme.colors.border.emphasis,
+    backgroundColor: theme.colors.surface.elevated,
+  },
+  filterPillText: {
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.secondary,
+  },
+  filterPillTextActive: {
+    color: theme.colors.text.primary,
+    fontWeight: theme.typography.fontWeight.semibold,
+  },
+  emptyInsights: {
+    paddingVertical: theme.spacing[4],
+    paddingHorizontal: theme.spacing[4],
+    borderRadius: theme.borderRadius.md,
+    borderWidth: theme.borderWidth.hairline,
+    borderColor: theme.colors.border.subtle,
+    backgroundColor: theme.colors.surface.base,
+    marginBottom: theme.spacing[4],
+  },
+  emptyInsightsText: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.tertiary,
+  },
+  loadingInline: {
+    paddingVertical: theme.spacing[6],
+    alignItems: "center",
+  },
+  exerciseInsights: {
+    marginBottom: theme.spacing[4],
+  },
+  statusHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: theme.spacing[2],
+  },
+  statusLabel: {
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.primary,
+  },
+  statusBadge: {
+    paddingVertical: theme.spacing[1],
+    paddingHorizontal: theme.spacing[3],
+    borderRadius: theme.borderRadius.full,
+    borderWidth: theme.borderWidth.hairline,
+  },
+  statusBadgeStable: {
+    borderColor: theme.colors.state.success,
+    backgroundColor: theme.colors.surface.elevated,
+  },
+  statusBadgeHold: {
+    borderColor: theme.colors.state.warning,
+    backgroundColor: theme.colors.surface.elevated,
+  },
+  statusBadgeRegress: {
+    borderColor: theme.colors.state.error,
+    backgroundColor: theme.colors.surface.elevated,
+  },
+  statusBadgeText: {
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.primary,
+    fontWeight: theme.typography.fontWeight.semibold,
+  },
+  statusDescription: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.tertiary,
+    marginBottom: theme.spacing[3],
+  },
+  chartCard: {
+    backgroundColor: theme.colors.surface.base,
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing[3],
+    borderWidth: theme.borderWidth.hairline,
+    borderColor: theme.colors.border.subtle,
+    marginBottom: theme.spacing[3],
+  },
+  chartTitle: {
+    fontSize: theme.typography.fontSize.sm,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing[2],
+  },
+  chartContainer: {
+    borderRadius: theme.borderRadius.sm,
+    backgroundColor: theme.colors.background.secondary,
+    overflow: "hidden",
+  },
+  chartLayer: {
+    flex: 1,
+  },
+  chartLine: {
+    position: "absolute",
+    height: 2,
+  },
+  chartLineVertical: {
+    position: "absolute",
+    width: 2,
+  },
+  chartDot: {
+    position: "absolute",
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  chartEmptyState: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  chartEmptyText: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.disabled,
+  },
+  chartMeta: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: theme.spacing[2],
+  },
+  chartMetaText: {
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.tertiary,
+  },
+  historyTable: {
+    backgroundColor: theme.colors.surface.base,
+    borderRadius: theme.borderRadius.md,
+    borderWidth: theme.borderWidth.hairline,
+    borderColor: theme.colors.border.subtle,
+    padding: theme.spacing[3],
+  },
+  tableHeaderRow: {
+    flexDirection: "row",
+    borderBottomWidth: theme.borderWidth.hairline,
+    borderBottomColor: theme.colors.border.subtle,
+    paddingBottom: theme.spacing[2],
+    marginBottom: theme.spacing[2],
+  },
+  tableHeaderText: {
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.tertiary,
+    textTransform: "uppercase",
+    letterSpacing: theme.typography.letterSpacing.wide,
+  },
+  tableRow: {
+    flexDirection: "row",
+    paddingVertical: theme.spacing[2],
+    borderBottomWidth: theme.borderWidth.hairline,
+    borderBottomColor: theme.colors.border.subtle,
+  },
+  tableCellText: {
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.secondary,
+  },
+  tableDate: {
+    flex: 1.2,
+  },
+  tableLoad: {
+    flex: 1,
+    textAlign: "right",
+  },
+  tableSets: {
+    flex: 1.2,
+    textAlign: "right",
+  },
+  tableClean: {
+    flex: 0.8,
+    textAlign: "right",
+  },
+  tableFlags: {
+    flex: 1.2,
+    textAlign: "right",
+  },
+  tableEmptyRow: {
+    paddingVertical: theme.spacing[3],
+  },
+  tableEmptyText: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.disabled,
+    textAlign: "center",
   },
   loadingContainer: {
     flex: 1,
