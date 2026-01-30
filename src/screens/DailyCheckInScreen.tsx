@@ -113,8 +113,11 @@ export default function DailyCheckInScreen({ navigation }: Props) {
 
       console.log("[DailyCheckIn] Check-in saved:", checkInId);
 
-      // Navigate to home screen with programId
-      navigation.navigate("Home", { programId: "no-gym" });
+      // Navigate to home screen with programId and clear check-in from stack
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Home", params: { programId: "no-gym" } }],
+      });
     } catch (error) {
       console.error("[DailyCheckIn] Failed to save:", error);
       Alert.alert("Error", "Failed to save check-in. Please try again.");

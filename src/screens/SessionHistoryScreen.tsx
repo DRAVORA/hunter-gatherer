@@ -6,11 +6,11 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  ScrollView,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../App";
 
+import { getExerciseRules } from "../data/exercises";
 import { getDatabase } from "../database/init";
 import {
   formatMinutes,
@@ -20,7 +20,7 @@ import {
 } from "../utils/formatting";
 import { UNICODE } from "../constants/unicode";
 import { theme } from "../styles/theme";
-import { StopReason } from "../types";
+import { ExerciseCategory, StopReason } from "../types";
 
 type SessionHistoryNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -105,6 +105,19 @@ interface ProgressionStatus {
 }
 
 type ExerciseMetricType = "load" | "hold" | "rep" | "distance";
+type ExerciseCategoryGroupKey = ExerciseCategory | "OTHER";
+
+const EXERCISE_CATEGORY_ORDER: Array<{
+  key: ExerciseCategoryGroupKey;
+  label: string;
+}> = [
+  { key: ExerciseCategory.PULL, label: "Pull" },
+  { key: ExerciseCategory.PUSH, label: "Push" },
+  { key: ExerciseCategory.LEGS, label: "Legs" },
+  { key: ExerciseCategory.CORE, label: "Core" },
+  { key: ExerciseCategory.CARRY, label: "Carry" },
+  { key: "OTHER", label: "Other" },
+];
 
 // ============================================================================
 // SESSION HISTORY SCREEN
@@ -366,6 +379,26 @@ export default function SessionHistoryScreen({ navigation }: Props) {
     }
 
     return sections;
+  }
+
+  function groupExerciseOptionsByCategory(options: string[]): Array<{
+    key: ExerciseCategoryGroupKey;
+    label: string;
+    exercises: string[];
+  }> {
+    const grouped = new Map<ExerciseCategoryGroupKey, string[]>();
+
+    options.forEach((exerciseName) => {
+      const rules = getExerciseRules(exerciseName);
+      const category = rules?.category ?? "OTHER";
+      const existing = grouped.get(category) ?? [];
+      grouped.set(category, [...existing, exerciseName]);
+    });
+
+    return EXERCISE_CATEGORY_ORDER.map((category) => ({
+      ...category,
+      exercises: grouped.get(category.key) ?? [],
+    })).filter((category) => category.exercises.length > 0);
   }
 
   function getDisplayName(sessionName: string): string {
@@ -748,38 +781,44 @@ export default function SessionHistoryScreen({ navigation }: Props) {
   }
 
   function renderExerciseFilter() {
+    const groupedOptions = groupExerciseOptionsByCategory(exerciseOptions);
+
     return (
       <View style={styles.filterSection}>
         <Text style={styles.filterLabel}>Filter by exercise</Text>
         {exerciseOptions.length === 0 ? (
           <Text style={styles.filterEmptyText}>No exercise data yet.</Text>
         ) : (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.filterList}
-          >
-            {exerciseOptions.map((exerciseName) => (
-              <TouchableOpacity
-                key={exerciseName}
-                onPress={() => setSelectedExercise(exerciseName)}
-                style={[
-                  styles.filterPill,
-                  selectedExercise === exerciseName && styles.filterPillActive,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.filterPillText,
-                    selectedExercise === exerciseName &&
-                      styles.filterPillTextActive,
-                  ]}
-                >
-                  {exerciseName}
-                </Text>
-              </TouchableOpacity>
+          <View style={styles.filterGroups}>
+            {groupedOptions.map((group) => (
+              <View key={group.key} style={styles.filterGroup}>
+                <Text style={styles.filterGroupTitle}>{group.label}</Text>
+                <View style={styles.filterGroupPills}>
+                  {group.exercises.map((exerciseName) => (
+                    <TouchableOpacity
+                      key={exerciseName}
+                      onPress={() => setSelectedExercise(exerciseName)}
+                      style={[
+                        styles.filterPill,
+                        selectedExercise === exerciseName &&
+                          styles.filterPillActive,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.filterPillText,
+                          selectedExercise === exerciseName &&
+                            styles.filterPillTextActive,
+                        ]}
+                      >
+                        {exerciseName}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
             ))}
-          </ScrollView>
+          </View>
         )}
       </View>
     );
@@ -1099,9 +1138,23 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.text.disabled,
   },
-  filterList: {
+  filterGroups: {
+    gap: theme.spacing[3],
+  },
+  filterGroup: {
     gap: theme.spacing[2],
-    paddingRight: theme.spacing[2],
+  },
+  filterGroupTitle: {
+    fontSize: theme.typography.fontSize.xs,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.tertiary,
+    textTransform: "uppercase",
+    letterSpacing: theme.typography.letterSpacing.wide,
+  },
+  filterGroupPills: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: theme.spacing[2],
   },
   filterPill: {
     paddingVertical: theme.spacing[1],
