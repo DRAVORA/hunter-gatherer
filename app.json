@@ -15,7 +15,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.dravora.atavia",
-      "buildNumber": "1",
+      "buildNumber": "2",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -30,9 +30,7 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
-    "plugins": [
-      "expo-sqlite"
-    ],
+    "plugins": ["expo-sqlite"],
     "extra": {
       "eas": {
         "projectId": "454e615f-a384-430c-a66d-925009376ade"
