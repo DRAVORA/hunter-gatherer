@@ -6,6 +6,7 @@ import {
   ScrollView,
   StyleSheet,
   Alert,
+  TextInput,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
@@ -48,7 +49,8 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [showSetupCues, setShowSetupCues] = useState(true);
   const [showRestTimer, setShowRestTimer] = useState(false);
-  const [holdDuration, setHoldDuration] = useState(0);
+  const [weightInput, setWeightInput] = useState("");
+  const [distanceInput, setDistanceInput] = useState("");
 
   // Load session data
   useEffect(() => {
@@ -148,6 +150,18 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
 
   // Get exercise rules
   const exerciseRules = currentExercise ? getExerciseRules(currentExercise.exerciseName) : null;
+  const isDistanceExercise = currentExercise?.targetDistance !== undefined;
+  const isTimedExercise = currentExercise?.targetDuration !== undefined;
+
+  useEffect(() => {
+    if (!currentExercise) return;
+    setWeightInput("");
+    setDistanceInput(
+      currentExercise.targetDistance !== undefined
+        ? String(currentExercise.targetDistance)
+        : "",
+    );
+  }, [currentExerciseIndex, currentExercise]);
 
   // Show setup cues on first set
   useEffect(() => {
@@ -167,8 +181,6 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
   }
 
   function handleDurationStop(seconds: number) {
-    setHoldDuration(seconds);
-    
     // Ask if the hold felt clean
     Alert.alert(
       "Hold Complete",
@@ -205,11 +217,26 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
     );
   }
 
+  function parseInputValue(value: string): number | undefined {
+    const parsed = Number.parseFloat(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+
+  function getWeightValue(): number | undefined {
+    return parseInputValue(weightInput);
+  }
+
+  function getDistanceValue(): number | undefined {
+    return parseInputValue(distanceInput);
+  }
+
   async function completeSet(feltClean: boolean, stopReason: StopReason) {
+    const weightValue = getWeightValue();
     const result = await stopSet(
       feltClean,
       stopReason,
       currentExercise?.restTimeSeconds,
+      { weight: weightValue },
     );
 
     if (result.sessionComplete) {
@@ -230,11 +257,12 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
     feltClean: boolean,
     stopReason: StopReason,
   ) {
+    const weightValue = getWeightValue();
     const result = await stopSet(
       feltClean,
       stopReason,
       currentExercise?.restTimeSeconds,
-      durationSeconds, // Pass duration for timed exercises
+      { duration: durationSeconds, weight: weightValue },
     );
 
     if (result.sessionComplete) {
@@ -244,11 +272,9 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
       // New exercise - show setup cues
       setShowSetupCues(true);
       setShowRestTimer(false);
-      setHoldDuration(0); // Reset duration for next exercise
     } else {
       // Rest between sets
       setShowRestTimer(true);
-      setHoldDuration(0); // Reset duration for next set
     }
   }
 
@@ -285,14 +311,66 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
 
   // Determine target display
   const targetDisplay = currentExercise.targetReps !== undefined
-    ? currentExercise.targetReps === 0 
-      ? "AMRAP" 
+    ? currentExercise.targetReps === 0
+      ? "AMRAP"
       : `${currentExercise.targetReps} reps`
     : currentExercise.targetDuration !== undefined
       ? currentExercise.targetDuration === 0
-        ? "Max time"
+        ? "Max time hold"
         : `${currentExercise.targetDuration}s hold`
-      : "AMRAP"; // Default to AMRAP if neither is specified
+      : currentExercise.targetDistance !== undefined
+        ? currentExercise.targetDistance === 0
+          ? "Max distance carry"
+          : `${currentExercise.targetDistance}m carry`
+        : "AMRAP"; // Default to AMRAP if neither is specified
+
+  function handleDistanceStop() {
+    const distanceValue = getDistanceValue();
+    if (distanceValue === undefined) {
+      Alert.alert("Distance required", "Enter distance in meters to save the carry.");
+      return;
+    }
+
+    Alert.alert(
+      "Carry Complete",
+      `Recorded ${distanceValue}m. Did this carry feel clean?`,
+      [
+        {
+          text: "Yes - Clean",
+          onPress: () =>
+            completeSetWithDistance(distanceValue, true, StopReason.CLEAN_COMPLETION),
+        },
+        {
+          text: "No - Form Break",
+          onPress: () => completeSetWithDistance(distanceValue, false, StopReason.CORE_FAILURE),
+          style: "destructive",
+        },
+      ],
+    );
+  }
+
+  async function completeSetWithDistance(
+    distanceMeters: number,
+    feltClean: boolean,
+    stopReason: StopReason,
+  ) {
+    const weightValue = getWeightValue();
+    const result = await stopSet(
+      feltClean,
+      stopReason,
+      currentExercise?.restTimeSeconds,
+      { distance: distanceMeters, weight: weightValue },
+    );
+
+    if (result.sessionComplete) {
+      handleSessionComplete();
+    } else if (result.movedToNextExercise) {
+      setShowSetupCues(true);
+      setShowRestTimer(false);
+    } else {
+      setShowRestTimer(true);
+    }
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -356,7 +434,7 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
               <StopRulesBox rules={exerciseRules.stopRules} />
             </View>
 
-            {/* Exercise Tracking - Duration Timer or Rep Counter */}
+            {/* Exercise Tracking - Duration Timer, Distance Input, or Rep Counter */}
             {!isSetActive && (
               <TouchableOpacity
                 style={styles.startSetButton}
@@ -366,15 +444,56 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
               </TouchableOpacity>
             )}
 
+            {!showRestTimer && (
+              <View style={styles.metricInputs}>
+                <View style={styles.metricInputBlock}>
+                  <Text style={styles.metricLabel}>Load (kg)</Text>
+                  <TextInput
+                    style={styles.metricInput}
+                    keyboardType="decimal-pad"
+                    placeholder="Optional"
+                    placeholderTextColor={theme.colors.text.disabled}
+                    value={weightInput}
+                    onChangeText={setWeightInput}
+                  />
+                </View>
+                {isDistanceExercise && (
+                  <View style={styles.metricInputBlock}>
+                    <Text style={styles.metricLabel}>Distance (m)</Text>
+                    <TextInput
+                      style={styles.metricInput}
+                      keyboardType="decimal-pad"
+                      placeholder="Enter meters"
+                      placeholderTextColor={theme.colors.text.disabled}
+                      value={distanceInput}
+                      onChangeText={setDistanceInput}
+                    />
+                  </View>
+                )}
+              </View>
+            )}
+
             {isSetActive && (
               <>
                 {/* Show Duration Timer for timed exercises (holds) */}
-                {currentExercise.targetDuration !== undefined ? (
+                {isTimedExercise ? (
                   <View style={styles.durationTimerSection}>
                     <DurationTimer
                       targetSeconds={currentExercise.targetDuration}
                       onStop={handleDurationStop}
                     />
+                  </View>
+                ) : isDistanceExercise ? (
+                  <View style={styles.distanceSection}>
+                    <Text style={styles.distancePrompt}>
+                      Carry the prescribed distance, then finish the set.
+                    </Text>
+                    <TouchableOpacity
+                      style={styles.stopButton}
+                      onPress={handleDistanceStop}
+                    >
+                      <Text style={styles.stopButtonText}>Finish Carry</Text>
+                    </TouchableOpacity>
                   </View>
                 ) : (
                   /* Show Rep Counter for rep-based exercises */
@@ -388,7 +507,7 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
                 )}
 
                 {/* Stop Set Button - Only show for rep-based exercises */}
-                {currentExercise.targetDuration === undefined && (
+                {!isTimedExercise && !isDistanceExercise && (
                   <TouchableOpacity
                     style={styles.stopButton}
                     onPress={handleStopSet}
@@ -578,5 +697,44 @@ const styles = StyleSheet.create({
   },
   restSection: {
     marginTop: theme.spacing[4],
+  },
+  metricInputs: {
+    marginTop: theme.spacing[4],
+    marginBottom: theme.spacing[2],
+    gap: theme.spacing[3],
+  },
+  metricInputBlock: {
+    backgroundColor: theme.colors.surface.base,
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing[3],
+    borderWidth: theme.borderWidth.hairline,
+    borderColor: theme.colors.border.subtle,
+  },
+  metricLabel: {
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.tertiary,
+    textTransform: "uppercase",
+    letterSpacing: theme.typography.letterSpacing.wide,
+    marginBottom: theme.spacing[2],
+  },
+  metricInput: {
+    fontSize: theme.typography.fontSize.lg,
+    color: theme.colors.text.primary,
+    borderWidth: theme.borderWidth.hairline,
+    borderColor: theme.colors.border.subtle,
+    borderRadius: theme.borderRadius.sm,
+    paddingVertical: theme.spacing[2],
+    paddingHorizontal: theme.spacing[3],
+    backgroundColor: theme.colors.surface.elevated,
+  },
+  distanceSection: {
+    marginTop: theme.spacing[3],
+    alignItems: "center",
+  },
+  distancePrompt: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+    marginBottom: theme.spacing[3],
+    textAlign: "center",
   },
 });

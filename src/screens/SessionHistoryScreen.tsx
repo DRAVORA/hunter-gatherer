@@ -12,7 +12,12 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../App";
 
 import { getDatabase } from "../database/init";
-import { formatMinutes, formatPercentage, formatWeight } from "../utils/formatting";
+import {
+  formatMinutes,
+  formatPercentage,
+  formatWeight,
+  formatDistance,
+} from "../utils/formatting";
 import { UNICODE } from "../constants/unicode";
 import { theme } from "../styles/theme";
 import { StopReason } from "../types";
@@ -42,6 +47,8 @@ interface ExerciseSet {
   set_number: number;
   reps_completed: number | null;
   duration_seconds: number | null;
+  distance_metres: number | null;
+  weight_kg: number | null;
   felt_clean: number;
   stop_reason: string | null;
 }
@@ -63,10 +70,13 @@ interface ExerciseHistoryRow {
   completed_sets: number;
   total_sets: number;
   total_clean_reps: number;
+  total_duration: number;
+  total_distance: number;
   clean_sets: number;
   top_clean_load: number | null;
   top_clean_duration: number | null;
   top_clean_reps: number | null;
+  top_clean_distance: number | null;
   stop_flag_count: number;
 }
 
@@ -78,10 +88,13 @@ interface ExerciseHistoryEntry {
   completedSets: number;
   totalSets: number;
   totalCleanReps: number;
+  totalDuration: number;
+  totalDistance: number;
   cleanSets: number;
   topCleanLoad: number | null;
   topCleanDuration: number | null;
   topCleanReps: number | null;
+  topCleanDistance: number | null;
   stopFlagCount: number;
 }
 
@@ -91,7 +104,7 @@ interface ProgressionStatus {
   tone: "stable" | "hold" | "regress";
 }
 
-type ExerciseMetricType = "load" | "hold" | "rep";
+type ExerciseMetricType = "load" | "hold" | "rep" | "distance";
 
 // ============================================================================
 // SESSION HISTORY SCREEN
@@ -217,10 +230,13 @@ export default function SessionHistoryScreen({ navigation }: Props) {
             MAX(es.completed_sets) as completed_sets,
             COUNT(ex.id) as total_sets,
             SUM(ex.clean_reps) as total_clean_reps,
+            SUM(CASE WHEN ex.duration IS NOT NULL THEN ex.duration ELSE 0 END) as total_duration,
+            SUM(CASE WHEN ex.distance IS NOT NULL THEN ex.distance ELSE 0 END) as total_distance,
             SUM(CASE WHEN ex.felt_clean = 1 THEN 1 ELSE 0 END) as clean_sets,
             MAX(CASE WHEN ex.felt_clean = 1 THEN ex.weight ELSE NULL END) as top_clean_load,
             MAX(CASE WHEN ex.felt_clean = 1 THEN ex.duration ELSE NULL END) as top_clean_duration,
             MAX(CASE WHEN ex.felt_clean = 1 THEN ex.clean_reps ELSE NULL END) as top_clean_reps,
+            MAX(CASE WHEN ex.felt_clean = 1 THEN ex.distance ELSE NULL END) as top_clean_distance,
             SUM(CASE WHEN ex.stop_reason != ? THEN 1 ELSE 0 END) as stop_flag_count
           FROM training_session ts
           JOIN exercise_session es ON ts.id = es.session_id
@@ -241,11 +257,15 @@ export default function SessionHistoryScreen({ navigation }: Props) {
         completedSets: Number(row.completed_sets) || 0,
         totalSets: Number(row.total_sets) || 0,
         totalCleanReps: Number(row.total_clean_reps) || 0,
+        totalDuration: Number(row.total_duration) || 0,
+        totalDistance: Number(row.total_distance) || 0,
         cleanSets: Number(row.clean_sets) || 0,
         topCleanLoad: row.top_clean_load === null ? null : Number(row.top_clean_load),
         topCleanDuration:
           row.top_clean_duration === null ? null : Number(row.top_clean_duration),
         topCleanReps: row.top_clean_reps === null ? null : Number(row.top_clean_reps),
+        topCleanDistance:
+          row.top_clean_distance === null ? null : Number(row.top_clean_distance),
         stopFlagCount: Number(row.stop_flag_count) || 0,
       }));
 
@@ -267,6 +287,8 @@ export default function SessionHistoryScreen({ navigation }: Props) {
           ex.set_number,
           ex.clean_reps as reps_completed,
           ex.duration as duration_seconds,
+          ex.distance as distance_metres,
+          ex.weight as weight_kg,
           ex.felt_clean,
           ex.stop_reason
         FROM exercise_set ex
@@ -378,6 +400,9 @@ export default function SessionHistoryScreen({ navigation }: Props) {
   function getExerciseMetricType(
     entries: ExerciseHistoryEntry[],
   ): ExerciseMetricType {
+    if (entries.some((entry) => entry.topCleanDistance !== null)) {
+      return "distance";
+    }
     if (entries.some((entry) => entry.topCleanDuration !== null)) {
       return "hold";
     }
@@ -391,14 +416,24 @@ export default function SessionHistoryScreen({ navigation }: Props) {
     entry: ExerciseHistoryEntry,
     metricType: ExerciseMetricType,
   ): string {
+    const loadSuffix =
+      entry.topCleanLoad !== null
+        ? ` @ ${formatTopCleanLoad(entry.topCleanLoad)}`
+        : "";
+    if (metricType === "distance") {
+      if (entry.topCleanDistance === null || Number.isNaN(entry.topCleanDistance)) {
+        return UNICODE.EM_DASH;
+      }
+      return `${formatDistance(entry.topCleanDistance)}${loadSuffix}`;
+    }
     if (metricType === "hold") {
-      return formatDurationSeconds(entry.topCleanDuration);
+      return `${formatDurationSeconds(entry.topCleanDuration)}${loadSuffix}`;
     }
     if (metricType === "rep") {
       if (entry.topCleanReps === null || Number.isNaN(entry.topCleanReps)) {
         return UNICODE.EM_DASH;
       }
-      return `${Math.round(entry.topCleanReps)} reps`;
+      return `${Math.round(entry.topCleanReps)} reps${loadSuffix}`;
     }
     return formatTopCleanLoad(entry.topCleanLoad);
   }
@@ -494,8 +529,21 @@ export default function SessionHistoryScreen({ navigation }: Props) {
     return formatWeight(load);
   }
 
-  function formatSetsReps(entry: ExerciseHistoryEntry): string {
+  function formatSetsReps(
+    entry: ExerciseHistoryEntry,
+    metricType: ExerciseMetricType,
+  ): string {
     if (entry.totalSets === 0) return UNICODE.EM_DASH;
+    if (metricType === "hold") {
+      const averageSeconds =
+        entry.totalSets > 0 ? entry.totalDuration / entry.totalSets : 0;
+      return `${entry.totalSets} × ${formatDurationSeconds(averageSeconds)}`;
+    }
+    if (metricType === "distance") {
+      const averageDistance =
+        entry.totalSets > 0 ? entry.totalDistance / entry.totalSets : 0;
+      return `${entry.totalSets} × ${formatDistance(averageDistance)}`;
+    }
     const averageReps =
       entry.totalSets > 0
         ? Math.round(entry.totalCleanReps / entry.totalSets)
@@ -570,17 +618,15 @@ export default function SessionHistoryScreen({ navigation }: Props) {
                 </Text>
               </View>
               <View style={styles.authorityRow}>
-                <Text style={styles.authorityLabel}>
-                  Load / Time / Reps
-                </Text>
+                <Text style={styles.authorityLabel}>Key metric</Text>
                 <Text style={styles.authorityValue}>
                   {formatMetricValue(lastEntry, metricType)}
                 </Text>
               </View>
               <View style={styles.authorityRow}>
-                <Text style={styles.authorityLabel}>Sets × reps</Text>
+                <Text style={styles.authorityLabel}>Sets × avg</Text>
                 <Text style={styles.authorityValue}>
-                  {formatSetsReps(lastEntry)}
+                  {formatSetsReps(lastEntry, metricType)}
                 </Text>
               </View>
               <View style={styles.authorityRow}>
@@ -639,10 +685,10 @@ export default function SessionHistoryScreen({ navigation }: Props) {
           <View style={styles.tableHeaderRow}>
             <Text style={[styles.tableHeaderText, styles.tableDate]}>Date</Text>
             <Text style={[styles.tableHeaderText, styles.tableLoad]}>
-              Load / Time / Reps
+              Key metric
             </Text>
             <Text style={[styles.tableHeaderText, styles.tableSets]}>
-              Sets × reps
+              Sets × avg
             </Text>
             <Text style={[styles.tableHeaderText, styles.tableClean]}>
               Clean %
@@ -671,7 +717,7 @@ export default function SessionHistoryScreen({ navigation }: Props) {
                     {formatMetricValue(entry, metricType)}
                   </Text>
                   <Text style={[styles.tableCellText, styles.tableSets]}>
-                    {formatSetsReps(entry)}
+                    {formatSetsReps(entry, metricType)}
                   </Text>
                   <Text style={[styles.tableCellText, styles.tableClean]}>
                     {formatPercentage(getCleanPercentage(entry))}
@@ -778,19 +824,34 @@ export default function SessionHistoryScreen({ navigation }: Props) {
         <Text style={styles.exerciseSectionTitle}>Exercise Breakdown</Text>
 
         {Object.entries(groupedExercises).map(([exerciseName, sets]) => {
-          // Check if this is a timed exercise (has duration instead of reps)
-          const isTimedExercise = sets.some(set => set.duration_seconds !== null && set.duration_seconds > 0);
-          
+          const isTimedExercise = sets.some(
+            (set) => set.duration_seconds !== null && set.duration_seconds > 0,
+          );
+          const isDistanceExercise = sets.some(
+            (set) => set.distance_metres !== null && set.distance_metres > 0,
+          );
+
           const totalReps = sets.reduce(
             (sum, set) => sum + (set.reps_completed || 0),
-            0
+            0,
           );
-          
+
           const totalDuration = sets.reduce(
             (sum, set) => sum + (set.duration_seconds || 0),
-            0
+            0,
           );
-          
+
+          const totalDistance = sets.reduce(
+            (sum, set) => sum + (set.distance_metres || 0),
+            0,
+          );
+
+          const maxWeight = sets.reduce((max, set) => {
+            if (set.weight_kg === null) return max;
+            return Math.max(max, set.weight_kg);
+          }, -Infinity);
+          const hasWeight = Number.isFinite(maxWeight) && maxWeight > 0;
+
           const cleanSets = sets.filter((set) => set.felt_clean === 1).length;
 
           return (
@@ -798,7 +859,15 @@ export default function SessionHistoryScreen({ navigation }: Props) {
               <View style={styles.exerciseHeader}>
                 <Text style={styles.exerciseName}>{exerciseName}</Text>
                 <Text style={styles.exerciseStats}>
-                  {sets.length} sets {UNICODE.BULLET} {isTimedExercise ? `${totalDuration}s total` : `${totalReps} reps`}
+                  {sets.length} sets {UNICODE.BULLET}{" "}
+                  {isTimedExercise
+                    ? `${formatDurationSeconds(totalDuration)} total`
+                    : isDistanceExercise
+                      ? `${formatDistance(totalDistance)} total`
+                      : `${totalReps} reps`}
+                  {hasWeight
+                    ? ` ${UNICODE.BULLET} Top load ${formatWeight(maxWeight)}`
+                    : ""}
                 </Text>
               </View>
 
@@ -807,22 +876,37 @@ export default function SessionHistoryScreen({ navigation }: Props) {
                 <View key={set.set_number} style={styles.setRow}>
                   <Text style={styles.setNumber}>Set {set.set_number}</Text>
 
-                  {set.duration_seconds !== null && set.duration_seconds > 0 ? (
-                    <Text style={styles.setValue}>
-                      {set.duration_seconds}s
-                    </Text>
-                  ) : set.reps_completed !== null && set.reps_completed > 0 ? (
-                    <Text style={styles.setValue}>
-                      {set.reps_completed} reps
-                    </Text>
-                  ) : (
-                    <Text style={styles.setValue}>{UNICODE.EM_DASH}</Text>
-                  )}
+                  <View style={styles.setMetrics}>
+                    {set.duration_seconds !== null && set.duration_seconds > 0 ? (
+                      <Text style={styles.setValue}>
+                        Time: {formatDurationSeconds(set.duration_seconds)}
+                      </Text>
+                    ) : set.distance_metres !== null &&
+                      set.distance_metres > 0 ? (
+                      <Text style={styles.setValue}>
+                        Distance: {formatDistance(set.distance_metres)}
+                      </Text>
+                    ) : set.reps_completed !== null &&
+                      set.reps_completed > 0 ? (
+                      <Text style={styles.setValue}>
+                        Reps: {set.reps_completed}
+                      </Text>
+                    ) : (
+                      <Text style={styles.setValue}>{UNICODE.EM_DASH}</Text>
+                    )}
+                    {set.weight_kg !== null && set.weight_kg > 0 ? (
+                      <Text style={styles.setSubValue}>
+                        Load: {formatWeight(set.weight_kg)}
+                      </Text>
+                    ) : null}
+                  </View>
 
                   <View style={styles.setIndicators}>
                     {set.felt_clean === 1 ? (
                       <View style={styles.cleanBadge}>
-                        <Text style={styles.cleanBadgeText}>{UNICODE.CHECKMARK} Clean</Text>
+                        <Text style={styles.cleanBadgeText}>
+                          {UNICODE.CHECKMARK} Clean
+                        </Text>
                       </View>
                     ) : (
                       <View style={styles.dirtyBadge}>
@@ -1369,11 +1453,18 @@ const styles = StyleSheet.create({
     color: theme.colors.text.tertiary,
     width: 60,
   },
+  setMetrics: {
+    flex: 1,
+  },
   setValue: {
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.text.secondary,
     fontWeight: theme.typography.fontWeight.medium,
-    width: 80,
+  },
+  setSubValue: {
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.tertiary,
+    marginTop: theme.spacing[0.5],
   },
   setIndicators: {
     flex: 1,

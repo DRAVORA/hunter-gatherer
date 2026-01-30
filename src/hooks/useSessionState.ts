@@ -126,13 +126,20 @@ export function useSessionState({
     feltClean: boolean,
     stopReason: StopReason,
     restTimeSeconds?: number,
-    duration?: number, // Optional duration for timed exercises (holds)
+    setMetrics: {
+      duration?: number; // Optional duration for timed exercises (holds)
+      distance?: number; // Optional distance for carries
+      weight?: number; // Optional load in kg
+    } = {},
   ): Promise<StopSetResult> => {
     if (!isInitialized) {
       throw new Error("Session not initialized");
     }
 
     const exerciseSessionId = exerciseSessionIds[currentExerciseIndex];
+    const { duration, distance, weight } = setMetrics;
+    const isNonRepMetric =
+      duration !== undefined || distance !== undefined;
 
     // Save set to database
     await db.saveExerciseSet({
@@ -140,11 +147,13 @@ export function useSessionState({
       exerciseSessionId,
       setNumber: currentSetNumber,
       targetReps: currentExercise.targetReps,
-      cleanReps: duration !== undefined ? 0 : cleanReps, // Set cleanReps to 0 for timed exercises
+      cleanReps: isNonRepMetric ? 0 : cleanReps, // Set cleanReps to 0 for timed or distance-based exercises
       feltClean,
       stopReason,
       restTimeSeconds,
-      duration, // Add duration for timed exercises
+      weight,
+      duration,
+      distance,
       timestamp: getCurrentTimestamp(),
     });
 
