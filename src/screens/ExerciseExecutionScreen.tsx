@@ -479,7 +479,7 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
                 {isTimedExercise ? (
                   <View style={styles.durationTimerSection}>
                     <DurationTimer
-                      targetSeconds={currentExercise.targetDuration}
+                      targetSeconds={currentExercise?.targetDuration ?? 0}
                       onStop={handleDurationStop}
                     />
                   </View>
