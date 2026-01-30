@@ -119,9 +119,9 @@ export default function SessionHistoryScreen({ navigation }: Props) {
   }>({});
   const [exerciseOptions, setExerciseOptions] = useState<string[]>([]);
   const [selectedExercise, setSelectedExercise] = useState<string | null>(null);
-  const [exerciseHistory, setExerciseHistory] = useState<ExerciseHistoryEntry[]>(
-    [],
-  );
+  const [exerciseHistory, setExerciseHistory] = useState<
+    ExerciseHistoryEntry[]
+  >([]);
   const [exerciseHistoryLoading, setExerciseHistoryLoading] = useState(false);
 
   useEffect(() => {
@@ -130,7 +130,7 @@ export default function SessionHistoryScreen({ navigation }: Props) {
 
   // Reload history when screen comes into focus
   useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
+    const unsubscribe = navigation.addListener("focus", () => {
       loadExerciseOptions();
       if (selectedExercise) {
         loadSessionHistory(selectedExercise);
@@ -260,12 +260,18 @@ export default function SessionHistoryScreen({ navigation }: Props) {
         totalDuration: Number(row.total_duration) || 0,
         totalDistance: Number(row.total_distance) || 0,
         cleanSets: Number(row.clean_sets) || 0,
-        topCleanLoad: row.top_clean_load === null ? null : Number(row.top_clean_load),
+        topCleanLoad:
+          row.top_clean_load === null ? null : Number(row.top_clean_load),
         topCleanDuration:
-          row.top_clean_duration === null ? null : Number(row.top_clean_duration),
-        topCleanReps: row.top_clean_reps === null ? null : Number(row.top_clean_reps),
+          row.top_clean_duration === null
+            ? null
+            : Number(row.top_clean_duration),
+        topCleanReps:
+          row.top_clean_reps === null ? null : Number(row.top_clean_reps),
         topCleanDistance:
-          row.top_clean_distance === null ? null : Number(row.top_clean_distance),
+          row.top_clean_distance === null
+            ? null
+            : Number(row.top_clean_distance),
         stopFlagCount: Number(row.stop_flag_count) || 0,
       }));
 
@@ -281,7 +287,8 @@ export default function SessionHistoryScreen({ navigation }: Props) {
     try {
       const db = getDatabase();
 
-      const exercises = await db.getAllAsync<ExerciseSet>(`
+      const exercises = await db.getAllAsync<ExerciseSet>(
+        `
         SELECT 
           es.exercise_name,
           ex.set_number,
@@ -295,14 +302,18 @@ export default function SessionHistoryScreen({ navigation }: Props) {
         JOIN exercise_session es ON ex.exercise_session_id = es.id
         WHERE es.session_id = ?
         ORDER BY es.order_in_session ASC, ex.set_number ASC
-      `, [sessionId]);
+      `,
+        [sessionId],
+      );
 
       setSessionExercises((prev) => ({
         ...prev,
         [sessionId]: exercises,
       }));
 
-      console.log(`[SessionHistory] Loaded ${exercises.length} sets for session ${sessionId}`);
+      console.log(
+        `[SessionHistory] Loaded ${exercises.length} sets for session ${sessionId}`,
+      );
     } catch (error) {
       console.error("[SessionHistory] Failed to load exercises:", error);
     }
@@ -325,7 +336,7 @@ export default function SessionHistoryScreen({ navigation }: Props) {
 
     sessions.forEach((session) => {
       // Parse the date string (YYYY-MM-DD) as local date
-      const [year, month, day] = session.date.split('-').map(Number);
+      const [year, month, day] = session.date.split("-").map(Number);
       const sessionDate = new Date(year, month - 1, day);
 
       if (sessionDate.getTime() === today.getTime()) {
@@ -367,7 +378,7 @@ export default function SessionHistoryScreen({ navigation }: Props) {
       "Push + Shoulders": "Day 3: Push + Shoulders",
       "Push Session": "Day 3: Push + Shoulders",
       "Movement / Conditioning": "Day 4: Movement / Conditioning",
-      "Conditioning": "Day 4: Movement / Conditioning",
+      Conditioning: "Day 4: Movement / Conditioning",
     };
 
     return nameMap[sessionName] || sessionName;
@@ -375,7 +386,7 @@ export default function SessionHistoryScreen({ navigation }: Props) {
 
   function formatSessionDate(dateStr: string): string {
     // Parse YYYY-MM-DD as local date to avoid timezone issues
-    const [year, month, day] = dateStr.split('-').map(Number);
+    const [year, month, day] = dateStr.split("-").map(Number);
     const date = new Date(year, month - 1, day);
     const options: Intl.DateTimeFormatOptions = {
       weekday: "short",
@@ -421,7 +432,10 @@ export default function SessionHistoryScreen({ navigation }: Props) {
         ? ` @ ${formatTopCleanLoad(entry.topCleanLoad)}`
         : "";
     if (metricType === "distance") {
-      if (entry.topCleanDistance === null || Number.isNaN(entry.topCleanDistance)) {
+      if (
+        entry.topCleanDistance === null ||
+        Number.isNaN(entry.topCleanDistance)
+      ) {
         return UNICODE.EM_DASH;
       }
       return `${formatDistance(entry.topCleanDistance)}${loadSuffix}`;
@@ -675,8 +689,8 @@ export default function SessionHistoryScreen({ navigation }: Props) {
           <Text style={styles.rulesText}>
             Progression is allowed only when the most recent session completes
             all prescribed sets, counts only clean reps, triggers no stop rules,
-            maintains 1–2 reps in reserve on the final working set, and applies
-            no volume reductions. Any violation blocks progression.
+            maintains 1{UNICODE.DASH}2 reps in reserve on the final working set,
+            and applies no volume reductions. Any violation blocks progression.
           </Text>
         </View>
 
@@ -693,7 +707,9 @@ export default function SessionHistoryScreen({ navigation }: Props) {
             <Text style={[styles.tableHeaderText, styles.tableClean]}>
               Clean %
             </Text>
-            <Text style={[styles.tableHeaderText, styles.tableFlags]}>Flags</Text>
+            <Text style={[styles.tableHeaderText, styles.tableFlags]}>
+              Flags
+            </Text>
           </View>
           {tableEntries.length === 0 ? (
             <View style={styles.tableEmptyRow}>
@@ -704,10 +720,7 @@ export default function SessionHistoryScreen({ navigation }: Props) {
           ) : (
             tableEntries.map((entry) => {
               return (
-                <View
-                  key={entry.sessionId}
-                  style={styles.tableRow}
-                >
+                <View key={entry.sessionId} style={styles.tableRow}>
                   <View style={[styles.tableDate, styles.tableDateCell]}>
                     <Text style={styles.tableCellText}>
                       {formatSessionDate(entry.date)}
@@ -793,7 +806,9 @@ export default function SessionHistoryScreen({ navigation }: Props) {
     }
   }
 
-  function groupExercisesBySets(sets: ExerciseSet[]): { [key: string]: ExerciseSet[] } {
+  function groupExercisesBySets(sets: ExerciseSet[]): {
+    [key: string]: ExerciseSet[];
+  } {
     const grouped: { [key: string]: ExerciseSet[] } = {};
 
     sets.forEach((set) => {
@@ -877,7 +892,8 @@ export default function SessionHistoryScreen({ navigation }: Props) {
                   <Text style={styles.setNumber}>Set {set.set_number}</Text>
 
                   <View style={styles.setMetrics}>
-                    {set.duration_seconds !== null && set.duration_seconds > 0 ? (
+                    {set.duration_seconds !== null &&
+                    set.duration_seconds > 0 ? (
                       <Text style={styles.setValue}>
                         Time: {formatDurationSeconds(set.duration_seconds)}
                       </Text>
@@ -940,7 +956,7 @@ export default function SessionHistoryScreen({ navigation }: Props) {
 
     // Ensure all values are safe for rendering
     const displayName = getDisplayName(
-      String(item.session_name || "Unknown Session")
+      String(item.session_name || "Unknown Session"),
     );
     const sessionDate = formatSessionDate(String(item.date || ""));
     const completedVol = Number(item.completed_volume) || 0;
