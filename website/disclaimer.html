@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health &amp; Fitness Disclaimer | ATAVIA by Dravora</title>
+    <meta name="description" content="Health and Fitness Disclaimer for ATAVIA training companion app by Dravora.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/Dravora.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Crimson Text', serif;
+            background: #F5F3EE;
+            color: #2B2B2B;
+            line-height: 1.7;
+        }
+
+        .nav {
+            background: rgba(245, 243, 238, 0.98);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(92, 26, 51, 0.15);
+            padding: 30px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .crest {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            text-decoration: none;
+        }
+
+        .crest-text {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .crest-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #2B2B2B;
+            line-height: 1;
+        }
+
+        .crest-subtitle {
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: #5C1A33;
+            text-transform: uppercase;
+        }
+
+        .logo-image {
+            display: block;
+            height: 60px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 45px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #2B2B2B;
+            font-weight: 600;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -6px;
+            width: 0;
+            height: 1px;
+            background: #5C1A33;
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #5C1A33;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 80px 40px;
+        }
+
+        .page-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 42px;
+            font-weight: 600;
+            color: #2B2B2B;
+            margin-bottom: 16px;
+        }
+
+        .last-updated {
+            font-size: 14px;
+            color: #5C1A33;
+            margin-bottom: 48px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 28px;
+            font-weight: 600;
+            color: #2B2B2B;
+            margin-top: 48px;
+            margin-bottom: 16px;
+        }
+
+        h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 22px;
+            font-weight: 600;
+            color: #3B3B3B;
+            margin-top: 32px;
+            margin-bottom: 12px;
+        }
+
+        p {
+            margin-bottom: 16px;
+            color: #3B3B3B;
+        }
+
+        ul, ol {
+            margin-bottom: 16px;
+            padding-left: 24px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            color: #3B3B3B;
+        }
+
+        .warning-banner {
+            background: #5C1A33;
+            color: #F5F3EE;
+            padding: 32px;
+            border-radius: 16px;
+            margin-bottom: 48px;
+        }
+
+        .warning-banner h2 {
+            color: #F5F3EE;
+            margin-top: 0;
+            margin-bottom: 16px;
+            font-size: 24px;
+        }
+
+        .warning-banner p {
+            color: #F5F3EE;
+            margin-bottom: 0;
+            font-size: 18px;
+        }
+
+        .highlight-box {
+            background: rgba(92, 26, 51, 0.06);
+            border-left: 4px solid #5C1A33;
+            padding: 20px 24px;
+            margin: 32px 0;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .highlight-box p {
+            margin-bottom: 0;
+            font-weight: 600;
+        }
+
+        .warning-box {
+            background: rgba(155, 123, 74, 0.1);
+            border-left: 4px solid #9B7B4A;
+            padding: 20px 24px;
+            margin: 32px 0;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .warning-box p {
+            margin-bottom: 0;
+        }
+
+        .stop-box {
+            background: rgba(139, 38, 53, 0.1);
+            border: 2px solid #8B2635;
+            padding: 24px;
+            border-radius: 12px;
+            margin: 32px 0;
+        }
+
+        .stop-box h3 {
+            color: #8B2635;
+            margin-top: 0;
+        }
+
+        .acknowledgement-box {
+            background: rgba(74, 107, 74, 0.1);
+            border: 2px solid #4A6B4A;
+            border-radius: 16px;
+            padding: 32px;
+            margin-top: 48px;
+        }
+
+        .acknowledgement-box h3 {
+            color: #4A6B4A;
+            margin-top: 0;
+        }
+
+        .contact-box {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(92, 26, 51, 0.12);
+            border-radius: 16px;
+            padding: 32px;
+            margin-top: 48px;
+        }
+
+        .contact-box h3 {
+            margin-top: 0;
+        }
+
+        .footer {
+            background: rgba(27, 59, 42, 0.03);
+            border-top: 2px solid rgba(92, 26, 51, 0.15);
+            padding: 60px 40px 40px;
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            font-family: 'Crimson Text', serif;
+            color: #2B2B2B;
+            text-decoration: none;
+            font-size: 14px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .footer-links a:hover {
+            color: #5C1A33;
+        }
+
+        .footer-info {
+            font-size: 14px;
+            color: #2B2B2B;
+            margin-bottom: 20px;
+        }
+
+        .footer-copyright {
+            font-size: 12px;
+            color: #2B2B2B;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 900px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 18px;
+                padding: 0 30px;
+            }
+
+            .content {
+                padding: 60px 24px;
+            }
+
+            .page-title {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-container">
+            <a class="crest" href="/atavia">
+                <img src="../Dravora.png" alt="Dravora logo" class="logo-image">
+                <span class="crest-text">
+                    <span class="crest-name">Dravora</span>
+                    <span class="crest-subtitle">Atavia</span>
+                </span>
+            </a>
+            <div class="nav-links">
+                <a href="/atavia">Overview</a>
+                <a href="/atavia/privacy">Privacy</a>
+                <a href="/atavia/terms">Terms</a>
+                <a href="/atavia/support">Support</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="content">
+        <h1 class="page-title">Health &amp; Fitness Disclaimer</h1>
+        <p class="last-updated">Last Updated: February 2026</p>
+
+        <div class="warning-banner">
+            <h2>Important Safety Information</h2>
+            <p>This application is intended for informational and educational purposes only. It is NOT a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider before beginning any exercise programme.</p>
+        </div>
+
+        <h2>1. Not Medical Advice</h2>
+        <p>ATAVIA and its content, including training programmes, readiness assessments, exercise instructions, and recommendations, are provided for general informational purposes only. The App does not provide medical advice and is not intended to be used for medical diagnosis or treatment.</p>
+        <p>The information in this App:</p>
+        <ul>
+            <li>Is not a substitute for professional medical advice</li>
+            <li>Should not be used to diagnose or treat any health condition</li>
+            <li>Does not create a doctor-patient or therapist-client relationship</li>
+            <li>May not be appropriate for your individual circumstances</li>
+        </ul>
+
+        <h2>2. Consult Your Physician</h2>
+        <div class="highlight-box">
+            <p>You must consult with a qualified healthcare professional before starting any exercise programme, particularly if you have any pre-existing health conditions.</p>
+        </div>
+        <p>You should consult a physician before using ATAVIA if you:</p>
+        <ul>
+            <li>Have any cardiovascular conditions (heart disease, high blood pressure, etc.)</li>
+            <li>Have any musculoskeletal conditions or injuries</li>
+            <li>Have diabetes or metabolic disorders</li>
+            <li>Are pregnant or postpartum</li>
+            <li>Have been sedentary for an extended period</li>
+            <li>Are over 40 years of age and have not exercised regularly</li>
+            <li>Have any chronic health conditions</li>
+            <li>Are taking any medications that may affect your ability to exercise</li>
+            <li>Have any concerns about your physical ability to exercise safely</li>
+        </ul>
+
+        <h2>3. Assumption of Risk</h2>
+        <p>Physical exercise carries inherent risks. By using ATAVIA, you acknowledge and accept that:</p>
+        <ul>
+            <li>Exercise involves risk of injury, including but not limited to muscle strains, sprains, fractures, joint injuries, and cardiovascular events</li>
+            <li>You are voluntarily participating in physical activities at your own risk</li>
+            <li>You are solely responsible for your health and safety during exercise</li>
+            <li>Results from exercise vary and are not guaranteed</li>
+            <li>You should use your own judgement regarding the suitability of any exercise</li>
+        </ul>
+
+        <div class="stop-box">
+            <h3>Stop Exercising Immediately If You Experience:</h3>
+            <ul>
+                <li>Chest pain or pressure</li>
+                <li>Difficulty breathing or shortness of breath</li>
+                <li>Dizziness, lightheadedness, or feeling faint</li>
+                <li>Nausea or vomiting</li>
+                <li>Sharp or sudden pain in any joint or muscle</li>
+                <li>Heart palpitations or irregular heartbeat</li>
+                <li>Extreme fatigue or exhaustion</li>
+                <li>Blurred vision or seeing spots</li>
+                <li>Loss of coordination or balance</li>
+                <li>Any other unusual symptoms</li>
+            </ul>
+            <p style="margin-top: 16px; margin-bottom: 0;"><strong>If you experience any of these symptoms, stop exercising immediately and seek medical attention.</strong></p>
+        </div>
+
+        <h2>4. Exercise Safely</h2>
+        <p>To reduce your risk of injury when using ATAVIA:</p>
+        <ul>
+            <li>Always warm up before and cool down after exercise</li>
+            <li>Use proper form and technique for all exercises</li>
+            <li>Start with lighter weights and progress gradually</li>
+            <li>Follow the stop rules provided in the App</li>
+            <li>Listen to your body and rest when needed</li>
+            <li>Stay hydrated before, during, and after exercise</li>
+            <li>Exercise in a safe environment with appropriate equipment</li>
+            <li>Do not exercise when ill, injured, or excessively fatigued</li>
+            <li>Seek instruction from a qualified fitness professional if unsure about any exercise</li>
+        </ul>
+
+        <h2>5. Readiness Assessments</h2>
+        <p>The daily readiness assessments in ATAVIA are designed to provide general guidance based on self-reported data. These assessments:</p>
+        <ul>
+            <li>Are not medical evaluations</li>
+            <li>Do not diagnose any health conditions</li>
+            <li>Are based solely on information you provide</li>
+            <li>Should be used as one factor in your decision to exercise, not the only factor</li>
+            <li>Do not replace your own judgement about your readiness to train</li>
+        </ul>
+        <p>Even if the App indicates you are "ready" to train, you should not exercise if you feel unwell, are injured, or have any concerns about your ability to exercise safely.</p>
+
+        <h2>6. Training Programmes</h2>
+        <p>The training programmes in ATAVIA are general fitness programmes designed for healthy adults. These programmes:</p>
+        <ul>
+            <li>Are not personalised to your individual health status or fitness level</li>
+            <li>May not be appropriate for everyone</li>
+            <li>Should be modified based on your individual needs and limitations</li>
+            <li>Are not supervised by fitness professionals</li>
+        </ul>
+        <p>You are responsible for selecting exercises and weights appropriate for your fitness level and any physical limitations you may have.</p>
+
+        <h2>7. Limitation of Liability</h2>
+        <p>To the maximum extent permitted by Australian law, Dravora and its officers, directors, employees, and agents shall not be liable for any:</p>
+        <ul>
+            <li>Personal injury, illness, or death</li>
+            <li>Property damage</li>
+            <li>Direct, indirect, incidental, consequential, or punitive damages</li>
+            <li>Loss of profits, data, or other intangible losses</li>
+        </ul>
+        <p>arising from or related to your use of ATAVIA or any exercise or activity performed in connection with the App.</p>
+
+        <h2>8. Indemnification</h2>
+        <p>You agree to indemnify and hold harmless Dravora and its officers, directors, employees, and agents from any claims, damages, losses, liabilities, costs, or expenses arising from:</p>
+        <ul>
+            <li>Your use of the App</li>
+            <li>Any exercise or physical activity you perform</li>
+            <li>Any injury or harm to yourself or others</li>
+            <li>Your failure to follow safety guidelines or seek appropriate medical advice</li>
+        </ul>
+
+        <h2>9. No Warranties</h2>
+        <p>ATAVIA is provided "as is" without any warranties, express or implied. We do not warrant that:</p>
+        <ul>
+            <li>The App will meet your specific needs or expectations</li>
+            <li>The App will be error-free or uninterrupted</li>
+            <li>The training programmes will produce specific results</li>
+            <li>The readiness assessments are accurate for your situation</li>
+        </ul>
+
+        <div class="acknowledgement-box">
+            <h3>By Using ATAVIA, You Acknowledge That:</h3>
+            <ol>
+                <li>You have read and understood this Health and Fitness Disclaimer</li>
+                <li>You have consulted (or will consult) a physician before beginning any exercise programme</li>
+                <li>You understand the risks associated with physical exercise</li>
+                <li>You voluntarily assume all risks of injury or illness</li>
+                <li>You are solely responsible for your health and safety</li>
+                <li>You release Dravora from any liability for injuries or damages</li>
+                <li>You will stop exercising immediately if you experience any warning signs</li>
+                <li>You will follow all safety guidelines and stop rules in the App</li>
+            </ol>
+        </div>
+
+        <div class="contact-box">
+            <h3>Questions?</h3>
+            <p>If you have questions about this disclaimer or the safety of any exercises in ATAVIA, please consult a qualified healthcare or fitness professional.</p>
+            <p>For general enquiries about the App:</p>
+            <p><strong>Dravora</strong><br>
+            ABN: 82 696 943 213<br>
+            Adelaide, South Australia<br>
+            Email: support@dravora.com</p>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="/atavia">Overview</a>
+            <a href="/atavia/privacy">Privacy</a>
+            <a href="/atavia/terms">Terms</a>
+            <a href="/atavia/disclaimer">Disclaimer</a>
+            <a href="/atavia/support">Support</a>
+        </div>
+        <div class="footer-info">
+            <strong>DRAVORA</strong><br>
+            ABN: 82 696 943 213 · Adelaide, South Australia
+        </div>
+        <div class="footer-copyright">
+            &copy; MMXXVI Dravora · 2026
+        </div>
+    </footer>
+</body>
+</html>

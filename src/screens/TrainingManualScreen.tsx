@@ -5,11 +5,23 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Linking,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../App";
 import { UNICODE } from "../constants/unicode";
 import { theme } from "../styles/theme";
+
+// ============================================================================
+// LEGAL LINKS
+// ============================================================================
+
+const LEGAL_LINKS = [
+  { title: "Privacy Policy", url: "https://dravora.com/atavia/privacy" },
+  { title: "Terms of Service", url: "https://dravora.com/atavia/terms" },
+  { title: "Health Disclaimer", url: "https://dravora.com/atavia/disclaimer" },
+  { title: "Support", url: "https://dravora.com/atavia/support" },
+];
 
 const PROGRESSION_RULES = [
   "Hit all prescribed sets/reps with clean technique and no stop-rule violations.",
@@ -116,6 +128,10 @@ interface Props {
 }
 
 export default function TrainingManualScreen({ navigation }: Props) {
+  const openLink = (url: string) => {
+    Linking.openURL(url);
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
@@ -139,6 +155,26 @@ export default function TrainingManualScreen({ navigation }: Props) {
             </View>
           </View>
         ))}
+
+        {/* Legal & Support Section */}
+        <View style={styles.legalSection}>
+          <Text style={styles.legalTitle}>Legal & Support</Text>
+          <Text style={styles.legalDescription}>
+            View our policies and get help with ATAVIA.
+          </Text>
+          <View style={styles.legalLinks}>
+            {LEGAL_LINKS.map((link) => (
+              <TouchableOpacity
+                key={link.title}
+                style={styles.legalLink}
+                onPress={() => openLink(link.url)}
+              >
+                <Text style={styles.legalLinkText}>{link.title}</Text>
+                <Text style={styles.legalLinkArrow}>{UNICODE.ARROW_RIGHT}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
 
         <View style={styles.callout}>
           <Text style={styles.calloutTitle}>Ready to Train?</Text>
@@ -242,5 +278,45 @@ const styles = StyleSheet.create({
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.text.primary,
     letterSpacing: theme.typography.letterSpacing.wide,
+  },
+  legalSection: {
+    backgroundColor: theme.colors.surface.base,
+    borderRadius: theme.borderRadius.md,
+    borderWidth: theme.borderWidth.hairline,
+    borderColor: theme.colors.border.subtle,
+    padding: theme.spacing[4],
+    marginBottom: theme.spacing[4],
+  },
+  legalTitle: {
+    fontSize: theme.typography.fontSize.lg,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.emphasis,
+    marginBottom: theme.spacing[2],
+  },
+  legalDescription: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+    marginBottom: theme.spacing[4],
+  },
+  legalLinks: {
+    gap: theme.spacing[2],
+  },
+  legalLink: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: theme.colors.surface.interactive,
+    paddingVertical: theme.spacing[3],
+    paddingHorizontal: theme.spacing[4],
+    borderRadius: theme.borderRadius.base,
+  },
+  legalLinkText: {
+    fontSize: theme.typography.fontSize.base,
+    color: theme.colors.accent.tertiary,
+    fontWeight: theme.typography.fontWeight.medium,
+  },
+  legalLinkArrow: {
+    fontSize: theme.typography.fontSize.base,
+    color: theme.colors.text.tertiary,
   },
 });

@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service | ATAVIA by Dravora</title>
+    <meta name="description" content="Terms of Service for ATAVIA training companion app by Dravora.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/Dravora.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Crimson Text', serif;
+            background: #F5F3EE;
+            color: #2B2B2B;
+            line-height: 1.7;
+        }
+
+        .nav {
+            background: rgba(245, 243, 238, 0.98);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(92, 26, 51, 0.15);
+            padding: 30px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .crest {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            text-decoration: none;
+        }
+
+        .crest-text {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .crest-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #2B2B2B;
+            line-height: 1;
+        }
+
+        .crest-subtitle {
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: #5C1A33;
+            text-transform: uppercase;
+        }
+
+        .logo-image {
+            display: block;
+            height: 60px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 45px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #2B2B2B;
+            font-weight: 600;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -6px;
+            width: 0;
+            height: 1px;
+            background: #5C1A33;
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #5C1A33;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 80px 40px;
+        }
+
+        .page-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 42px;
+            font-weight: 600;
+            color: #2B2B2B;
+            margin-bottom: 16px;
+        }
+
+        .last-updated {
+            font-size: 14px;
+            color: #5C1A33;
+            margin-bottom: 48px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 28px;
+            font-weight: 600;
+            color: #2B2B2B;
+            margin-top: 48px;
+            margin-bottom: 16px;
+        }
+
+        h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 22px;
+            font-weight: 600;
+            color: #3B3B3B;
+            margin-top: 32px;
+            margin-bottom: 12px;
+        }
+
+        p {
+            margin-bottom: 16px;
+            color: #3B3B3B;
+        }
+
+        ul, ol {
+            margin-bottom: 16px;
+            padding-left: 24px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            color: #3B3B3B;
+        }
+
+        .highlight-box {
+            background: rgba(92, 26, 51, 0.06);
+            border-left: 4px solid #5C1A33;
+            padding: 20px 24px;
+            margin: 32px 0;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .highlight-box p {
+            margin-bottom: 0;
+            font-weight: 600;
+        }
+
+        .warning-box {
+            background: rgba(155, 123, 74, 0.1);
+            border-left: 4px solid #9B7B4A;
+            padding: 20px 24px;
+            margin: 32px 0;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .warning-box p {
+            margin-bottom: 0;
+        }
+
+        .contact-box {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(92, 26, 51, 0.12);
+            border-radius: 16px;
+            padding: 32px;
+            margin-top: 48px;
+        }
+
+        .contact-box h3 {
+            margin-top: 0;
+        }
+
+        .footer {
+            background: rgba(27, 59, 42, 0.03);
+            border-top: 2px solid rgba(92, 26, 51, 0.15);
+            padding: 60px 40px 40px;
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            font-family: 'Crimson Text', serif;
+            color: #2B2B2B;
+            text-decoration: none;
+            font-size: 14px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .footer-links a:hover {
+            color: #5C1A33;
+        }
+
+        .footer-info {
+            font-size: 14px;
+            color: #2B2B2B;
+            margin-bottom: 20px;
+        }
+
+        .footer-copyright {
+            font-size: 12px;
+            color: #2B2B2B;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 900px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 18px;
+                padding: 0 30px;
+            }
+
+            .content {
+                padding: 60px 24px;
+            }
+
+            .page-title {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-container">
+            <a class="crest" href="/atavia">
+                <img src="../Dravora.png" alt="Dravora logo" class="logo-image">
+                <span class="crest-text">
+                    <span class="crest-name">Dravora</span>
+                    <span class="crest-subtitle">Atavia</span>
+                </span>
+            </a>
+            <div class="nav-links">
+                <a href="/atavia">Overview</a>
+                <a href="/atavia/privacy">Privacy</a>
+                <a href="/atavia/terms">Terms</a>
+                <a href="/atavia/support">Support</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="content">
+        <h1 class="page-title">Terms of Service</h1>
+        <p class="last-updated">Last Updated: February 2026</p>
+
+        <div class="highlight-box">
+            <p>By downloading, installing, or using ATAVIA, you agree to be bound by these Terms of Service. Please read them carefully.</p>
+        </div>
+
+        <h2>1. Agreement to Terms</h2>
+        <p>These Terms of Service ("Terms") constitute a legally binding agreement between you and Dravora (ABN 82 696 943 213) ("we," "us," or "our") regarding your use of the ATAVIA mobile application ("the App").</p>
+        <p>By accessing or using the App, you confirm that you:</p>
+        <ul>
+            <li>Are at least 16 years of age</li>
+            <li>Have read and understood these Terms</li>
+            <li>Agree to be bound by these Terms</li>
+            <li>Have the legal capacity to enter into this agreement</li>
+        </ul>
+
+        <h2>2. Description of Service</h2>
+        <p>ATAVIA is a training companion application that provides:</p>
+        <ul>
+            <li>Structured strength training programmes</li>
+            <li>Daily readiness assessments based on user-provided data</li>
+            <li>Exercise tracking and logging functionality</li>
+            <li>Training volume recommendations</li>
+            <li>Session history and performance tracking</li>
+        </ul>
+        <p>The App is designed as an informational and organisational tool for fitness enthusiasts. It is not a substitute for professional medical advice, diagnosis, or treatment.</p>
+
+        <h2>3. Health and Safety Disclaimer</h2>
+        <div class="warning-box">
+            <p><strong>Important:</strong> ATAVIA does not provide medical advice. The training programmes, readiness assessments, and recommendations are for informational purposes only. Always consult a qualified healthcare professional before beginning any exercise programme.</p>
+        </div>
+        <p>By using this App, you acknowledge and agree that:</p>
+        <ul>
+            <li>You are solely responsible for your health and safety during exercise</li>
+            <li>You will consult a physician before starting any new exercise programme</li>
+            <li>You will stop exercising immediately if you experience pain, dizziness, nausea, or discomfort</li>
+            <li>The App's recommendations are general guidance, not personalised medical advice</li>
+            <li>You assume all risks associated with physical exercise</li>
+        </ul>
+        <p>Please review our full <a href="/atavia/disclaimer">Health and Fitness Disclaimer</a> for complete details.</p>
+
+        <h2>4. User Responsibilities</h2>
+        <p>When using ATAVIA, you agree to:</p>
+        <ul>
+            <li>Provide accurate information in daily check-ins and session logs</li>
+            <li>Use the App only for its intended purpose of fitness tracking</li>
+            <li>Follow the stop rules and safety guidelines provided in the App</li>
+            <li>Not rely solely on the App for health or medical decisions</li>
+            <li>Keep your device secure to protect your data</li>
+            <li>Not attempt to reverse engineer, modify, or exploit the App</li>
+        </ul>
+
+        <h2>5. Intellectual Property</h2>
+        <p>All content within ATAVIA, including but not limited to:</p>
+        <ul>
+            <li>Training programmes and methodologies</li>
+            <li>Exercise descriptions and instructions</li>
+            <li>User interface design and graphics</li>
+            <li>Text, logos, and branding</li>
+            <li>Software code and functionality</li>
+        </ul>
+        <p>is the exclusive property of Dravora and is protected by Australian and international copyright, trademark, and intellectual property laws.</p>
+        <p>You may not copy, reproduce, distribute, modify, or create derivative works from any content in the App without our express written permission.</p>
+
+        <h2>6. Licence Grant</h2>
+        <p>Subject to your compliance with these Terms, we grant you a limited, non-exclusive, non-transferable, revocable licence to:</p>
+        <ul>
+            <li>Download and install the App on your personal mobile device</li>
+            <li>Use the App for your personal, non-commercial fitness tracking purposes</li>
+        </ul>
+        <p>This licence does not include the right to:</p>
+        <ul>
+            <li>Sublicence, sell, or distribute the App</li>
+            <li>Use the App for commercial purposes</li>
+            <li>Modify or create derivative works</li>
+            <li>Remove any proprietary notices from the App</li>
+        </ul>
+
+        <h2>7. Limitation of Liability</h2>
+        <p>To the maximum extent permitted by Australian law:</p>
+        <ul>
+            <li>The App is provided "as is" without warranties of any kind, express or implied</li>
+            <li>We do not warrant that the App will be error-free, uninterrupted, or free of harmful components</li>
+            <li>We disclaim all liability for any injuries, damages, or losses resulting from your use of the App</li>
+            <li>Our total liability to you for any claims arising from your use of the App shall not exceed the amount you paid for the App (if any)</li>
+        </ul>
+
+        <h2>8. Indemnification</h2>
+        <p>You agree to indemnify, defend, and hold harmless Dravora, its officers, directors, employees, and agents from any claims, damages, losses, liabilities, costs, or expenses (including reasonable legal fees) arising from:</p>
+        <ul>
+            <li>Your use of the App</li>
+            <li>Your violation of these Terms</li>
+            <li>Your violation of any rights of another party</li>
+            <li>Any injury or harm resulting from your exercise activities</li>
+        </ul>
+
+        <h2>9. Modifications to the App</h2>
+        <p>We reserve the right to:</p>
+        <ul>
+            <li>Modify, update, or discontinue the App at any time without notice</li>
+            <li>Add or remove features or functionality</li>
+            <li>Change training programmes or content</li>
+        </ul>
+        <p>We are not liable for any modification, suspension, or discontinuation of the App.</p>
+
+        <h2>10. Changes to Terms</h2>
+        <p>We may update these Terms from time to time. When we make changes:</p>
+        <ul>
+            <li>We will update the "Last Updated" date at the top of this page</li>
+            <li>Significant changes may be communicated through the App or website</li>
+            <li>Your continued use of the App after changes constitutes acceptance of the revised Terms</li>
+        </ul>
+        <p>If you do not agree to the revised Terms, you must stop using the App and uninstall it from your device.</p>
+
+        <h2>11. Termination</h2>
+        <p>You may terminate this agreement at any time by uninstalling the App from your device.</p>
+        <p>We may terminate or suspend your access to the App at any time, without notice, for conduct that we believe:</p>
+        <ul>
+            <li>Violates these Terms</li>
+            <li>Is harmful to other users or third parties</li>
+            <li>Is harmful to us or our business interests</li>
+        </ul>
+
+        <h2>12. Governing Law</h2>
+        <p>These Terms are governed by the laws of South Australia, Australia. Any disputes arising from these Terms or your use of the App shall be subject to the exclusive jurisdiction of the courts of South Australia.</p>
+
+        <h2>13. Australian Consumer Law</h2>
+        <p>Nothing in these Terms excludes, restricts, or modifies any consumer rights under the Australian Consumer Law that cannot be excluded, restricted, or modified by agreement. If the Australian Consumer Law applies to you, our liability is limited to the extent permitted by that law.</p>
+
+        <h2>14. Severability</h2>
+        <p>If any provision of these Terms is found to be invalid or unenforceable, the remaining provisions will continue in full force and effect.</p>
+
+        <h2>15. Entire Agreement</h2>
+        <p>These Terms, together with our <a href="/atavia/privacy">Privacy Policy</a> and <a href="/atavia/disclaimer">Health and Fitness Disclaimer</a>, constitute the entire agreement between you and Dravora regarding your use of the App.</p>
+
+        <div class="contact-box">
+            <h3>Contact Us</h3>
+            <p>If you have questions about these Terms of Service, please contact us:</p>
+            <p><strong>Dravora</strong><br>
+            ABN: 82 696 943 213<br>
+            Adelaide, South Australia<br>
+            Email: support@dravora.com</p>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="/atavia">Overview</a>
+            <a href="/atavia/privacy">Privacy</a>
+            <a href="/atavia/terms">Terms</a>
+            <a href="/atavia/disclaimer">Disclaimer</a>
+            <a href="/atavia/support">Support</a>
+        </div>
+        <div class="footer-info">
+            <strong>DRAVORA</strong><br>
+            ABN: 82 696 943 213 · Adelaide, South Australia
+        </div>
+        <div class="footer-copyright">
+            &copy; MMXXVI Dravora · 2026
+        </div>
+    </footer>
+</body>
+</html>

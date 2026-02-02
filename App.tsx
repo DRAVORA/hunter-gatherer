@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { initDatabase, checkDatabaseHealth } from "./src/database/init";
+import { initDatabase, checkDatabaseHealth, getDatabase } from "./src/database/init";
 
 // Import screens
+import DisclaimerScreen from "./src/screens/DisclaimerScreen";
 import ProgramSelectionScreen from "./src/screens/ProgramSelectionScreen";
 import HomeScreen from "./src/screens/HomeScreen";
 import DailyCheckInScreen from "./src/screens/DailyCheckInScreen";
@@ -19,6 +20,7 @@ import TrainingManualScreen from "./src/screens/TrainingManualScreen";
 // ============================================================================
 
 export type RootStackParamList = {
+  Disclaimer: undefined;
   ProgramSelection: undefined;
   Home: { programId?: string }; // Make optional
   TrainingManual: undefined;
@@ -49,6 +51,7 @@ const Stack = createStackNavigator<RootStackParamList>();
 export default function App() {
   const [isDbReady, setIsDbReady] = useState(false);
   const [dbError, setDbError] = useState<string | null>(null);
+  const [disclaimerAccepted, setDisclaimerAccepted] = useState<boolean | null>(null);
 
   useEffect(() => {
     initializeDatabase();
@@ -68,6 +71,15 @@ export default function App() {
         );
       }
 
+      // Check if disclaimer has been accepted
+      const db = getDatabase();
+      const result = await db.getFirstAsync<{ disclaimer_accepted: number }>(
+        "SELECT disclaimer_accepted FROM app_settings WHERE id = 'app_settings'"
+      );
+      const accepted = result?.disclaimer_accepted === 1;
+      console.log("[App] Disclaimer accepted:", accepted);
+      setDisclaimerAccepted(accepted);
+
       setIsDbReady(true);
       console.log("[App] Database ready");
     } catch (error) {
@@ -80,8 +92,18 @@ export default function App() {
   if (!isDbReady && !dbError) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#2196F3" />
-        <Text style={styles.loadingText}>Initializing database...</Text>
+        <ActivityIndicator size="large" color="#8B2635" />
+        <Text style={styles.loadingText}>Loading ATAVIA...</Text>
+      </View>
+    );
+  }
+
+  // Still checking disclaimer status
+  if (disclaimerAccepted === null && !dbError) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#8B2635" />
+        <Text style={styles.loadingText}>Loading ATAVIA...</Text>
       </View>
     );
   }
@@ -100,11 +122,14 @@ export default function App() {
     );
   }
 
+  // Determine initial route based on disclaimer acceptance
+  const initialRouteName = disclaimerAccepted ? "ProgramSelection" : "Disclaimer";
+
   // Main app navigation
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="ProgramSelection"
+        initialRouteName={initialRouteName}
         screenOptions={{
           headerStyle: {
             backgroundColor: "#2B2B2B",
@@ -116,6 +141,15 @@ export default function App() {
           headerBackTitle: "Back",
         }}
       >
+        <Stack.Screen
+          name="Disclaimer"
+          component={DisclaimerScreen}
+          options={{
+            title: "Health & Safety",
+            headerLeft: () => null, // No back button on disclaimer
+          }}
+        />
+
         <Stack.Screen
           name="ProgramSelection"
           component={ProgramSelectionScreen}

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy | ATAVIA by Dravora</title>
+    <meta name="description" content="Privacy Policy for ATAVIA training companion app by Dravora.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/Dravora.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Crimson Text', serif;
+            background: #F5F3EE;
+            color: #2B2B2B;
+            line-height: 1.7;
+        }
+
+        .nav {
+            background: rgba(245, 243, 238, 0.98);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(92, 26, 51, 0.15);
+            padding: 30px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .crest {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            text-decoration: none;
+        }
+
+        .crest-text {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .crest-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #2B2B2B;
+            line-height: 1;
+        }
+
+        .crest-subtitle {
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: #5C1A33;
+            text-transform: uppercase;
+        }
+
+        .logo-image {
+            display: block;
+            height: 60px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 45px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #2B2B2B;
+            font-weight: 600;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -6px;
+            width: 0;
+            height: 1px;
+            background: #5C1A33;
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #5C1A33;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 80px 40px;
+        }
+
+        .page-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 42px;
+            font-weight: 600;
+            color: #2B2B2B;
+            margin-bottom: 16px;
+        }
+
+        .last-updated {
+            font-size: 14px;
+            color: #5C1A33;
+            margin-bottom: 48px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 28px;
+            font-weight: 600;
+            color: #2B2B2B;
+            margin-top: 48px;
+            margin-bottom: 16px;
+        }
+
+        h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 22px;
+            font-weight: 600;
+            color: #3B3B3B;
+            margin-top: 32px;
+            margin-bottom: 12px;
+        }
+
+        p {
+            margin-bottom: 16px;
+            color: #3B3B3B;
+        }
+
+        ul {
+            margin-bottom: 16px;
+            padding-left: 24px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            color: #3B3B3B;
+        }
+
+        .highlight-box {
+            background: rgba(92, 26, 51, 0.06);
+            border-left: 4px solid #5C1A33;
+            padding: 20px 24px;
+            margin: 32px 0;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .highlight-box p {
+            margin-bottom: 0;
+            font-weight: 600;
+        }
+
+        .contact-box {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(92, 26, 51, 0.12);
+            border-radius: 16px;
+            padding: 32px;
+            margin-top: 48px;
+        }
+
+        .contact-box h3 {
+            margin-top: 0;
+        }
+
+        .footer {
+            background: rgba(27, 59, 42, 0.03);
+            border-top: 2px solid rgba(92, 26, 51, 0.15);
+            padding: 60px 40px 40px;
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            font-family: 'Crimson Text', serif;
+            color: #2B2B2B;
+            text-decoration: none;
+            font-size: 14px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .footer-links a:hover {
+            color: #5C1A33;
+        }
+
+        .footer-info {
+            font-size: 14px;
+            color: #2B2B2B;
+            margin-bottom: 20px;
+        }
+
+        .footer-copyright {
+            font-size: 12px;
+            color: #2B2B2B;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 900px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 18px;
+                padding: 0 30px;
+            }
+
+            .content {
+                padding: 60px 24px;
+            }
+
+            .page-title {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-container">
+            <a class="crest" href="/atavia">
+                <img src="../Dravora.png" alt="Dravora logo" class="logo-image">
+                <span class="crest-text">
+                    <span class="crest-name">Dravora</span>
+                    <span class="crest-subtitle">Atavia</span>
+                </span>
+            </a>
+            <div class="nav-links">
+                <a href="/atavia">Overview</a>
+                <a href="/atavia/privacy">Privacy</a>
+                <a href="/atavia/terms">Terms</a>
+                <a href="/atavia/support">Support</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="content">
+        <h1 class="page-title">Privacy Policy</h1>
+        <p class="last-updated">Last Updated: February 2026</p>
+
+        <div class="highlight-box">
+            <p>ATAVIA is designed with your privacy as a priority. All your data stays on your device. We do not collect, transmit, or store any of your personal information on external servers.</p>
+        </div>
+
+        <h2>1. Introduction</h2>
+        <p>This Privacy Policy explains how ATAVIA ("the App"), developed and operated by Dravora (ABN 82 696 943 213), handles information when you use our mobile application. We are committed to protecting your privacy and being transparent about our data practices.</p>
+        <p>By using ATAVIA, you agree to the practices described in this Privacy Policy. If you do not agree, please do not use the App.</p>
+
+        <h2>2. Information We Collect</h2>
+        <p>ATAVIA collects the following types of information to provide its training functionality:</p>
+
+        <h3>2.1 Health and Fitness Data</h3>
+        <ul>
+            <li>Sleep duration (hours per night)</li>
+            <li>Hydration status and water intake</li>
+            <li>Appetite status</li>
+            <li>Muscle soreness levels</li>
+            <li>Pain indicators and locations</li>
+            <li>Body weight (if provided)</li>
+        </ul>
+
+        <h3>2.2 Training Data</h3>
+        <ul>
+            <li>Exercise performance (sets, reps, weights, duration, distance)</li>
+            <li>Session duration and timing</li>
+            <li>Form quality indicators</li>
+            <li>Stop reasons and session notes</li>
+            <li>Programme selection and progression</li>
+        </ul>
+
+        <h3>2.3 Usage Data</h3>
+        <ul>
+            <li>Daily check-in responses</li>
+            <li>Readiness calculations</li>
+            <li>Session history</li>
+        </ul>
+
+        <h2>3. How Your Data is Stored</h2>
+        <div class="highlight-box">
+            <p>All data is stored locally on your device only. ATAVIA does not transmit any data to external servers.</p>
+        </div>
+        <p>Your information is stored in a local SQLite database on your device. This means:</p>
+        <ul>
+            <li>Your data never leaves your device</li>
+            <li>We cannot access your data</li>
+            <li>No cloud synchronisation occurs</li>
+            <li>No third parties receive your data</li>
+        </ul>
+
+        <h2>4. How We Use Your Information</h2>
+        <p>The data you enter into ATAVIA is used solely to:</p>
+        <ul>
+            <li>Calculate your daily training readiness</li>
+            <li>Adjust training volume based on recovery indicators</li>
+            <li>Track your exercise performance over time</li>
+            <li>Provide personalised session recommendations</li>
+            <li>Display your training history and progress</li>
+        </ul>
+        <p>We do not use your data for advertising, marketing, or any purpose other than providing the App's core functionality.</p>
+
+        <h2>5. Data Sharing</h2>
+        <p>ATAVIA does not share your data with anyone. Specifically:</p>
+        <ul>
+            <li>We do not sell your data</li>
+            <li>We do not share data with advertisers</li>
+            <li>We do not use third-party analytics services</li>
+            <li>We do not transmit data to any external servers</li>
+        </ul>
+
+        <h2>6. Data Retention and Deletion</h2>
+        <p>Your data remains on your device for as long as you use the App. To delete your data:</p>
+        <ul>
+            <li><strong>Delete all data:</strong> Uninstall the App from your device. This permanently removes all stored data.</li>
+            <li><strong>Fresh start:</strong> Reinstalling the App will create a new, empty database.</li>
+        </ul>
+        <p>Since we do not store your data externally, uninstalling the App is the complete and final deletion of all your information.</p>
+
+        <h2>7. Data Security</h2>
+        <p>Your data is protected by:</p>
+        <ul>
+            <li>Your device's built-in security features (passcode, Face ID, Touch ID)</li>
+            <li>The App's local-only storage architecture</li>
+            <li>No network transmission of personal data</li>
+        </ul>
+        <p>We recommend keeping your device's operating system updated and using a strong device passcode to protect your data.</p>
+
+        <h2>8. Children's Privacy</h2>
+        <p>ATAVIA is not intended for use by children under the age of 16. We do not knowingly collect data from children. If you believe a child has used the App, the data can be removed by uninstalling the App from the device.</p>
+
+        <h2>9. International Users</h2>
+        <p>ATAVIA is developed in Australia and complies with the Australian Privacy Act 1988. As all data is stored locally on your device, no international data transfers occur.</p>
+
+        <h2>10. Your Rights</h2>
+        <p>Under Australian privacy law and applicable international regulations, you have the right to:</p>
+        <ul>
+            <li><strong>Access:</strong> View all your data within the App (Session History, Training Manual)</li>
+            <li><strong>Correction:</strong> Your data reflects what you enter; future entries will reflect corrections</li>
+            <li><strong>Deletion:</strong> Remove all data by uninstalling the App</li>
+            <li><strong>Portability:</strong> Your data is stored locally and accessible on your device</li>
+        </ul>
+
+        <h2>11. Third-Party Services</h2>
+        <p>ATAVIA does not integrate with third-party services that collect personal data. The App does not include:</p>
+        <ul>
+            <li>Analytics or tracking software</li>
+            <li>Advertising networks</li>
+            <li>Social media integrations</li>
+            <li>Cloud storage services</li>
+        </ul>
+
+        <h2>12. Changes to This Policy</h2>
+        <p>We may update this Privacy Policy from time to time. When we make changes, we will update the "Last Updated" date at the top of this page. Continued use of the App after changes constitutes acceptance of the revised policy.</p>
+
+        <h2>13. App Store Privacy Labels</h2>
+        <p>In accordance with Apple App Store requirements, ATAVIA declares:</p>
+        <ul>
+            <li><strong>Data Not Linked to You:</strong> The data collected is not linked to your identity</li>
+            <li><strong>Data Not Used to Track You:</strong> We do not track you across apps or websites</li>
+        </ul>
+
+        <div class="contact-box">
+            <h3>Contact Us</h3>
+            <p>If you have questions about this Privacy Policy or our data practices, please contact us:</p>
+            <p><strong>Dravora</strong><br>
+            ABN: 82 696 943 213<br>
+            Adelaide, South Australia<br>
+            Email: support@dravora.com</p>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="/atavia">Overview</a>
+            <a href="/atavia/privacy">Privacy</a>
+            <a href="/atavia/terms">Terms</a>
+            <a href="/atavia/disclaimer">Disclaimer</a>
+            <a href="/atavia/support">Support</a>
+        </div>
+        <div class="footer-info">
+            <strong>DRAVORA</strong><br>
+            ABN: 82 696 943 213 · Adelaide, South Australia
+        </div>
+        <div class="footer-copyright">
+            &copy; MMXXVI Dravora · 2026
+        </div>
+    </footer>
+</body>
+</html>

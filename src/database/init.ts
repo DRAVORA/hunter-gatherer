@@ -80,6 +80,29 @@ function getInlineSchema(): string {
   // This is a copy of schema.sql as a string
   // In production, you'd use require() or import the .sql file
   return `
+    -- APP SETTINGS TABLE (includes disclaimer acceptance)
+    CREATE TABLE IF NOT EXISTS app_settings (
+      id TEXT PRIMARY KEY DEFAULT 'app_settings',
+      disclaimer_accepted INTEGER NOT NULL DEFAULT 0,
+      disclaimer_accepted_at TEXT,
+      disclaimer_version TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    -- Insert default app settings row if not exists
+    INSERT OR IGNORE INTO app_settings (id, disclaimer_accepted, created_at, updated_at)
+    VALUES ('app_settings', 0, datetime('now'), datetime('now'));
+
+    -- Trigger to update app_settings updated_at
+    CREATE TRIGGER IF NOT EXISTS trg_app_settings_updated_at
+    AFTER UPDATE ON app_settings
+    BEGIN
+      UPDATE app_settings
+      SET updated_at = datetime('now')
+      WHERE id = NEW.id;
+    END;
+
     -- USER PROFILE TABLE
     CREATE TABLE IF NOT EXISTS user_profile (
       id TEXT PRIMARY KEY,

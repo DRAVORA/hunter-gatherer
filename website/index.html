@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATAVIA | Training Companion</title>
+    <meta name="description" content="ATAVIA guides lifters through structured strength programs with readiness-driven volume, strict form expectations, and clear stop rules.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/Dravora.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Crimson Text', serif;
+            background: #F5F3EE;
+            color: #2B2B2B;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(43, 43, 43, 0.02) 1px, rgba(43, 43, 43, 0.02) 2px),
+                repeating-linear-gradient(90deg, transparent, transparent 1px, rgba(43, 43, 43, 0.02) 1px, rgba(43, 43, 43, 0.02) 2px);
+            opacity: 0.4;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(44, 59, 42, 0.03) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 2;
+        }
+
+        .nav {
+            background: rgba(245, 243, 238, 0.98);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(92, 26, 51, 0.15);
+            padding: 30px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .crest {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            text-decoration: none;
+        }
+
+        .crest-text {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .crest-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #2B2B2B;
+            line-height: 1;
+        }
+
+        .crest-subtitle {
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: #5C1A33;
+            text-transform: uppercase;
+        }
+
+        .logo-image {
+            display: block;
+            height: 60px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 45px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #2B2B2B;
+            font-weight: 600;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -6px;
+            width: 0;
+            height: 1px;
+            background: #5C1A33;
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #5C1A33;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .hero {
+            padding: 120px 60px 80px;
+            text-align: center;
+        }
+
+        .hero-inner {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid #5C1A33;
+            padding: 8px 18px;
+            border-radius: 999px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #5C1A33;
+            background: rgba(92, 26, 51, 0.03);
+            margin-bottom: 28px;
+        }
+
+        .hero-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 40px;
+            font-weight: 600;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: #5C1A33;
+            margin-bottom: 16px;
+        }
+
+        .hero h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 54px;
+            font-weight: 600;
+            color: #2B2B2B;
+            margin-bottom: 24px;
+        }
+
+        .hero p {
+            font-size: 20px;
+            line-height: 1.6;
+            color: #3B3B3B;
+        }
+
+        .cta-row {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 36px;
+            flex-wrap: wrap;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 14px 28px;
+            border-radius: 999px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-decoration: none;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .button.primary {
+            background: #5C1A33;
+            color: #F5F3EE;
+            box-shadow: 0 10px 25px rgba(92, 26, 51, 0.2);
+        }
+
+        .button.secondary {
+            border: 1px solid #5C1A33;
+            color: #5C1A33;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+        }
+
+        .section {
+            padding: 80px 60px;
+        }
+
+        .section-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 38px;
+            color: #2B2B2B;
+            margin-bottom: 16px;
+        }
+
+        .section-subtitle {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #3B3B3B;
+            margin-bottom: 32px;
+        }
+
+        .grid {
+            display: grid;
+            gap: 28px;
+        }
+
+        .grid.two {
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(92, 26, 51, 0.12);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 12px 24px rgba(92, 26, 51, 0.08);
+        }
+
+        .card h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 26px;
+            color: #2B2B2B;
+            margin-bottom: 12px;
+        }
+
+        .card p {
+            color: #3B3B3B;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .card ul {
+            list-style: none;
+            display: grid;
+            gap: 10px;
+        }
+
+        .card li {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            color: #2B2B2B;
+        }
+
+        .card li::before {
+            content: '◆';
+            color: #5C1A33;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .readiness {
+            background: rgba(92, 26, 51, 0.06);
+            border-radius: 24px;
+            padding: 36px;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .status {
+            padding: 20px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(92, 26, 51, 0.12);
+        }
+
+        .status strong {
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-size: 12px;
+            margin-bottom: 8px;
+            color: #5C1A33;
+        }
+
+        .flow {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .flow-step {
+            padding: 24px;
+            border-radius: 20px;
+            border: 1px dashed rgba(92, 26, 51, 0.3);
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .flow-step h3 {
+            color: #2B2B2B;
+        }
+
+        .flow-step span {
+            font-size: 12px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #5C1A33;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .footer {
+            background: rgba(27, 59, 42, 0.03);
+            border-top: 2px solid rgba(92, 26, 51, 0.15);
+            padding: 80px 60px 50px;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            font-family: 'Crimson Text', serif;
+            color: #2B2B2B;
+            text-decoration: none;
+            font-size: 15px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: color 0.3s;
+            font-weight: 600;
+        }
+
+        .footer-links a:hover {
+            color: #5C1A33;
+        }
+
+        .footer-legal {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .footer-legal a {
+            font-family: 'Crimson Text', serif;
+            color: #5C1A33;
+            text-decoration: none;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            transition: color 0.3s;
+        }
+
+        .footer-legal a:hover {
+            color: #2B2B2B;
+        }
+
+        .footer-info {
+            font-family: 'Crimson Text', serif;
+            color: #2B2B2B;
+            font-size: 15px;
+            line-height: 2;
+            margin-bottom: 40px;
+        }
+
+        .footer-copyright {
+            font-family: 'Crimson Text', serif;
+            color: #2B2B2B;
+            font-size: 13px;
+            padding-top: 40px;
+            border-top: 1px solid rgba(92, 26, 51, 0.15);
+            opacity: 0.7;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 900px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 18px;
+                padding: 0 30px;
+            }
+
+            .hero {
+                padding: 100px 30px 60px;
+            }
+
+            .hero h1 {
+                font-size: 40px;
+            }
+
+            .section {
+                padding: 70px 30px;
+            }
+
+            .footer {
+                padding: 60px 30px 40px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 {
+                font-size: 34px;
+            }
+
+            .hero-title {
+                font-size: 28px;
+            }
+
+            .section-title {
+                font-size: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="content-wrapper">
+        <nav class="nav">
+            <div class="nav-container">
+                <a class="crest" href="/">
+                    <img src="../Dravora.png" alt="Dravora logo" class="logo-image">
+                    <span class="crest-text">
+                        <span class="crest-name">Dravora</span>
+                        <span class="crest-subtitle">Atavia</span>
+                    </span>
+                </a>
+                <div class="nav-links">
+                    <a href="#approach">Approach</a>
+                    <a href="#tracks">Tracks</a>
+                    <a href="#readiness">Readiness</a>
+                    <a href="/">Dravora</a>
+                </div>
+            </div>
+        </nav>
+
+        <header class="hero">
+            <div class="hero-inner">
+                <div class="hero-badge">Training Companion</div>
+                <div class="hero-title">ATAVIA</div>
+                <h1>Strength programmes built on discipline, readiness, and precise execution.</h1>
+                <p>
+                    ATAVIA guides athletes through structured strength programmes — from programme selection to daily
+                    readiness check-ins, session execution, and post-session logging. Every session reinforces
+                    quality movement, injury prevention, and gradual progression through clear stop rules.
+                </p>
+                <div class="cta-row">
+                    <a class="button primary" href="mailto:support@dravora.com?subject=ATAVIA%20Waitlist">Join the waitlist</a>
+                    <a class="button secondary" href="#tracks">View training tracks</a>
+                </div>
+            </div>
+        </header>
+
+        <section class="section" id="approach">
+            <div class="section-inner">
+                <h2 class="section-title">A deliberate training flow.</h2>
+                <p class="section-subtitle">
+                    ATAVIA keeps athletes consistent without overreaching by combining strict form standards
+                    with programme structure that adapts to readiness.
+                </p>
+                <div class="flow">
+                    <div class="flow-step">
+                        <span>Step 01</span>
+                        <h3>Programme selection</h3>
+                        <p>Choose a structured plan with defined frequency, duration, and equipment expectations.</p>
+                    </div>
+                    <div class="flow-step">
+                        <span>Step 02</span>
+                        <h3>Daily readiness</h3>
+                        <p>Complete a short check-in that sets the day's volume guidance.</p>
+                    </div>
+                    <div class="flow-step">
+                        <span>Step 03</span>
+                        <h3>Session execution</h3>
+                        <p>Train with clear stop rules and strict form expectations on every set.</p>
+                    </div>
+                    <div class="flow-step">
+                        <span>Step 04</span>
+                        <h3>Post-session log</h3>
+                        <p>Capture performance notes to reinforce progression and durability.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="tracks">
+            <div class="section-inner">
+                <h2 class="section-title">Two distinct training tracks.</h2>
+                <p class="section-subtitle">
+                    Gym and no-gym athletes follow the same training philosophy while choosing the environment
+                    that fits their equipment and schedule.
+                </p>
+                <div class="grid two">
+                    <div class="card">
+                        <h3>Gym Track</h3>
+                        <p>Built for lifters with full equipment access and longer session windows.</p>
+                        <ul>
+                            <li>Defined training frequency and duration</li>
+                            <li>Barbell and machine emphasis</li>
+                            <li>Progressive loading checkpoints</li>
+                            <li>Accessory work for balance and joint health</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>No-Gym Track</h3>
+                        <p>Structured strength sessions for minimal-equipment environments.</p>
+                        <ul>
+                            <li>Bodyweight and compact equipment focus</li>
+                            <li>Short, repeatable session formats</li>
+                            <li>Strength endurance and control</li>
+                            <li>Travel-ready progressions</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="readiness">
+            <div class="section-inner readiness">
+                <h2 class="section-title">Readiness-driven volume adjustment.</h2>
+                <p class="section-subtitle">
+                    Daily check-ins inform the day's training dose, balancing progress with recovery.
+                    Athletes stay consistent without overreaching.
+                </p>
+                <div class="status-grid">
+                    <div class="status">
+                        <strong>Green readiness</strong>
+                        <p>Full volume and intensity. Push planned progressions.</p>
+                    </div>
+                    <div class="status">
+                        <strong>Amber readiness</strong>
+                        <p>Moderate volume with adjusted sets to protect recovery.</p>
+                    </div>
+                    <div class="status">
+                        <strong>Red readiness</strong>
+                        <p>Reduced volume and strict stop rules to maintain form integrity.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-inner">
+                <div class="grid two">
+                    <div class="card">
+                        <h3>Quality movement first.</h3>
+                        <p>
+                            ATAVIA enforces strict form expectations and injury-prevention cues so every rep
+                            reinforces durable strength.
+                        </p>
+                        <ul>
+                            <li>Clear stop rules for each exercise</li>
+                            <li>Execution cues built into every session</li>
+                            <li>Consistency over maximal strain</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>Progression without burnout.</h3>
+                        <p>
+                            Sustainable strength development comes from steady, readiness-driven increases — not
+                            constant max effort.
+                        </p>
+                        <ul>
+                            <li>Built-in deload guidance</li>
+                            <li>Form-first progression checks</li>
+                            <li>Long-term durability focus</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-main">
+                    <div class="footer-links">
+                        <a href="/atavia">Overview</a>
+                        <a href="#approach">Approach</a>
+                        <a href="#tracks">Tracks</a>
+                        <a href="#readiness">Readiness</a>
+                        <a href="/">Dravora</a>
+                    </div>
+
+                    <div class="footer-legal">
+                        <a href="/atavia/privacy">Privacy Policy</a>
+                        <a href="/atavia/terms">Terms of Service</a>
+                        <a href="/atavia/disclaimer">Health Disclaimer</a>
+                        <a href="/atavia/support">Support</a>
+                    </div>
+
+                    <div class="footer-info">
+                        <strong>DRAVORA</strong><br>
+                        Australian Business Number: 82 696 943 213<br>
+                        Adelaide, South Australia
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <div class="footer-copyright">
+                        &copy; MMXXVI Dravora · 2026
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support | ATAVIA by Dravora</title>
+    <meta name="description" content="Get help and support for ATAVIA training companion app by Dravora.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/Dravora.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Crimson Text', serif;
+            background: #F5F3EE;
+            color: #2B2B2B;
+            line-height: 1.7;
+        }
+
+        .nav {
+            background: rgba(245, 243, 238, 0.98);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(92, 26, 51, 0.15);
+            padding: 30px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .crest {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            text-decoration: none;
+        }
+
+        .crest-text {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .crest-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #2B2B2B;
+            line-height: 1;
+        }
+
+        .crest-subtitle {
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: #5C1A33;
+            text-transform: uppercase;
+        }
+
+        .logo-image {
+            display: block;
+            height: 60px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 45px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #2B2B2B;
+            font-weight: 600;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -6px;
+            width: 0;
+            height: 1px;
+            background: #5C1A33;
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #5C1A33;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 80px 40px;
+        }
+
+        .page-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 42px;
+            font-weight: 600;
+            color: #2B2B2B;
+            margin-bottom: 16px;
+        }
+
+        .page-subtitle {
+            font-size: 18px;
+            color: #3B3B3B;
+            margin-bottom: 48px;
+        }
+
+        h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 28px;
+            font-weight: 600;
+            color: #2B2B2B;
+            margin-top: 48px;
+            margin-bottom: 24px;
+        }
+
+        h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 22px;
+            font-weight: 600;
+            color: #3B3B3B;
+            margin-top: 32px;
+            margin-bottom: 12px;
+        }
+
+        p {
+            margin-bottom: 16px;
+            color: #3B3B3B;
+        }
+
+        ul {
+            margin-bottom: 16px;
+            padding-left: 24px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            color: #3B3B3B;
+        }
+
+        .contact-card {
+            background: rgba(92, 26, 51, 0.06);
+            border: 1px solid rgba(92, 26, 51, 0.15);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 48px;
+            text-align: center;
+        }
+
+        .contact-card h2 {
+            margin-top: 0;
+            margin-bottom: 16px;
+        }
+
+        .contact-card p {
+            margin-bottom: 24px;
+        }
+
+        .contact-email {
+            display: inline-block;
+            background: #5C1A33;
+            color: #F5F3EE;
+            padding: 14px 32px;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 18px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .contact-email:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(92, 26, 51, 0.3);
+        }
+
+        .faq-section {
+            margin-top: 48px;
+        }
+
+        .faq-item {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(92, 26, 51, 0.12);
+            border-radius: 16px;
+            padding: 24px 28px;
+            margin-bottom: 16px;
+        }
+
+        .faq-question {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 20px;
+            font-weight: 600;
+            color: #2B2B2B;
+            margin-bottom: 12px;
+        }
+
+        .faq-answer {
+            color: #3B3B3B;
+            margin-bottom: 0;
+        }
+
+        .faq-answer ul {
+            margin-top: 12px;
+            margin-bottom: 0;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(92, 26, 51, 0.12);
+            border-radius: 16px;
+            padding: 28px;
+        }
+
+        .info-card h3 {
+            margin-top: 0;
+            color: #5C1A33;
+        }
+
+        .info-card p {
+            margin-bottom: 0;
+        }
+
+        .highlight-box {
+            background: rgba(92, 26, 51, 0.06);
+            border-left: 4px solid #5C1A33;
+            padding: 20px 24px;
+            margin: 32px 0;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .highlight-box p {
+            margin-bottom: 0;
+        }
+
+        .footer {
+            background: rgba(27, 59, 42, 0.03);
+            border-top: 2px solid rgba(92, 26, 51, 0.15);
+            padding: 60px 40px 40px;
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            font-family: 'Crimson Text', serif;
+            color: #2B2B2B;
+            text-decoration: none;
+            font-size: 14px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .footer-links a:hover {
+            color: #5C1A33;
+        }
+
+        .footer-info {
+            font-size: 14px;
+            color: #2B2B2B;
+            margin-bottom: 20px;
+        }
+
+        .footer-copyright {
+            font-size: 12px;
+            color: #2B2B2B;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 900px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 18px;
+                padding: 0 30px;
+            }
+
+            .content {
+                padding: 60px 24px;
+            }
+
+            .page-title {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-container">
+            <a class="crest" href="/atavia">
+                <img src="../Dravora.png" alt="Dravora logo" class="logo-image">
+                <span class="crest-text">
+                    <span class="crest-name">Dravora</span>
+                    <span class="crest-subtitle">Atavia</span>
+                </span>
+            </a>
+            <div class="nav-links">
+                <a href="/atavia">Overview</a>
+                <a href="/atavia/privacy">Privacy</a>
+                <a href="/atavia/terms">Terms</a>
+                <a href="/atavia/support">Support</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="content">
+        <h1 class="page-title">Support</h1>
+        <p class="page-subtitle">Need help with ATAVIA? Find answers below or get in touch with us.</p>
+
+        <div class="contact-card">
+            <h2>Contact Us</h2>
+            <p>Have a question, feedback, or need assistance? We're here to help.</p>
+            <a href="mailto:support@dravora.com" class="contact-email">support@dravora.com</a>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-card">
+                <h3>Response Time</h3>
+                <p>We aim to respond to all support enquiries within 48 hours during business days.</p>
+            </div>
+            <div class="info-card">
+                <h3>Business Hours</h3>
+                <p>Monday – Friday<br>9:00 AM – 5:00 PM ACST<br>Adelaide, South Australia</p>
+            </div>
+        </div>
+
+        <section class="faq-section">
+            <h2>Frequently Asked Questions</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">How do I delete all my data?</div>
+                <p class="faq-answer">All your data is stored locally on your device. To delete all data, simply uninstall the ATAVIA app from your device. Reinstalling the app will start you with a fresh, empty database. Since we don't store any data externally, uninstalling completely removes all your information.</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Can I transfer my data to a new device?</div>
+                <p class="faq-answer">Currently, ATAVIA stores data locally on your device and does not include cloud sync or data export features. If you switch devices, you will need to start fresh. We may add data export functionality in a future update.</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">What does my readiness status mean?</div>
+                <p class="faq-answer">Your readiness status is calculated based on your daily check-in responses:
+                    <ul>
+                        <li><strong>Ready:</strong> Train at full volume with planned progressions.</li>
+                        <li><strong>Volume Reduced:</strong> Train but reduce total volume by the percentage shown.</li>
+                        <li><strong>No Progression:</strong> Complete the session but don't increase weights.</li>
+                        <li><strong>Rest Day:</strong> Skip training and focus on recovery.</li>
+                    </ul>
+                </p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Why can't I go back during a training session?</div>
+                <p class="faq-answer">The back button is disabled during exercise execution for safety reasons. This prevents accidental navigation that could cause you to lose your session data or disrupt your training flow. Complete your session or use the provided controls to finish early if needed.</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">How do I change my training programme?</div>
+                <p class="faq-answer">You can select a different programme from the Programme Selection screen. Your historical data from previous programmes is preserved and can be viewed in Session History.</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">What are stop rules?</div>
+                <p class="faq-answer">Stop rules are safety guidelines that indicate when you should end a set or exercise. Common stop rules include sharp pain, technique breakdown, dizziness, nausea, or loss of control. Following stop rules helps prevent injury and ensures quality training.</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Is my data secure?</div>
+                <p class="faq-answer">Yes. All your data is stored locally on your device and is never transmitted to external servers. Your data is protected by your device's security features (passcode, Face ID, Touch ID). We do not collect, store, or have access to any of your personal information.</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">The app crashed or isn't working properly. What should I do?</div>
+                <p class="faq-answer">Try these steps:
+                    <ul>
+                        <li>Force close the app and reopen it</li>
+                        <li>Restart your device</li>
+                        <li>Ensure your device has the latest operating system updates</li>
+                        <li>Ensure you have the latest version of ATAVIA from the App Store</li>
+                    </ul>
+                    If the problem persists, please contact us at support@dravora.com with details about what happened, your device model, and iOS version.
+                </p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Can I request a feature or improvement?</div>
+                <p class="faq-answer">We'd love to hear from you. Send your feature requests and suggestions to support@dravora.com. While we can't implement every request, we review all feedback and use it to guide future development.</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Is ATAVIA available on Android?</div>
+                <p class="faq-answer">ATAVIA is currently available for iOS devices. Android availability may be considered in the future based on demand.</p>
+            </div>
+        </section>
+
+        <h2>Before You Train</h2>
+        <div class="highlight-box">
+            <p><strong>Important:</strong> ATAVIA is a training companion, not a medical advisor. Please consult a qualified healthcare professional before beginning any exercise programme. Read our full <a href="/atavia/disclaimer">Health and Fitness Disclaimer</a> for important safety information.</p>
+        </div>
+
+        <h2>Report a Problem</h2>
+        <p>If you encounter a bug, error, or unexpected behaviour in the app, please email us at <a href="mailto:support@dravora.com">support@dravora.com</a> with:</p>
+        <ul>
+            <li>A description of what happened</li>
+            <li>Steps to reproduce the issue (if possible)</li>
+            <li>Your device model (e.g., iPhone 14 Pro)</li>
+            <li>Your iOS version (e.g., iOS 17.2)</li>
+            <li>The ATAVIA app version (found in the App Store)</li>
+            <li>Screenshots or screen recordings (if applicable)</li>
+        </ul>
+        <p>This information helps us identify and fix issues more quickly.</p>
+
+        <h2>Legal Information</h2>
+        <p>For information about how we handle your data and the terms of using ATAVIA, please review:</p>
+        <ul>
+            <li><a href="/atavia/privacy">Privacy Policy</a></li>
+            <li><a href="/atavia/terms">Terms of Service</a></li>
+            <li><a href="/atavia/disclaimer">Health and Fitness Disclaimer</a></li>
+        </ul>
+
+        <div class="info-card" style="margin-top: 48px;">
+            <h3>About Dravora</h3>
+            <p><strong>Dravora</strong><br>
+            ABN: 82 696 943 213<br>
+            Adelaide, South Australia<br>
+            <a href="mailto:support@dravora.com">support@dravora.com</a></p>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="/atavia">Overview</a>
+            <a href="/atavia/privacy">Privacy</a>
+            <a href="/atavia/terms">Terms</a>
+            <a href="/atavia/disclaimer">Disclaimer</a>
+            <a href="/atavia/support">Support</a>
+        </div>
+        <div class="footer-info">
+            <strong>DRAVORA</strong><br>
+            ABN: 82 696 943 213 · Adelaide, South Australia
+        </div>
+        <div class="footer-copyright">
+            &copy; MMXXVI Dravora · 2026
+        </div>
+    </footer>
+</body>
+</html>
