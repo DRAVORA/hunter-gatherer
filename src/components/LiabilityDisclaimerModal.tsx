@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
+  Linking,
 } from "react-native";
 
 type LiabilityDisclaimerModalProps = {
@@ -43,6 +44,27 @@ export default function LiabilityDisclaimerModal({
               To the fullest extent permitted by law, the creators and owners of
               this app are not liable for any injury, loss, or damages arising
               from your use of the app or reliance on its content.
+            </Text>
+            <Text style={styles.paragraph}>
+              Review the{" "}
+              <Text
+                style={styles.link}
+                onPress={() =>
+                  Linking.openURL("https://dravora.com.au/atavia/terms.html")
+                }
+              >
+                Terms of Service
+              </Text>{" "}
+              and{" "}
+              <Text
+                style={styles.link}
+                onPress={() =>
+                  Linking.openURL("https://dravora.com.au/atavia/privacy.html")
+                }
+              >
+                Privacy Policy
+              </Text>
+              .
             </Text>
             <Text style={styles.paragraph}>
               If you do not agree, please close the app now.
@@ -91,6 +113,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     color: "#3B3B3B",
+  },
+  link: {
+    color: "#1E1E1E",
+    fontWeight: "600",
+    textDecorationLine: "underline",
   },
   acceptButton: {
     marginTop: 12,
