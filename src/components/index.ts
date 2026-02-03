@@ -11,3 +11,4 @@ export { default as DurationTimer } from "./DurationTimer";
 export { default as ConfirmationDialog } from "./ConfirmationDialog";
 export { default as ReadinessIndicator } from "./ReadinessIndicator";
 export { default as HydrationTracker } from "./HydrationTracker";
+export { default as LiabilityDisclaimerModal } from "./LiabilityDisclaimerModal";

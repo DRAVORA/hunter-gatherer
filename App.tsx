@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { initDatabase, checkDatabaseHealth } from "./src/database/init";
+import LiabilityDisclaimerModal from "./src/components/LiabilityDisclaimerModal";
 
 // Import screens
 import ProgramSelectionScreen from "./src/screens/ProgramSelectionScreen";
@@ -49,9 +51,18 @@ const Stack = createStackNavigator<RootStackParamList>();
 export default function App() {
   const [isDbReady, setIsDbReady] = useState(false);
   const [dbError, setDbError] = useState<string | null>(null);
+  const [isDisclaimerAccepted, setIsDisclaimerAccepted] = useState<
+    boolean | null
+  >(null);
+
+  const disclaimerStorageKey = "liability_disclaimer_accepted";
 
   useEffect(() => {
     initializeDatabase();
+  }, []);
+
+  useEffect(() => {
+    loadDisclaimerAcceptance();
   }, []);
 
   async function initializeDatabase() {
@@ -73,6 +84,25 @@ export default function App() {
     } catch (error) {
       console.error("[App] Database initialization failed:", error);
       setDbError(String(error));
+    }
+  }
+
+  async function loadDisclaimerAcceptance() {
+    try {
+      const storedValue = await AsyncStorage.getItem(disclaimerStorageKey);
+      setIsDisclaimerAccepted(storedValue === "accepted");
+    } catch (error) {
+      console.error("[App] Disclaimer load failed:", error);
+      setIsDisclaimerAccepted(false);
+    }
+  }
+
+  async function acceptDisclaimer() {
+    try {
+      await AsyncStorage.setItem(disclaimerStorageKey, "accepted");
+      setIsDisclaimerAccepted(true);
+    } catch (error) {
+      console.error("[App] Disclaimer save failed:", error);
     }
   }
 
@@ -102,88 +132,94 @@ export default function App() {
 
   // Main app navigation
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName="ProgramSelection"
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: "#2B2B2B",
-          },
-          headerTintColor: "#FFF",
-          headerTitleStyle: {
-            fontWeight: "bold",
-          },
-          headerBackTitle: "Back",
-        }}
-      >
-        <Stack.Screen
-          name="ProgramSelection"
-          component={ProgramSelectionScreen}
-          options={{
-            title: "Select Program",
-            headerLeft: () => null, // No back button on program selection
+    <>
+      <NavigationContainer>
+        <Stack.Navigator
+          initialRouteName="ProgramSelection"
+          screenOptions={{
+            headerStyle: {
+              backgroundColor: "#2B2B2B",
+            },
+            headerTintColor: "#FFF",
+            headerTitleStyle: {
+              fontWeight: "bold",
+            },
+            headerBackTitle: "Back",
           }}
-        />
+        >
+          <Stack.Screen
+            name="ProgramSelection"
+            component={ProgramSelectionScreen}
+            options={{
+              title: "Select Program",
+              headerLeft: () => null, // No back button on program selection
+            }}
+          />
 
-        <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{
-            title: "ATAVIA",
-          }}
-        />
+          <Stack.Screen
+            name="Home"
+            component={HomeScreen}
+            options={{
+              title: "ATAVIA",
+            }}
+          />
 
-        <Stack.Screen
-          name="TrainingManual"
-          component={TrainingManualScreen}
-          options={{
-            title: "Training Manual",
-          }}
-        />
+          <Stack.Screen
+            name="TrainingManual"
+            component={TrainingManualScreen}
+            options={{
+              title: "Training Manual",
+            }}
+          />
 
-        <Stack.Screen
-          name="DailyCheckIn"
-          component={DailyCheckInScreen}
-          options={{
-            title: "Daily Check-In",
-          }}
-        />
+          <Stack.Screen
+            name="DailyCheckIn"
+            component={DailyCheckInScreen}
+            options={{
+              title: "Daily Check-In",
+            }}
+          />
 
-        <Stack.Screen
-          name="SessionReadiness"
-          component={SessionReadinessScreen}
-          options={{
-            title: "Session Readiness",
-          }}
-        />
+          <Stack.Screen
+            name="SessionReadiness"
+            component={SessionReadinessScreen}
+            options={{
+              title: "Session Readiness",
+            }}
+          />
 
-        <Stack.Screen
-          name="ExerciseExecution"
-          component={ExerciseExecutionScreen}
-          options={{
-            title: "Training Session",
-            headerLeft: () => null, // Prevent back navigation during session
-          }}
-        />
+          <Stack.Screen
+            name="ExerciseExecution"
+            component={ExerciseExecutionScreen}
+            options={{
+              title: "Training Session",
+              headerLeft: () => null, // Prevent back navigation during session
+            }}
+          />
 
-        <Stack.Screen
-          name="PostSession"
-          component={PostSessionScreen}
-          options={{
-            title: "Session Complete",
-            headerLeft: () => null, // No back button on post-session
-          }}
-        />
+          <Stack.Screen
+            name="PostSession"
+            component={PostSessionScreen}
+            options={{
+              title: "Session Complete",
+              headerLeft: () => null, // No back button on post-session
+            }}
+          />
 
-        <Stack.Screen
-          name="SessionHistory"
-          component={SessionHistoryScreen}
-          options={{
-            title: "Session History",
-          }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+          <Stack.Screen
+            name="SessionHistory"
+            component={SessionHistoryScreen}
+            options={{
+              title: "Session History",
+            }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+      <LiabilityDisclaimerModal
+        visible={isDisclaimerAccepted === false}
+        onAccept={acceptDisclaimer}
+      />
+    </>
   );
 }
 
