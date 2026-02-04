@@ -282,10 +282,6 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
     setShowRestTimer(false);
   }
 
-  function handleSkipRest() {
-    setShowRestTimer(false);
-  }
-
   async function handleSessionComplete() {
     try {
       const db = getDatabase();
@@ -308,6 +304,8 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
       </View>
     );
   }
+
+  const performCues = exerciseRules.perform ?? exerciseRules.executionFocus;
 
   // Determine target display
   const targetDisplay = currentExercise.targetReps !== undefined
@@ -409,6 +407,15 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
         {/* Execution Focus (Always Visible) */}
         {!showSetupCues && !showRestTimer && (
           <>
+            <View style={styles.performSection}>
+              <Text style={styles.performTitle}>PERFORM</Text>
+              {performCues.map((cue, index) => (
+                <Text key={index} style={styles.cueText}>
+                  {UNICODE.BULLET} {cue}
+                </Text>
+              ))}
+            </View>
+
             <View style={styles.focusSection}>
               <Text style={styles.focusTitle}>FOCUS ON</Text>
               {exerciseRules.executionFocus.map((cue, index) => (
@@ -526,7 +533,6 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
             <RestTimer
               targetSeconds={currentExercise.restTimeSeconds}
               onComplete={handleRestComplete}
-              onSkip={handleSkipRest}
             />
           </View>
         )}
@@ -635,6 +641,21 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing[4],
   },
   focusTitle: {
+    fontSize: theme.typography.fontSize.sm,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.emphasis,
+    marginBottom: theme.spacing[3],
+    letterSpacing: theme.typography.letterSpacing.wider,
+  },
+  performSection: {
+    backgroundColor: theme.colors.surface.base,
+    padding: theme.spacing[4],
+    borderRadius: theme.borderRadius.md,
+    borderWidth: theme.borderWidth.hairline,
+    borderColor: theme.colors.border.subtle,
+    marginBottom: theme.spacing[4],
+  },
+  performTitle: {
     fontSize: theme.typography.fontSize.sm,
     fontWeight: theme.typography.fontWeight.semibold,
     color: theme.colors.text.emphasis,

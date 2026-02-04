@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { View, Text, StyleSheet, Alert } from "react-native";
 import { formatRestTime } from "../utils/formatting";
 import { theme } from "../styles/theme";
 
@@ -15,17 +15,20 @@ import { theme } from "../styles/theme";
 interface RestTimerProps {
   targetSeconds: number;
   onComplete: (actualSeconds: number) => void;
-  onSkip: () => void;
 }
 
 export default function RestTimer({
   targetSeconds,
   onComplete,
-  onSkip,
 }: RestTimerProps) {
-  const [isRunning, setIsRunning] = useState(false);
+  const [isRunning, setIsRunning] = useState(true);
   const [remainingSeconds, setRemainingSeconds] = useState(targetSeconds);
   const [hasCompleted, setHasCompleted] = useState(false);
+
+  useEffect(() => {
+    setRemainingSeconds(targetSeconds);
+    setIsRunning(true);
+  }, [targetSeconds]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -53,63 +56,16 @@ export default function RestTimer({
     if (hasCompleted) {
       setHasCompleted(false);
       onComplete(targetSeconds);
-      Alert.alert("Rest Complete", "Time to start your next set", [
-        { text: "OK", onPress: () => onSkip() },
-      ]);
+      Alert.alert("Rest Complete", "Time to start your next set.");
     }
-  }, [hasCompleted, targetSeconds, onComplete, onSkip]);
-
-  const handleStart = () => {
-    setIsRunning(true);
-  };
-
-  const handlePause = () => {
-    setIsRunning(false);
-  };
-
-  const handleReset = () => {
-    setIsRunning(false);
-    setRemainingSeconds(targetSeconds);
-  };
-
-  const handleSkip = () => {
-    setIsRunning(false);
-    setRemainingSeconds(0);
-    onSkip();
-  };
+  }, [hasCompleted, targetSeconds, onComplete]);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Rest Timer (Fixed)</Text>
+      <Text style={styles.title}>Rest Timer</Text>
       <Text style={styles.subtitle}>{targetSeconds} seconds prescribed</Text>
 
       <Text style={styles.timer}>{formatRestTime(remainingSeconds)}</Text>
-
-      <View style={styles.buttonRow}>
-        {!isRunning ? (
-          <TouchableOpacity style={styles.button} onPress={handleStart}>
-            <Text style={styles.buttonText}>Start</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity style={styles.button} onPress={handlePause}>
-            <Text style={styles.buttonText}>Pause</Text>
-          </TouchableOpacity>
-        )}
-
-        <TouchableOpacity
-          style={[styles.button, styles.secondaryButton]}
-          onPress={handleReset}
-        >
-          <Text style={styles.buttonText}>Reset</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.button, styles.secondaryButton]}
-          onPress={handleSkip}
-        >
-          <Text style={styles.buttonText}>Skip</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 }
@@ -146,30 +102,5 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginVertical: theme.spacing["4"],
     color: theme.colors.timer.active,
-  },
-  buttonRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: theme.spacing["3"],
-  },
-  button: {
-    flex: 1,
-    backgroundColor: theme.colors.accent.secondary,
-    paddingVertical: theme.spacing["3"],
-    borderRadius: theme.borderRadius.base,
-    marginHorizontal: theme.spacing["1"],
-    borderWidth: theme.borderWidth.hairline,
-    borderColor: theme.colors.accent.secondaryDark,
-  },
-  secondaryButton: {
-    backgroundColor: theme.colors.surface.interactive,
-    borderColor: theme.colors.border.default,
-  },
-  buttonText: {
-    fontSize: theme.typography.fontSize.base,
-    fontWeight: theme.typography.fontWeight.bold,
-    color: theme.colors.text.primary,
-    textAlign: "center",
-    letterSpacing: theme.typography.letterSpacing.wide,
   },
 });

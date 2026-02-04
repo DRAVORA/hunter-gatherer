@@ -109,6 +109,12 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       "Dead hang start",
       "Ribs down, glutes lightly engaged",
     ],
+    perform: [
+      "Pull shoulders down first",
+      "Drive elbows to ribs",
+      "Chin clears the bar",
+      "Lower with control",
+    ],
     executionFocus: [
       "Pull shoulders down first",
       "Drive elbows down and back",
@@ -137,6 +143,12 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       "Dead hang start",
       "Ribs down, glutes on",
     ],
+    perform: [
+      "Pull shoulders down first",
+      "Drive elbows to ribs",
+      "Chin clears the bar",
+      "Lower with control",
+    ],
     executionFocus: [
       "Shoulders down first",
       "Pull elbows to ribs",
@@ -164,6 +176,12 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       "Arms stay straight",
       "Dead hang",
       "Ribs down, glutes on",
+    ],
+    perform: [
+      "Depress shoulders only",
+      "Rise 2–3 cm without elbow bend",
+      "Pause 1 sec at the top",
+      "Return slowly to dead hang",
     ],
     executionFocus: [
       "Depress shoulders only",
@@ -223,6 +241,11 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       "Arms straight",
       "Shoulders slightly depressed (active)",
       "Ribs down",
+    ],
+    perform: [
+      "Maintain slight shoulder depression",
+      "No swinging or kipping",
+      "Keep body quiet and stacked",
     ],
     executionFocus: [
       "Maintain shoulder position",
@@ -336,6 +359,11 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       "Ribs down",
       "Shoulders packed",
     ],
+    perform: [
+      "Walk slowly and deliberately",
+      "Keep ribs down without leaning",
+      "Maintain tall posture throughout",
+    ],
     executionFocus: [
       "Walk slowly",
       "No lean to either side",
@@ -368,6 +396,10 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       "Feet together or hip-width",
       "Ribs down, glutes on",
     ],
+    perform: [
+      "Lower chest under control",
+      "Press to full lockout",
+    ],
     executionFocus: [
       "Lower chest to floor",
       "Elbows 45° angle",
@@ -395,6 +427,10 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       "Hands under shoulders",
       "Body straight",
       "Increased forward lean",
+    ],
+    perform: [
+      "Lower chest under control",
+      "Press to full lockout",
     ],
     executionFocus: [
       "Same as standard push-up",
@@ -479,6 +515,11 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       "Bar at collarbone (barbell) or shoulders (dumbbell)",
       "Elbows slightly forward",
       "Ribs down, glutes on",
+    ],
+    perform: [
+      "Press straight up",
+      "Head moves through at the top",
+      "Lock out overhead",
     ],
     executionFocus: [
       "Press straight up",
@@ -568,6 +609,11 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       "Toes slightly out",
       "Ribs down, core braced",
     ],
+    perform: [
+      "Hips back then down",
+      "Knees track over toes",
+      "Drive through full foot to stand",
+    ],
     executionFocus: [
       "Push hips back first",
       "Knees track over toes",
@@ -595,6 +641,11 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       "Arms forward for balance",
       "Tall posture",
       "Ribs down",
+    ],
+    perform: [
+      "Hips back then down",
+      "Knees track toes",
+      "Drive through full foot to stand",
     ],
     executionFocus: [
       "Hips back first",
@@ -707,6 +758,11 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       "Bar at thighs",
       "Neutral spine",
       "Ribs down, glutes engaged",
+    ],
+    perform: [
+      "Push hips back to feel hamstrings",
+      "Keep bar close and spine neutral",
+      "Drive hips through to stand",
     ],
     executionFocus: [
       "Push hips back",

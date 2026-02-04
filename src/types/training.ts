@@ -138,7 +138,6 @@ export interface RepCounterProps {
 export interface RestTimerProps {
   targetSeconds: number;
   onComplete: (actualSeconds: number) => void;
-  onSkip: () => void;
 }
 
 export interface ConfirmationDialogProps {

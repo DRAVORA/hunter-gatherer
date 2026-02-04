@@ -116,6 +116,7 @@ export interface ExerciseRules {
   name: string;
   category: ExerciseCategory;
   setup: string[];
+  perform?: string[];
   executionFocus: string[];
   breathing: {
     inhale: string;
