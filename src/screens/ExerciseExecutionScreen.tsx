@@ -389,6 +389,26 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
         {/* Setup Cues (First Set Only) */}
         {showSetupCues && (
           <View style={styles.setupSection}>
+            {(exerciseRules.overview || exerciseRules.why) && (
+              <View style={styles.exerciseInfoSection}>
+                {exerciseRules.overview && (
+                  <>
+                    <Text style={styles.exerciseInfoTitle}>WHAT IT IS</Text>
+                    <Text style={styles.exerciseInfoText}>
+                      {exerciseRules.overview}
+                    </Text>
+                  </>
+                )}
+                {exerciseRules.why && (
+                  <>
+                    <Text style={styles.exerciseInfoTitle}>WHY THIS EXISTS</Text>
+                    <Text style={styles.exerciseInfoText}>
+                      {exerciseRules.why}
+                    </Text>
+                  </>
+                )}
+              </View>
+            )}
             <Text style={styles.setupTitle}>SETUP</Text>
             {exerciseRules.setup.map((cue, index) => (
               <Text key={index} style={styles.cueText}>
@@ -435,6 +455,28 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
                 Exhale: {exerciseRules.breathing.exhale}
               </Text>
             </View>
+
+            {exerciseRules.selfCheck && (
+              <View style={styles.selfCheckSection}>
+                <Text style={styles.selfCheckTitle}>SELF-CHECK</Text>
+                {exerciseRules.selfCheck.map((cue, index) => (
+                  <Text key={index} style={styles.cueText}>
+                    {UNICODE.BULLET} {cue}
+                  </Text>
+                ))}
+              </View>
+            )}
+
+            {exerciseRules.commonMistakes && (
+              <View style={styles.commonMistakesSection}>
+                <Text style={styles.commonMistakesTitle}>COMMON MISTAKES</Text>
+                {exerciseRules.commonMistakes.map((cue, index) => (
+                  <Text key={index} style={styles.cueText}>
+                    {UNICODE.BULLET} {cue}
+                  </Text>
+                ))}
+              </View>
+            )}
 
             {/* Stop Rules Box */}
             <View style={styles.stopRulesSection}>
@@ -604,6 +646,21 @@ const styles = StyleSheet.create({
     borderWidth: theme.borderWidth.thin,
     borderColor: theme.colors.accent.tertiary,
   },
+  exerciseInfoSection: {
+    marginBottom: theme.spacing[4],
+  },
+  exerciseInfoTitle: {
+    fontSize: theme.typography.fontSize.xs,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.emphasis,
+    marginBottom: theme.spacing[2],
+    letterSpacing: theme.typography.letterSpacing.wider,
+  },
+  exerciseInfoText: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+    marginBottom: theme.spacing[3],
+  },
   setupTitle: {
     fontSize: theme.typography.fontSize.md,
     fontWeight: theme.typography.fontWeight.bold,
@@ -679,6 +736,36 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.text.secondary,
     marginBottom: theme.spacing[1],
+  },
+  selfCheckSection: {
+    backgroundColor: theme.colors.surface.base,
+    padding: theme.spacing[4],
+    borderRadius: theme.borderRadius.md,
+    borderWidth: theme.borderWidth.hairline,
+    borderColor: theme.colors.border.subtle,
+    marginBottom: theme.spacing[4],
+  },
+  selfCheckTitle: {
+    fontSize: theme.typography.fontSize.sm,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.emphasis,
+    marginBottom: theme.spacing[3],
+    letterSpacing: theme.typography.letterSpacing.wider,
+  },
+  commonMistakesSection: {
+    backgroundColor: theme.colors.surface.base,
+    padding: theme.spacing[4],
+    borderRadius: theme.borderRadius.md,
+    borderWidth: theme.borderWidth.hairline,
+    borderColor: theme.colors.border.subtle,
+    marginBottom: theme.spacing[4],
+  },
+  commonMistakesTitle: {
+    fontSize: theme.typography.fontSize.sm,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.emphasis,
+    marginBottom: theme.spacing[3],
+    letterSpacing: theme.typography.letterSpacing.wider,
   },
   stopRulesSection: {
     marginBottom: theme.spacing[4],

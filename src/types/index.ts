@@ -115,6 +115,8 @@ export interface ExerciseSet {
 export interface ExerciseRules {
   name: string;
   category: ExerciseCategory;
+  overview?: string;
+  why?: string;
   setup: string[];
   perform?: string[];
   executionFocus: string[];
@@ -122,6 +124,8 @@ export interface ExerciseRules {
     inhale: string;
     exhale: string;
   };
+  selfCheck?: string[];
+  commonMistakes?: string[];
   stopRules: string[];
   scaling?: {
     description: string;

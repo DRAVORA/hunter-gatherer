@@ -103,6 +103,9 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
   "Pull-Up": {
     name: "Pull-Up",
     category: ExerciseCategory.PULL,
+    overview:
+      "A bodyweight vertical pull using an overhand grip from a dead hang.",
+    why: "Builds primary upper-body pulling strength and shoulder control.",
     setup: [
       "Overhand grip, full thumb wrap",
       "Hands shoulder-width or slightly wider",
@@ -110,10 +113,10 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       "Ribs down, glutes lightly engaged",
     ],
     perform: [
-      "Pull shoulders down first",
-      "Drive elbows to ribs",
+      "Pull shoulders down to start the rep",
+      "Drive elbows toward ribs",
       "Chin clears the bar",
-      "Lower with control",
+      "Lower under control to dead hang",
     ],
     executionFocus: [
       "Pull shoulders down first",
@@ -125,6 +128,8 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       inhale: "Bottom position",
       exhale: "During pull",
     },
+    selfCheck: ["No swing", "Chin clears bar", "Shoulders stay down"],
+    commonMistakes: ["Kipping", "Half reps", "Shrugging at the top"],
     stopRules: [
       "Any swing or leg kick",
       "Chin fails to clear bar",
@@ -137,6 +142,9 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
   "Chin-Up": {
     name: "Chin-Up",
     category: ExerciseCategory.PULL,
+    overview:
+      "A bodyweight vertical pull using an underhand grip from a dead hang.",
+    why: "Builds upper-body pulling strength with increased biceps emphasis.",
     setup: [
       "Underhand grip, full thumb wrap",
       "Hands shoulder-width",
@@ -144,10 +152,10 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       "Ribs down, glutes on",
     ],
     perform: [
-      "Pull shoulders down first",
-      "Drive elbows to ribs",
+      "Pull shoulders down to start the rep",
+      "Drive elbows toward ribs",
       "Chin clears the bar",
-      "Lower with control",
+      "Lower under control to dead hang",
     ],
     executionFocus: [
       "Shoulders down first",
@@ -159,6 +167,8 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       inhale: "Bottom position",
       exhale: "During pull",
     },
+    selfCheck: ["No swing", "Chin clears bar", "Elbows track down"],
+    commonMistakes: ["Swinging", "Short reps", "Biceps-only pull"],
     stopRules: [
       "Swing or momentum",
       "Chin fails to clear",
@@ -171,6 +181,9 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
   "Scapular Pull-Up": {
     name: "Scapular Pull-Up",
     category: ExerciseCategory.PULL,
+    overview:
+      "A small-range pull-up that moves only the shoulders with straight elbows.",
+    why: "Teaches shoulder depression needed for safe pulling strength.",
     setup: [
       "Overhand grip",
       "Arms stay straight",
@@ -193,6 +206,8 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       inhale: "Hang",
       exhale: "Depress shoulders",
     },
+    selfCheck: ["Elbows stay straight", "Movement is small and controlled"],
+    commonMistakes: ["Elbow bend", "Large swing", "Back arching"],
     stopRules: [
       "Any elbow bend",
       "Back arches",
@@ -208,11 +223,19 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
   "High Pull-Up Hold": {
     name: "High Pull-Up Hold",
     category: ExerciseCategory.PULL,
+    overview: "An isometric hold at the top of a pull-up.",
+    why: "Builds top-position strength and scapular control.",
     setup: [
       "Pull chin over bar",
       "Hold top position",
       "Ribs down",
       "Glutes engaged",
+    ],
+    perform: [
+      "Hold the top position",
+      "Keep shoulders pulled down",
+      "Stay tall through the chest",
+      "Breathe steadily without dropping",
     ],
     executionFocus: [
       "Shoulders stay depressed",
@@ -224,6 +247,8 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       inhale: "Steady, controlled breaths",
       exhale: "Do not hold breath",
     },
+    selfCheck: ["Chin stays above bar", "Shoulders stay down"],
+    commonMistakes: ["Shrugging", "Neck strain", "Sinking below bar"],
     stopRules: [
       "Shoulders shrug up",
       "Neck strain appears",
@@ -236,6 +261,9 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
   "Dead Hang": {
     name: "Dead Hang",
     category: ExerciseCategory.PULL,
+    overview:
+      "An active dead hang with straight arms and slight shoulder depression.",
+    why: "Builds shoulder tolerance and grip while restoring overhead posture.",
     setup: [
       "Overhand grip",
       "Arms straight",
@@ -257,6 +285,8 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       inhale: "Steady, rhythmic",
       exhale: "Inhale/exhale through nose",
     },
+    selfCheck: ["Shoulders stay down", "Breathing stays calm"],
+    commonMistakes: ["Shrugging", "Swinging", "Holding breath"],
     stopRules: [
       "Grip slipping",
       "Back tightness or pain",
@@ -269,11 +299,18 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
   "Barbell Row": {
     name: "Barbell Row",
     category: ExerciseCategory.PULL,
+    overview: "A hip-hinged row pulling a barbell to the lower ribs.",
+    why: "Builds upper-back strength and reinforces posture.",
     setup: [
       "Hip-width stance",
       "Hinge at hips (45° torso angle)",
       "Neutral spine",
       "Overhand or underhand grip",
+    ],
+    perform: [
+      "Pull bar to lower ribs",
+      "Keep torso angle fixed",
+      "Lower with control",
     ],
     executionFocus: [
       "Pull bar to lower ribs",
@@ -285,6 +322,8 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       inhale: "Start position",
       exhale: "During pull",
     },
+    selfCheck: ["Torso stays still", "Bar hits lower ribs"],
+    commonMistakes: ["Jerking the weight", "Torso rising", "Rounded back"],
     stopRules: [
       "Back rounds",
       "Torso rises up",
@@ -297,11 +336,18 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
   "Dumbbell Row": {
     name: "Dumbbell Row",
     category: ExerciseCategory.PULL,
+    overview: "A single-arm row braced on a bench or rack.",
+    why: "Builds upper-back strength while reinforcing core stability.",
     setup: [
       "One hand on bench",
       "Neutral spine",
       "Hip hinge maintained",
       "Non-working arm supports bodyweight",
+    ],
+    perform: [
+      "Pull dumbbell to hip",
+      "Pause briefly at the top",
+      "Lower slowly",
     ],
     executionFocus: [
       "Pull dumbbell to hip",
@@ -313,6 +359,8 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       inhale: "Start position",
       exhale: "During pull",
     },
+    selfCheck: ["No torso rotation", "Elbow tracks close to body"],
+    commonMistakes: ["Torso twisting", "Swinging the weight", "Shrugging"],
     stopRules: [
       "Torso rotates",
       "Hip drops",
@@ -353,6 +401,8 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
   "Farmer Carry": {
     name: "Farmer Carry",
     category: ExerciseCategory.CARRY,
+    overview: "A loaded walk carrying heavy implements at your sides.",
+    why: "Builds grip, core, and posture under load.",
     setup: [
       "Heavy dumbbells or kettlebells",
       "Tall posture",
@@ -374,6 +424,8 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       inhale: "Steady, rhythmic",
       exhale: "Do not hold breath",
     },
+    selfCheck: ["No leaning", "Posture stays tall"],
+    commonMistakes: ["Rushing steps", "Leaning", "Shoulders rising"],
     stopRules: [
       "Grip fails",
       "Posture collapses",
@@ -422,6 +474,8 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
   "Push-Up (Feet Elevated)": {
     name: "Push-Up (Feet Elevated)",
     category: ExerciseCategory.PUSH,
+    overview: "A push-up with feet elevated to increase loading.",
+    why: "Builds primary horizontal pushing strength with added intensity.",
     setup: [
       "Feet on bench/box",
       "Hands under shoulders",
@@ -442,6 +496,8 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       inhale: "Lowering",
       exhale: "Pushing up",
     },
+    selfCheck: ["Body stays rigid", "Full lockout at the top"],
+    commonMistakes: ["Sagging hips", "Partial range", "Elbows flaring"],
     stopRules: [
       "Hips sag",
       "Hips pike up",
@@ -454,11 +510,18 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
   "Pike Push-Up": {
     name: "Pike Push-Up",
     category: ExerciseCategory.PUSH,
+    overview: "A vertical pressing pattern using an inverted V position.",
+    why: "Builds vertical pressing strength without equipment.",
     setup: [
       "Hips high (inverted V)",
       "Hands shoulder-width",
       "Feet hip-width",
       "Head neutral",
+    ],
+    perform: [
+      "Lower head between hands",
+      "Press back up",
+      "Keep hips high throughout",
     ],
     executionFocus: [
       "Lower head between hands",
@@ -470,6 +533,8 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       inhale: "Lowering",
       exhale: "Pushing up",
     },
+    selfCheck: ["Hips stay high", "Head moves between hands"],
+    commonMistakes: ["Lumbar arch", "Hips dropping", "Elbows flaring"],
     stopRules: [
       "Hips drop",
       "Lumbar arch appears",
@@ -510,6 +575,8 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
   "Overhead Press": {
     name: "Overhead Press",
     category: ExerciseCategory.PUSH,
+    overview: "A standing press moving weight from shoulders to overhead.",
+    why: "Builds vertical pushing strength and shoulder stability.",
     setup: [
       "Standing, feet hip-width",
       "Bar at collarbone (barbell) or shoulders (dumbbell)",
@@ -531,6 +598,8 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       inhale: "Start position",
       exhale: "During press",
     },
+    selfCheck: ["No back arch", "Bar stays over midfoot"],
+    commonMistakes: ["Leaning back", "Ribs flaring", "Elbows drifting wide"],
     stopRules: [
       "Back arches excessively",
       "Ribs flare",
@@ -543,11 +612,18 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
   "Bench Press": {
     name: "Bench Press",
     category: ExerciseCategory.PUSH,
+    overview: "A horizontal press from a bench with feet planted.",
+    why: "Builds primary horizontal pushing strength.",
     setup: [
       "Feet flat on floor",
       "Shoulder blades retracted",
       "Slight arch in lower back",
       "Bar over chest",
+    ],
+    perform: [
+      "Lower bar to mid-chest",
+      "Press to lockout",
+      "Keep shoulders packed",
     ],
     executionFocus: [
       "Lower bar to mid-chest",
@@ -559,6 +635,8 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       inhale: "Lowering",
       exhale: "Pressing up",
     },
+    selfCheck: ["Stable setup", "Bar path stays controlled"],
+    commonMistakes: ["Bouncing bar", "Elbows flaring", "Feet lifting"],
     stopRules: [
       "Shoulders roll forward",
       "Elbows flare wide",
@@ -571,11 +649,18 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
   Dips: {
     name: "Dips",
     category: ExerciseCategory.PUSH,
+    overview: "A bodyweight press on parallel bars from support to depth.",
+    why: "Builds compound pushing strength and shoulder stability.",
     setup: [
       "Straight-arm support",
       "Shoulders depressed",
       "Ribs down",
       "Slight forward lean",
+    ],
+    perform: [
+      "Lower under control",
+      "Reach upper arms parallel to floor",
+      "Press to lockout",
     ],
     executionFocus: [
       "Lower until upper arms parallel to floor",
@@ -587,6 +672,8 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       inhale: "Lowering",
       exhale: "Pushing up",
     },
+    selfCheck: ["Shoulders stay packed", "Controlled depth"],
+    commonMistakes: ["Flaring elbows", "Bouncing at bottom", "Shrugging"],
     stopRules: [
       "Shoulders roll forward",
       "Sternum pain",
@@ -603,6 +690,8 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
   "Barbell Back Squat": {
     name: "Barbell Back Squat",
     category: ExerciseCategory.LEGS,
+    overview: "A barbell squat with the bar resting on the upper traps.",
+    why: "Builds full lower-body strength and bracing capacity.",
     setup: [
       "Bar on upper traps",
       "Feet shoulder-width",
@@ -624,6 +713,8 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       inhale: "Top position (brace)",
       exhale: "After standing",
     },
+    selfCheck: ["Balanced and controlled", "Depth achieved"],
+    commonMistakes: ["Rushing reps", "Knees caving", "Back rounding"],
     stopRules: [
       "Knees cave inward",
       "Heels lift",
@@ -669,11 +760,18 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
   "Bulgarian Split Squat": {
     name: "Bulgarian Split Squat",
     category: ExerciseCategory.LEGS,
+    overview: "A single-leg squat with the rear foot elevated.",
+    why: "Builds single-leg strength and balance.",
     setup: [
       "Rear foot elevated on bench",
       "Front foot far enough forward",
       "Torso upright",
       "Ribs down",
+    ],
+    perform: [
+      "Lower straight down",
+      "Keep front knee tracking toes",
+      "Drive through front heel to stand",
     ],
     executionFocus: [
       "Lower straight down",
@@ -685,6 +783,8 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       inhale: "Lowering",
       exhale: "Standing",
     },
+    selfCheck: ["Balance stays steady", "Torso stays upright"],
+    commonMistakes: ["Knee cave", "Forward lean", "Wobbly stance"],
     stopRules: [
       "Front knee caves in",
       "Torso leans forward excessively",
@@ -753,6 +853,8 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
   "Romanian Deadlift": {
     name: "Romanian Deadlift",
     category: ExerciseCategory.LEGS,
+    overview: "A hip hinge that loads the hamstrings with a neutral spine.",
+    why: "Builds posterior chain strength and hip-hinge control.",
     setup: [
       "Hip-width stance",
       "Bar at thighs",
@@ -774,6 +876,8 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       inhale: "Lowering",
       exhale: "Standing",
     },
+    selfCheck: ["Hamstrings loaded", "Spine stays neutral"],
+    commonMistakes: ["Rounding back", "Bar drifting away", "Knees bending too much"],
     stopRules: [
       "Back rounds",
       "Bar drifts away from legs",
@@ -814,12 +918,15 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
   "Wall Sit": {
     name: "Wall Sit",
     category: ExerciseCategory.LEGS,
+    overview: "An isometric hold with back against the wall at ~90° knees.",
+    why: "Builds isometric leg endurance and postural control.",
     setup: [
       "Back flat against wall",
       "Feet hip-width, ~60cm from wall",
       "Thighs parallel to ground",
       "90° knee angle",
     ],
+    perform: ["Hold the position", "Stay still and breathe steadily"],
     executionFocus: [
       "Maintain position",
       "Full back contact with wall",
@@ -830,6 +937,8 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       inhale: "Steady, controlled",
       exhale: "Do not hold breath",
     },
+    selfCheck: ["Posture unchanged", "Breathing stays calm"],
+    commonMistakes: ["Shifting weight", "Hips rising", "Heels lifting"],
     stopRules: [
       "Hips rise above parallel",
       "Knees cave inward",
@@ -986,12 +1095,15 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
   "Side Plank": {
     name: "Side Plank",
     category: ExerciseCategory.CORE,
+    overview: "A lateral core hold supported on one elbow or hand.",
+    why: "Builds lateral core stability and shoulder endurance.",
     setup: [
       "Elbow under shoulder",
       "Feet stacked or staggered",
       "Body in straight line",
       "Hips lifted",
     ],
+    perform: ["Hold hips high", "Stay long through the body"],
     executionFocus: [
       "Keep hips up",
       "Stack shoulders",
@@ -1002,6 +1114,8 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       inhale: "Steady, controlled",
       exhale: "Do not hold breath",
     },
+    selfCheck: ["No sagging", "Shoulders stacked"],
+    commonMistakes: ["Hip drop", "Shoulders rolling forward", "Neck strain"],
     stopRules: [
       "Hips sag",
       "Shoulder collapses forward",
@@ -1014,11 +1128,18 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
   "Chin Tucks": {
     name: "Chin Tucks",
     category: ExerciseCategory.CORE,
+    overview: "A neck alignment drill that glides the chin straight back.",
+    why: "Restores neck alignment and reduces forward-head posture.",
     setup: [
       "Seated or standing tall",
       "Shoulders relaxed down",
       "Look straight ahead",
       "Neck neutral",
+    ],
+    perform: [
+      "Draw chin straight back",
+      "Hold briefly",
+      "Relax without tilting head",
     ],
     executionFocus: [
       "Draw chin straight back",
@@ -1030,6 +1151,8 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
       inhale: "Natural",
       exhale: "Natural",
     },
+    selfCheck: ["Neck feels long", "Jaw stays relaxed"],
+    commonMistakes: ["Tilting head", "Clenching jaw", "Shoulders rising"],
     stopRules: [
       "Head tilts up or down",
       "Shoulders rise",
