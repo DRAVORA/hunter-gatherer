@@ -121,6 +121,42 @@ const GYM_PROGRAM_DAYS = [
   },
 ];
 
+const DAILY_NON_NEGOTIABLE_ROUTINE = [
+  {
+    id: "active-dead-hang",
+    title: "Active Dead Hang",
+    target: "60s total (1x60s, 2x30s, or 3x20s)",
+    checklist: [
+      "Overhand grip with full thumb wrap",
+      "Arms straight, ribs down, glutes lightly on",
+      "Slight shoulder depression (no shrugging)",
+      "Slow nasal breathing, no swinging",
+    ],
+  },
+  {
+    id: "scapular-pullups",
+    title: "Scapular Pull-Ups",
+    target: "15 clean reps",
+    checklist: [
+      "Start in active hang with elbows locked",
+      "Pull shoulders down and think back pockets",
+      "Move only 2-3 cm and pause 1s at top",
+      "No elbow bend, no hip swing, no back arch",
+    ],
+  },
+  {
+    id: "chin-tucks",
+    title: "Chin Tucks",
+    target: "20 controlled reps",
+    checklist: [
+      "Floor or wall setup with head supported",
+      "Pull chin straight back (double chin)",
+      "Hold 1-2s while shoulders stay relaxed",
+      "No head tilt, no jaw clench, no neck strain",
+    ],
+  },
+];
+
 // ============================================================================
 // HOME SCREEN
 // ============================================================================
@@ -372,189 +408,34 @@ export default function HomeScreen({ navigation, route }: Props) {
           ))}
         </View>
 
-        {/* Daily Non-Negotiables - Comprehensive */}
+        {/* Daily Non-Negotiables Routine */}
         <View style={styles.nonNegotiablesCard}>
           <Text style={styles.nonNegotiablesTitle}>DAILY NON-NEGOTIABLES</Text>
           <Text style={styles.nonNegotiablesSubtitle}>
-            Performed every day, including rest days
+            Daily routine {UNICODE.DASH} complete every day (including rest days)
           </Text>
           <Text style={styles.nonNegotiablesDescription}>
-            These are maintenance requirements, not training volume. They gate
-            posture, shoulder health, and pulling capacity.
+            Treat these like your other sessions: open this section, follow each
+            checklist, and mark it done.
           </Text>
           <Text style={styles.nonNegotiablesWarning}>
-            If these degrade, do not progress training.
+            If quality drops, pause progression and reset form first.
           </Text>
 
-          {/* 1. Active Dead Hang */}
-          <View style={styles.nonNegotiableSection}>
-            <Text style={styles.nonNegotiableHeader}>
-              1. ACTIVE DEAD HANG {UNICODE.DASH} 60 SECONDS TOTAL
-            </Text>
+          {DAILY_NON_NEGOTIABLE_ROUTINE.map((routine, index) => (
+            <View key={routine.id} style={styles.nonNegotiableRoutineCard}>
+              <Text style={styles.nonNegotiableHeader}>
+                {index + 1}. {routine.title.toUpperCase()}
+              </Text>
+              <Text style={styles.nonNegotiableTarget}>{routine.target}</Text>
 
-            <Text style={styles.nonNegotiableSubheading}>Setup</Text>
-            <Text style={styles.nonNegotiableText}>
-              {UNICODE.BULLET} Overhand grip with full thumb wrap{"\n"}
-              {UNICODE.BULLET} Hands shoulder-width or slightly wider{"\n"}
-              {UNICODE.BULLET} Arms fully straight{"\n"}
-              {UNICODE.BULLET} Let body settle before starting
-            </Text>
-
-            <Text style={styles.nonNegotiableSubheading}>Body Position</Text>
-            <Text style={styles.nonNegotiableText}>
-              {UNICODE.BULLET} Ribs down (no flare){"\n"}
-              {UNICODE.BULLET} Glutes lightly engaged{"\n"}
-              {UNICODE.BULLET} Legs together or slightly forward{"\n"}
-              {UNICODE.BULLET} Neck neutral{"\n"}
-              {"\n"}
-              You should feel long and supported {UNICODE.DASH} not collapsed.
-            </Text>
-
-            <Text style={styles.nonNegotiableSubheading}>Execution</Text>
-            <Text style={styles.nonNegotiableText}>
-              {UNICODE.BULLET} Maintain slight shoulder depression (shoulders
-              not in ears)
-              {"\n"}
-              {UNICODE.BULLET} No swinging{"\n"}
-              {UNICODE.BULLET} No shrugging{"\n"}
-              {UNICODE.BULLET} Body stays quiet{"\n"}
-              {"\n"}
-              This is not a passive stretch.
-            </Text>
-
-            <Text style={styles.nonNegotiableSubheading}>Breathing</Text>
-            <Text style={styles.nonNegotiableText}>
-              {UNICODE.BULLET} Slow nasal breathing{"\n"}
-              {UNICODE.BULLET} Calm, steady rhythm
-            </Text>
-
-            <Text style={styles.nonNegotiableSubheading}>Stop/Reset Rules</Text>
-            <Text style={styles.nonNegotiableText}>
-              {UNICODE.BULLET} Grip slipping{"\n"}
-              {UNICODE.BULLET} Lower back tightens{"\n"}
-              {UNICODE.BULLET} Shoulders elevate{"\n"}
-              {UNICODE.BULLET} Hips shake{"\n"}
-              {UNICODE.BULLET} Swinging appears{"\n"}
-              {"\n"}
-              If 60 seconds cannot be held cleanly:{"\n"}
-              Break into 2{UNICODE.MULTIPLY}30s or 3{UNICODE.MULTIPLY}20s
-            </Text>
-          </View>
-
-          {/* 2. Scapular Pull-Ups */}
-          <View style={styles.nonNegotiableSection}>
-            <Text style={styles.nonNegotiableHeader}>
-              2. SCAPULAR PULL-UPS {UNICODE.DASH} 15 TOTAL REPS
-            </Text>
-
-            <Text style={styles.nonNegotiableSubheading}>Setup</Text>
-            <Text style={styles.nonNegotiableText}>
-              {UNICODE.BULLET} Overhand grip{"\n"}
-              {UNICODE.BULLET} Arms completely straight{"\n"}
-              {UNICODE.BULLET} Dead hang start{"\n"}
-              {UNICODE.BULLET} Ribs down{"\n"}
-              {UNICODE.BULLET} Glutes lightly engaged{"\n"}
-              {"\n"}
-              Elbows must stay locked.
-            </Text>
-
-            <Text style={styles.nonNegotiableSubheading}>
-              Execution (Step-by-Step)
-            </Text>
-            <Text style={styles.nonNegotiableText}>
-              1. Pull shoulders down (depress){"\n"}
-              2. Think "put shoulders in back pockets"{"\n"}
-              3. Body rises 2{UNICODE.DASH}3 cm only{"\n"}
-              4. Pause 1 second at top{"\n"}
-              5. Slowly return to full hang{"\n"}
-              {"\n"}
-              That is one rep.{"\n"}
-              If the movement looks big, it's wrong.
-            </Text>
-
-            <Text style={styles.nonNegotiableSubheading}>Breathing</Text>
-            <Text style={styles.nonNegotiableText}>
-              {UNICODE.BULLET} Exhale as shoulders depress{"\n"}
-              {UNICODE.BULLET} Inhale returning to hang
-            </Text>
-
-            <Text style={styles.nonNegotiableSubheading}>Stop Rules</Text>
-            <Text style={styles.nonNegotiableText}>
-              {UNICODE.BULLET} Elbows bend{"\n"}
-              {UNICODE.BULLET} Lower back arches{"\n"}
-              {UNICODE.BULLET} Hips swing{"\n"}
-              {UNICODE.BULLET} Neck strains{"\n"}
-              {UNICODE.BULLET} Shoulders elevate instead of depress
-            </Text>
-
-            <Text style={styles.nonNegotiableSubheading}>
-              Scaling (If 15 clean reps not possible)
-            </Text>
-            <Text style={styles.nonNegotiableText}>
-              {UNICODE.BULLET} Cluster sets: 2 reps, rest 20{UNICODE.DASH}30s,
-              repeat until 15 total{"\n"}
-              OR{"\n"}
-              {UNICODE.BULLET} Isometric: Hold scap-down position 5
-              {UNICODE.DASH}10s {UNICODE.MULTIPLY} 5{UNICODE.DASH}6 sets
-            </Text>
-          </View>
-
-          {/* 3. Chin Tucks */}
-          <View style={styles.nonNegotiableSection}>
-            <Text style={styles.nonNegotiableHeader}>
-              3. CHIN TUCKS {UNICODE.DASH} 20 CONTROLLED REPS
-            </Text>
-
-            <Text style={styles.nonNegotiableSubheading}>
-              Setup (Choose one)
-            </Text>
-            <Text style={styles.nonNegotiableText}>
-              Floor:{"\n"}
-              {UNICODE.BULLET} Lie on back{"\n"}
-              {UNICODE.BULLET} Knees bent{"\n"}
-              {UNICODE.BULLET} Back of head resting on floor{"\n"}
-              {"\n"}
-              Wall:{"\n"}
-              {UNICODE.BULLET} Stand with back against wall{"\n"}
-              {UNICODE.BULLET} Back of head lightly touching wall
-            </Text>
-
-            <Text style={styles.nonNegotiableSubheading}>
-              Execution (Step-by-Step)
-            </Text>
-            <Text style={styles.nonNegotiableText}>
-              1. Gently pull chin straight back{"\n"}
-              2. Create a "double chin"{"\n"}
-              3. Head stays level (no nodding){"\n"}
-              4. Hold 1{UNICODE.DASH}2 seconds{"\n"}
-              5. Relax and repeat{"\n"}
-              {"\n"}
-              This is a retraction, not a tilt.
-            </Text>
-
-            <Text style={styles.nonNegotiableSubheading}>Execution Focus</Text>
-            <Text style={styles.nonNegotiableText}>
-              {UNICODE.BULLET} Neck stays long{"\n"}
-              {UNICODE.BULLET} Jaw relaxed{"\n"}
-              {UNICODE.BULLET} Shoulders stay down{"\n"}
-              {UNICODE.BULLET} Minimal effort
-            </Text>
-
-            <Text style={styles.nonNegotiableSubheading}>Breathing</Text>
-            <Text style={styles.nonNegotiableText}>
-              {UNICODE.BULLET} Normal nasal breathing{"\n"}
-              {UNICODE.BULLET} Do not brace
-            </Text>
-
-            <Text style={styles.nonNegotiableSubheading}>Stop Rules</Text>
-            <Text style={styles.nonNegotiableText}>
-              {UNICODE.BULLET} Neck strain{"\n"}
-              {UNICODE.BULLET} Head tilts up or down{"\n"}
-              {UNICODE.BULLET} Jaw clenches{"\n"}
-              {UNICODE.BULLET} Shoulders elevate{"\n"}
-              {UNICODE.BULLET} Head lifts off floor/wall
-            </Text>
-          </View>
+              {routine.checklist.map((item) => (
+                <Text key={item} style={styles.nonNegotiableChecklistItem}>
+                  {UNICODE.BULLET} {item}
+                </Text>
+              ))}
+            </View>
+          ))}
         </View>
 
         {/* View History Button */}
@@ -756,7 +637,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing[4],
     fontStyle: "italic",
   },
-  nonNegotiableSection: {
+  nonNegotiableRoutineCard: {
     backgroundColor: theme.colors.surface.base,
     borderRadius: theme.borderRadius.sm,
     padding: theme.spacing[3],
@@ -768,22 +649,21 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.base,
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.accent.tertiary,
-    marginBottom: theme.spacing[3],
+    marginBottom: theme.spacing[1],
     letterSpacing: theme.typography.letterSpacing.wide,
   },
-  nonNegotiableSubheading: {
+  nonNegotiableTarget: {
     fontSize: theme.typography.fontSize.sm,
     fontWeight: theme.typography.fontWeight.semibold,
-    color: theme.colors.text.primary,
-    marginTop: theme.spacing[2],
-    marginBottom: theme.spacing[1],
+    color: theme.colors.state.warning,
+    marginBottom: theme.spacing[2],
   },
-  nonNegotiableText: {
-    fontSize: theme.typography.fontSize.xs,
+  nonNegotiableChecklistItem: {
+    fontSize: theme.typography.fontSize.sm,
     color: theme.colors.text.secondary,
     lineHeight:
-      theme.typography.fontSize.xs * theme.typography.lineHeight.relaxed,
-    marginBottom: theme.spacing[2],
+      theme.typography.fontSize.sm * theme.typography.lineHeight.relaxed,
+    marginBottom: theme.spacing[1],
   },
   historyButton: {
     backgroundColor: theme.colors.surface.interactive,

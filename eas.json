@@ -4,16 +4,15 @@
   },
   "build": {
     "development": {
+      "distribution": "internal"
+    },
+    "devClient": {
       "developmentClient": true,
       "distribution": "internal"
     },
     "production": {
-      "ios": {
-        "distribution": "store"
-      },
-      "android": {
-        "distribution": "store"
-      }
+      "ios": { "distribution": "store" },
+      "android": { "distribution": "store" }
     }
   }
 }
