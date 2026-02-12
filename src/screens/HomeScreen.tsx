@@ -210,7 +210,7 @@ export default function HomeScreen({ navigation, route }: Props) {
         [
           {
             text: "Go to Check-In",
-            onPress: () => navigation.navigate("DailyCheckIn"),
+            onPress: () => navigation.navigate("DailyCheckIn", { programId }),
           },
         ],
       );
@@ -275,9 +275,7 @@ export default function HomeScreen({ navigation, route }: Props) {
         [
           sessionId,
           today,
-          programId === "gym"
-            ? "Hunter-Gatherer Gym"
-            : "Hunter-Gatherer No-Gym",
+          programId === "gym" ? "ATAVIA Gym" : "ATAVIA No-Gym",
           session.name,
           new Date().toISOString(),
           plannedVolume,
@@ -306,7 +304,7 @@ export default function HomeScreen({ navigation, route }: Props) {
   }
 
   function handleDailyCheckIn() {
-    navigation.navigate("DailyCheckIn");
+    navigation.navigate("DailyCheckIn", { programId });
   }
 
   function handleOpenManual() {
@@ -326,7 +324,7 @@ export default function HomeScreen({ navigation, route }: Props) {
       <View style={styles.content}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Hunter-Gatherer</Text>
+          <Text style={styles.title}>ATAVIA</Text>
           <Text style={styles.subtitle}>
             {programId === "gym"
               ? "Gym Program"

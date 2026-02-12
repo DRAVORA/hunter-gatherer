@@ -329,7 +329,7 @@ const CORE_SESSION: ProgramSession = {
 
 export const HUNTER_GATHERER_BASIC: Program = {
   id: "hunter-gatherer-basic",
-  name: "Hunter-Gatherer Basic",
+  name: "ATAVIA Basic",
   description:
     "Foundational strength program emphasizing execution quality, injury prevention, and controlled fatigue management. Suitable for returning lifters rebuilding capacity.",
   sessions: [
@@ -545,7 +545,7 @@ const NO_GYM_DAY4_CONDITIONING: ProgramSession = {
 
 export const HUNTER_GATHERER_NO_GYM: Program = {
   id: "hunter-gatherer-no-gym",
-  name: "Hunter-Gatherer No-Gym",
+  name: "ATAVIA No-Gym",
   description:
     "4-day bodyweight program requiring only a pull-up bar. Focus on vertical pulling strength, single-leg work, advanced push-up progressions, and conditioning work. Emphasizes execution quality and injury prevention for returning lifters.",
   sessions: [
@@ -715,7 +715,7 @@ const GYM_DAY3_PUSH: ProgramSession = {
 
 export const HUNTER_GATHERER_GYM: Program = {
   id: "hunter-gatherer-gym",
-  name: "Hunter-Gatherer Gym",
+  name: "ATAVIA Gym",
   description:
     "3-day gym program with barbell and dumbbell work. Focus on compound movements with controlled execution. Leave 2 reps in reserve on all main lifts. Requires squat rack, bench, pull-up bar, and dumbbells.",
   sessions: [GYM_DAY1_LOWER, GYM_DAY2_PULL, GYM_DAY3_PUSH],

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { formatRestTime } from "../utils/formatting";
 import { theme } from "../styles/theme";
@@ -22,28 +22,38 @@ export default function DurationTimer({
 }: DurationTimerProps) {
   const [isRunning, setIsRunning] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const startTimeRef = useRef<number | null>(null);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-
-    if (isRunning) {
-      interval = setInterval(() => {
-        setElapsedSeconds((prev) => prev + 1);
-      }, 1000);
+    if (!isRunning || startTimeRef.current === null) {
+      return;
     }
 
-    return () => {
-      if (interval) clearInterval(interval);
-    };
+    const interval = setInterval(() => {
+      if (startTimeRef.current === null) return;
+      const secondsElapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+      setElapsedSeconds(secondsElapsed);
+    }, 250);
+
+    return () => clearInterval(interval);
   }, [isRunning]);
 
   const handleStart = () => {
+    startTimeRef.current = Date.now();
+    setElapsedSeconds(0);
     setIsRunning(true);
   };
 
   const handleStop = () => {
+    const actualElapsed =
+      startTimeRef.current === null
+        ? elapsedSeconds
+        : Math.floor((Date.now() - startTimeRef.current) / 1000);
+
+    setElapsedSeconds(actualElapsed);
     setIsRunning(false);
-    onStop(elapsedSeconds);
+    startTimeRef.current = null;
+    onStop(actualElapsed);
   };
 
   const targetDisplay =
@@ -89,7 +99,7 @@ export default function DurationTimer({
 
 const styles = StyleSheet.create({
   container: {
-    padding: theme.spacing['4'],
+    padding: theme.spacing["4"],
     backgroundColor: theme.colors.execution.setup,
     borderRadius: theme.borderRadius.md,
     borderWidth: theme.borderWidth.thick,
@@ -98,7 +108,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: theme.typography.fontSize.base,
     fontWeight: theme.typography.fontWeight.bold,
-    marginBottom: theme.spacing['1'],
+    marginBottom: theme.spacing["1"],
     textAlign: "center",
     color: theme.colors.text.primary,
     letterSpacing: theme.typography.letterSpacing.wide,
@@ -107,23 +117,23 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.text.tertiary,
     textAlign: "center",
-    marginBottom: theme.spacing['3'],
+    marginBottom: theme.spacing["3"],
   },
   timer: {
     fontSize: 72,
     fontWeight: theme.typography.fontWeight.bold,
     textAlign: "center",
-    marginVertical: theme.spacing['5'],
+    marginVertical: theme.spacing["5"],
     color: theme.colors.accent.tertiary,
   },
   buttonRow: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: theme.spacing['3'],
+    marginTop: theme.spacing["3"],
   },
   button: {
     flex: 1,
-    paddingVertical: theme.spacing['4'],
+    paddingVertical: theme.spacing["4"],
     borderRadius: theme.borderRadius.md,
     alignItems: "center",
     borderWidth: theme.borderWidth.hairline,
@@ -146,7 +156,7 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.base,
     color: theme.colors.accent.tertiary,
     textAlign: "center",
-    marginTop: theme.spacing['3'],
+    marginTop: theme.spacing["3"],
     fontWeight: theme.typography.fontWeight.semibold,
   },
 });

@@ -24,7 +24,7 @@ export type RootStackParamList = {
   ProgramSelection: undefined;
   Home: { programId?: string }; // Make optional
   TrainingManual: undefined;
-  DailyCheckIn: undefined;
+  DailyCheckIn: { programId?: string } | undefined;
   SessionReadiness: {
     sessionId: string;
     checkInId: string;

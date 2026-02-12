@@ -9,6 +9,7 @@ import {
   Alert,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "../../App";
 import { v4 as uuidv4 } from "uuid";
 import "react-native-get-random-values";
@@ -28,16 +29,19 @@ type DailyCheckInScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
   "DailyCheckIn"
 >;
+type DailyCheckInScreenRouteProp = RouteProp<RootStackParamList, "DailyCheckIn">;
 
 interface Props {
   navigation: DailyCheckInScreenNavigationProp;
+  route: DailyCheckInScreenRouteProp;
 }
 
 // ============================================================================
 // DAILY CHECK-IN SCREEN
 // ============================================================================
 
-export default function DailyCheckInScreen({ navigation }: Props) {
+export default function DailyCheckInScreen({ navigation, route }: Props) {
+  const programId = route.params?.programId ?? "no-gym";
   const [sleepHours, setSleepHours] = useState("8.0");
   const [morningHydration, setMorningHydration] = useState(false);
   const [appetiteStatus, setAppetiteStatus] = useState<AppetiteStatus>(
@@ -116,7 +120,7 @@ export default function DailyCheckInScreen({ navigation }: Props) {
       // Navigate to home screen with programId and clear check-in from stack
       navigation.reset({
         index: 0,
-        routes: [{ name: "Home", params: { programId: "no-gym" } }],
+        routes: [{ name: "Home", params: { programId } }],
       });
     } catch (error) {
       console.error("[DailyCheckIn] Failed to save:", error);

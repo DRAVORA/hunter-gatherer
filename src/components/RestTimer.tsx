@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { View, Text, StyleSheet, Alert } from "react-native";
 import { formatRestTime } from "../utils/formatting";
 import { theme } from "../styles/theme";
@@ -21,44 +21,36 @@ export default function RestTimer({
   targetSeconds,
   onComplete,
 }: RestTimerProps) {
-  const [isRunning, setIsRunning] = useState(true);
   const [remainingSeconds, setRemainingSeconds] = useState(targetSeconds);
-  const [hasCompleted, setHasCompleted] = useState(false);
+  const endTimeRef = useRef<number>(Date.now() + targetSeconds * 1000);
+  const hasCompletedRef = useRef(false);
 
   useEffect(() => {
+    endTimeRef.current = Date.now() + targetSeconds * 1000;
+    hasCompletedRef.current = false;
     setRemainingSeconds(targetSeconds);
-    setIsRunning(true);
   }, [targetSeconds]);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
+    const interval = setInterval(() => {
+      const secondsLeft = Math.max(
+        0,
+        Math.ceil((endTimeRef.current - Date.now()) / 1000),
+      );
 
-    if (isRunning && remainingSeconds > 0) {
-      interval = setInterval(() => {
-        setRemainingSeconds((prev) => {
-          if (prev <= 1) {
-            setIsRunning(false);
-            setHasCompleted(true);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
+      setRemainingSeconds(secondsLeft);
+
+      if (secondsLeft === 0 && !hasCompletedRef.current) {
+        hasCompletedRef.current = true;
+        onComplete(targetSeconds);
+        Alert.alert("Rest Complete", "Time to start your next set.");
+      }
+    }, 250);
 
     return () => {
-      if (interval) clearInterval(interval);
+      clearInterval(interval);
     };
-  }, [isRunning, remainingSeconds]);
-
-  // Show alarm when timer completes
-  useEffect(() => {
-    if (hasCompleted) {
-      setHasCompleted(false);
-      onComplete(targetSeconds);
-      Alert.alert("Rest Complete", "Time to start your next set.");
-    }
-  }, [hasCompleted, targetSeconds, onComplete]);
+  }, [onComplete, targetSeconds]);
 
   return (
     <View style={styles.container}>
