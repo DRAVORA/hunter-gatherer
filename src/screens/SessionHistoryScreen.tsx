@@ -126,10 +126,6 @@ const EXERCISE_CATEGORY_ORDER: Array<{
 export default function SessionHistoryScreen({ navigation }: Props) {
   const [sections, setSections] = useState<SessionSection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [expandedSession, setExpandedSession] = useState<string | null>(null);
-  const [sessionExercises, setSessionExercises] = useState<{
-    [key: string]: ExerciseSet[];
-  }>({});
   const [exerciseOptions, setExerciseOptions] = useState<string[]>([]);
   const [selectedExercise, setSelectedExercise] = useState<string | null>(null);
   const [exerciseHistory, setExerciseHistory] = useState<
@@ -162,7 +158,6 @@ export default function SessionHistoryScreen({ navigation }: Props) {
       setExerciseHistory([]);
       setSections([]);
     }
-    setExpandedSession(null);
   }, [selectedExercise]);
 
   async function loadExerciseOptions() {
@@ -293,42 +288,6 @@ export default function SessionHistoryScreen({ navigation }: Props) {
       console.error("[SessionHistory] Failed to load exercise history:", error);
     } finally {
       setExerciseHistoryLoading(false);
-    }
-  }
-
-  async function loadSessionExercises(sessionId: string) {
-    try {
-      const db = getDatabase();
-
-      const exercises = await db.getAllAsync<ExerciseSet>(
-        `
-        SELECT 
-          es.exercise_name,
-          ex.set_number,
-          ex.clean_reps as reps_completed,
-          ex.duration as duration_seconds,
-          ex.distance as distance_metres,
-          ex.weight as weight_kg,
-          ex.felt_clean,
-          ex.stop_reason
-        FROM exercise_set ex
-        JOIN exercise_session es ON ex.exercise_session_id = es.id
-        WHERE es.session_id = ?
-        ORDER BY es.order_in_session ASC, ex.set_number ASC
-      `,
-        [sessionId],
-      );
-
-      setSessionExercises((prev) => ({
-        ...prev,
-        [sessionId]: exercises,
-      }));
-
-      console.log(
-        `[SessionHistory] Loaded ${exercises.length} sets for session ${sessionId}`,
-      );
-    } catch (error) {
-      console.error("[SessionHistory] Failed to load exercises:", error);
     }
   }
 
@@ -833,161 +792,7 @@ export default function SessionHistoryScreen({ navigation }: Props) {
     );
   }
 
-  async function toggleExpanded(sessionId: string) {
-    if (expandedSession === sessionId) {
-      setExpandedSession(null);
-    } else {
-      setExpandedSession(sessionId);
-      // Load exercises if not already loaded
-      if (!sessionExercises[sessionId]) {
-        await loadSessionExercises(sessionId);
-      }
-    }
-  }
-
-  function groupExercisesBySets(sets: ExerciseSet[]): {
-    [key: string]: ExerciseSet[];
-  } {
-    const grouped: { [key: string]: ExerciseSet[] } = {};
-
-    sets.forEach((set) => {
-      if (!grouped[set.exercise_name]) {
-        grouped[set.exercise_name] = [];
-      }
-      grouped[set.exercise_name].push(set);
-    });
-
-    return grouped;
-  }
-
-  function renderExerciseDetails(sessionId: string) {
-    const exercises = sessionExercises[sessionId];
-
-    if (!exercises || exercises.length === 0) {
-      return (
-        <View style={styles.exerciseSection}>
-          <Text style={styles.noDataText}>No exercise data recorded</Text>
-        </View>
-      );
-    }
-
-    const groupedExercises = groupExercisesBySets(exercises);
-
-    return (
-      <View style={styles.exerciseSection}>
-        <Text style={styles.exerciseSectionTitle}>Exercise Breakdown</Text>
-
-        {Object.entries(groupedExercises).map(([exerciseName, sets]) => {
-          const isTimedExercise = sets.some(
-            (set) => set.duration_seconds !== null && set.duration_seconds > 0,
-          );
-          const isDistanceExercise = sets.some(
-            (set) => set.distance_metres !== null && set.distance_metres > 0,
-          );
-
-          const totalReps = sets.reduce(
-            (sum, set) => sum + (set.reps_completed || 0),
-            0,
-          );
-
-          const totalDuration = sets.reduce(
-            (sum, set) => sum + (set.duration_seconds || 0),
-            0,
-          );
-
-          const totalDistance = sets.reduce(
-            (sum, set) => sum + (set.distance_metres || 0),
-            0,
-          );
-
-          const maxWeight = sets.reduce((max, set) => {
-            if (set.weight_kg === null) return max;
-            return Math.max(max, set.weight_kg);
-          }, -Infinity);
-          const hasWeight = Number.isFinite(maxWeight) && maxWeight > 0;
-
-          const cleanSets = sets.filter((set) => set.felt_clean === 1).length;
-
-          return (
-            <View key={exerciseName} style={styles.exerciseBlock}>
-              <View style={styles.exerciseHeader}>
-                <Text style={styles.exerciseName}>{exerciseName}</Text>
-                <Text style={styles.exerciseStats}>
-                  {sets.length} sets {UNICODE.BULLET}{" "}
-                  {isTimedExercise
-                    ? `${formatDurationSeconds(totalDuration)} total`
-                    : isDistanceExercise
-                      ? `${formatDistance(totalDistance)} total`
-                      : `${totalReps} reps`}
-                  {hasWeight
-                    ? ` ${UNICODE.BULLET} Top load ${formatWeight(maxWeight)}`
-                    : ""}
-                </Text>
-              </View>
-
-              {/* Set-by-set breakdown */}
-              {sets.map((set) => (
-                <View key={set.set_number} style={styles.setRow}>
-                  <Text style={styles.setNumber}>Set {set.set_number}</Text>
-
-                  <View style={styles.setMetrics}>
-                    {set.duration_seconds !== null &&
-                    set.duration_seconds > 0 ? (
-                      <Text style={styles.setValue}>
-                        Time: {formatDurationSeconds(set.duration_seconds)}
-                      </Text>
-                    ) : set.distance_metres !== null &&
-                      set.distance_metres > 0 ? (
-                      <Text style={styles.setValue}>
-                        Distance: {formatDistance(set.distance_metres)}
-                      </Text>
-                    ) : set.reps_completed !== null &&
-                      set.reps_completed > 0 ? (
-                      <Text style={styles.setValue}>
-                        Reps: {set.reps_completed}
-                      </Text>
-                    ) : (
-                      <Text style={styles.setValue}>{UNICODE.EM_DASH}</Text>
-                    )}
-                    {set.weight_kg !== null && set.weight_kg > 0 ? (
-                      <Text style={styles.setSubValue}>
-                        Load: {formatWeight(set.weight_kg)}
-                      </Text>
-                    ) : null}
-                  </View>
-
-                  <View style={styles.setIndicators}>
-                    {set.felt_clean === 1 ? (
-                      <View style={styles.cleanBadge}>
-                        <Text style={styles.cleanBadgeText}>
-                          {UNICODE.CHECKMARK} Clean
-                        </Text>
-                      </View>
-                    ) : (
-                      <View style={styles.dirtyBadge}>
-                        <Text style={styles.dirtyBadgeText}>Form Break</Text>
-                      </View>
-                    )}
-                  </View>
-                </View>
-              ))}
-
-              {/* Clean sets summary */}
-              <View style={styles.exerciseSummary}>
-                <Text style={styles.summaryText}>
-                  Clean execution: {cleanSets}/{sets.length} sets (
-                  {Math.round((cleanSets / sets.length) * 100)}%)
-                </Text>
-              </View>
-            </View>
-          );
-        })}
-      </View>
-    );
-  }
-
   function renderSession({ item }: { item: SessionSummary }) {
-    const isExpanded = expandedSession === item.id;
     const completionRate =
       item.planned_volume > 0
         ? Math.round((item.completed_volume / item.planned_volume) * 100)
@@ -1006,60 +811,48 @@ export default function SessionHistoryScreen({ navigation }: Props) {
 
     return (
       <View style={styles.sessionCard}>
-        <TouchableOpacity onPress={() => toggleExpanded(item.id)}>
-          <View style={styles.sessionHeader}>
-            <View style={styles.sessionInfo}>
-              <Text style={styles.sessionName}>{displayName}</Text>
-              <Text style={styles.sessionDate}>{sessionDate}</Text>
-            </View>
-            <View style={styles.sessionStats}>
-              <Text style={styles.statsText}>
-                {completedVol}/{plannedVol} sets
-              </Text>
-              {durationMins !== null && durationMins > 0 ? (
-                <Text style={styles.statsText}>
-                  {formatMinutes(durationMins)}
-                </Text>
-              ) : null}
-              <Text style={styles.expandIndicator}>
-                {isExpanded ? "▼" : "▶"}
-              </Text>
-            </View>
+        <View style={styles.sessionHeader}>
+          <View style={styles.sessionInfo}>
+            <Text style={styles.sessionName}>{displayName}</Text>
+            <Text style={styles.sessionDate}>{sessionDate}</Text>
           </View>
-        </TouchableOpacity>
+          <View style={styles.sessionStats}>
+            <Text style={styles.statsText}>
+              {completedVol}/{plannedVol} sets
+            </Text>
+            {durationMins !== null && durationMins > 0 ? (
+              <Text style={styles.statsText}>{formatMinutes(durationMins)}</Text>
+            ) : null}
+          </View>
+        </View>
 
-        {isExpanded && (
-          <View style={styles.sessionDetails}>
-            {/* Session summary */}
-            <View style={styles.summarySection}>
+        <View style={styles.sessionDetails}>
+          {/* Session summary */}
+          <View style={styles.summarySection}>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Completion:</Text>
+              <Text style={styles.detailValue}>{completionRate}%</Text>
+            </View>
+            {sessionFeel ? (
               <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>Completion:</Text>
-                <Text style={styles.detailValue}>{completionRate}%</Text>
+                <Text style={styles.detailLabel}>Session Feel:</Text>
+                <Text style={styles.detailValue}>{String(sessionFeel)}</Text>
               </View>
-              {sessionFeel ? (
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>Session Feel:</Text>
-                  <Text style={styles.detailValue}>{String(sessionFeel)}</Text>
-                </View>
-              ) : null}
-              {durationMins === null || durationMins === 0 ? (
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>Duration:</Text>
-                  <Text style={styles.detailValue}>Not recorded</Text>
-                </View>
-              ) : null}
-              {sessionNotes ? (
-                <View style={styles.notesSection}>
-                  <Text style={styles.notesLabel}>Notes:</Text>
-                  <Text style={styles.notesValue}>{sessionNotes}</Text>
-                </View>
-              ) : null}
-            </View>
-
-            {/* Exercise details */}
-            {renderExerciseDetails(item.id)}
+            ) : null}
+            {durationMins === null || durationMins === 0 ? (
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Duration:</Text>
+                <Text style={styles.detailValue}>Not recorded</Text>
+              </View>
+            ) : null}
+            {sessionNotes ? (
+              <View style={styles.notesSection}>
+                <Text style={styles.notesLabel}>Notes:</Text>
+                <Text style={styles.notesValue}>{sessionNotes}</Text>
+              </View>
+            ) : null}
           </View>
-        )}
+        </View>
       </View>
     );
   }

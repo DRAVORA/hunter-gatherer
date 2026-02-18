@@ -21,6 +21,7 @@ import { useSessionState } from "../hooks/useSessionState";
 import { StopReason } from "../types";
 import { UNICODE } from "../constants/unicode";
 import { theme } from "../styles/theme";
+import { formatWeight } from "../utils/formatting";
 
 type ExerciseExecutionNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -37,6 +38,16 @@ interface Props {
   route: ExerciseExecutionRouteProp;
 }
 
+interface LastSessionSetRow {
+  clean_reps: number | null;
+  weight: number | null;
+}
+
+interface LastSessionBest {
+  weightLabel: string;
+  reps: number | null;
+}
+
 // ============================================================================
 // EXERCISE EXECUTION SCREEN
 // ============================================================================
@@ -51,6 +62,7 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
   const [showRestTimer, setShowRestTimer] = useState(false);
   const [weightInput, setWeightInput] = useState("");
   const [distanceInput, setDistanceInput] = useState("");
+  const [lastSessionBest, setLastSessionBest] = useState<LastSessionBest | null>(null);
 
   // Load session data
   useEffect(() => {
@@ -162,6 +174,89 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
         : "",
     );
   }, [currentExerciseIndex, currentExercise]);
+
+  useEffect(() => {
+    if (!currentExercise?.exerciseName) {
+      setLastSessionBest(null);
+      return;
+    }
+
+    loadLastSessionBest(currentExercise.exerciseName);
+  }, [currentExercise?.exerciseName]);
+
+  async function loadLastSessionBest(exerciseName: string) {
+    try {
+      const db = getDatabase();
+      const latestSession = await db.getFirstAsync<{ id: string }>(
+        `
+          SELECT ts.id
+          FROM training_session ts
+          JOIN exercise_session es ON ts.id = es.session_id
+          WHERE ts.end_time IS NOT NULL
+            AND es.exercise_name = ?
+            AND ts.id != ?
+          ORDER BY ts.date DESC, ts.start_time DESC
+          LIMIT 1
+        `,
+        [exerciseName, sessionId],
+      );
+
+      if (!latestSession) {
+        setLastSessionBest(null);
+        return;
+      }
+
+      const setRows = await db.getAllAsync<LastSessionSetRow>(
+        `
+          SELECT ex.clean_reps, ex.weight
+          FROM exercise_set ex
+          JOIN exercise_session es ON ex.exercise_session_id = es.id
+          WHERE es.session_id = ?
+            AND es.exercise_name = ?
+            AND ex.felt_clean = 1
+        `,
+        [latestSession.id, exerciseName],
+      );
+
+      if (setRows.length === 0) {
+        setLastSessionBest(null);
+        return;
+      }
+
+      const maxLoad = setRows.reduce((max, row) => {
+        const weightValue = row.weight ?? 0;
+        return weightValue > max ? weightValue : max;
+      }, 0);
+
+      if (maxLoad > 0) {
+        const repsAtMaxLoad = setRows
+          .filter((row) => (row.weight ?? 0) === maxLoad)
+          .reduce((maxReps, row) => {
+            const repsValue = row.clean_reps ?? 0;
+            return repsValue > maxReps ? repsValue : maxReps;
+          }, 0);
+
+        setLastSessionBest({
+          weightLabel: formatWeight(maxLoad),
+          reps: repsAtMaxLoad > 0 ? repsAtMaxLoad : null,
+        });
+        return;
+      }
+
+      const maxBodyweightReps = setRows.reduce((maxReps, row) => {
+        const repsValue = row.clean_reps ?? 0;
+        return repsValue > maxReps ? repsValue : maxReps;
+      }, 0);
+
+      setLastSessionBest({
+        weightLabel: "Bodyweight",
+        reps: maxBodyweightReps > 0 ? maxBodyweightReps : null,
+      });
+    } catch (error) {
+      console.error("[ExerciseExecution] Failed to load last session best:", error);
+      setLastSessionBest(null);
+    }
+  }
 
   // Show setup cues on first set
   useEffect(() => {
@@ -383,6 +478,12 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
             Set {currentSetNumber} of {currentExercise.targetSets}
           </Text>
           <Text style={styles.targetInfo}>Target: {targetDisplay}</Text>
+          <Text style={styles.lastSessionInfo}>
+            Last session max: {lastSessionBest?.weightLabel ?? UNICODE.EM_DASH}
+            {lastSessionBest?.reps !== null && lastSessionBest?.reps !== undefined
+              ? ` × ${lastSessionBest.reps} reps`
+              : ""}
+          </Text>
           <Text style={styles.intensityRule}>Stop 1 rep before failure</Text>
         </View>
 
@@ -631,6 +732,11 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.base,
     color: theme.colors.accent.secondary,
     fontWeight: theme.typography.fontWeight.bold,
+  },
+  lastSessionInfo: {
+    marginTop: theme.spacing[1],
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
   },
   intensityRule: {
     fontSize: theme.typography.fontSize.sm,
