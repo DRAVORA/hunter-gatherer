@@ -35,6 +35,13 @@ interface SessionSummary {
   notes: string | null;
 }
 
+interface SessionExerciseSummary {
+  id: string;
+  exercise_name: string;
+  completed_sets: number;
+  planned_sets: number;
+}
+
 interface SessionSection {
   title: string;
   data: SessionSummary[];
@@ -61,6 +68,12 @@ export default function SessionHistoryScreen({ navigation }: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedProgram, setSelectedProgram] =
     useState<ProgramFilter>("gym");
+  const [expandedSessionId, setExpandedSessionId] = useState<string | null>(
+    null,
+  );
+  const [sessionExercises, setSessionExercises] = useState<
+    Record<string, SessionExerciseSummary[]>
+  >({});
 
   // Reload history when screen comes into focus
   useEffect(() => {
@@ -105,6 +118,7 @@ export default function SessionHistoryScreen({ navigation }: Props) {
       // Group sessions by date category
       const grouped = groupSessionsByDate(results);
       setSections(grouped);
+      setExpandedSessionId(null);
 
       console.log(`[SessionHistory] Loaded ${results.length} sessions`);
     } catch (error) {
@@ -113,6 +127,48 @@ export default function SessionHistoryScreen({ navigation }: Props) {
     } finally {
       setIsLoading(false);
     }
+  }
+
+  async function loadSessionExercises(sessionId: string) {
+    if (sessionExercises[sessionId]) return;
+
+    try {
+      const db = getDatabase();
+      const exercises = await db.getAllAsync<SessionExerciseSummary>(
+        `
+          SELECT
+            id,
+            exercise_name,
+            completed_sets,
+            planned_sets
+          FROM exercise_session
+          WHERE session_id = ?
+          ORDER BY order_in_session
+        `,
+        [sessionId],
+      );
+
+      setSessionExercises((prev) => ({
+        ...prev,
+        [sessionId]: exercises,
+      }));
+    } catch (error) {
+      console.error("[SessionHistory] Failed to load exercises:", error);
+      setSessionExercises((prev) => ({
+        ...prev,
+        [sessionId]: [],
+      }));
+    }
+  }
+
+  function toggleSessionExpansion(sessionId: string) {
+    if (expandedSessionId === sessionId) {
+      setExpandedSessionId(null);
+      return;
+    }
+
+    setExpandedSessionId(sessionId);
+    loadSessionExercises(sessionId);
   }
 
   function groupSessionsByDate(sessions: SessionSummary[]): SessionSection[] {
@@ -245,9 +301,15 @@ export default function SessionHistoryScreen({ navigation }: Props) {
     const durationMins = item.duration_minutes;
     const sessionFeel = item.session_feel;
     const sessionNotes = item.notes?.trim();
+    const isExpanded = expandedSessionId === item.id;
+    const exercises = sessionExercises[item.id];
 
     return (
-      <View style={styles.sessionCard}>
+      <TouchableOpacity
+        style={styles.sessionCard}
+        activeOpacity={0.9}
+        onPress={() => toggleSessionExpansion(item.id)}
+      >
         <View style={styles.sessionHeader}>
           <View style={styles.sessionInfo}>
             <Text style={styles.sessionName}>{displayName}</Text>
@@ -288,9 +350,45 @@ export default function SessionHistoryScreen({ navigation }: Props) {
                 <Text style={styles.notesValue}>{sessionNotes}</Text>
               </View>
             ) : null}
+            <View style={styles.expandHintRow}>
+              <Text style={styles.expandHintText}>
+                {isExpanded ? "Hide exercises" : "Tap to view exercises"}
+              </Text>
+            </View>
+
+            {isExpanded ? (
+              <View style={styles.exerciseListSection}>
+                <Text style={styles.exerciseListTitle}>Exercises</Text>
+                {exercises ? (
+                  exercises.length > 0 ? (
+                    exercises.map((exercise) => (
+                      <View key={exercise.id} style={styles.exerciseRow}>
+                        <Text style={styles.exerciseListName}>
+                          {exercise.exercise_name}
+                        </Text>
+                        <Text style={styles.exerciseSets}>
+                          {exercise.completed_sets}/{exercise.planned_sets} sets
+                        </Text>
+                      </View>
+                    ))
+                  ) : (
+                    <Text style={styles.exerciseEmptyText}>
+                      No exercise data saved for this session.
+                    </Text>
+                  )
+                ) : (
+                  <View style={styles.loadingInline}>
+                    <ActivityIndicator
+                      size="small"
+                      color={theme.colors.accent.secondary}
+                    />
+                  </View>
+                )}
+              </View>
+            ) : null}
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   }
 
@@ -420,8 +518,52 @@ const styles = StyleSheet.create({
     color: theme.colors.text.tertiary,
   },
   loadingInline: {
-    paddingVertical: theme.spacing[6],
+    paddingVertical: theme.spacing[2],
     alignItems: "center",
+  },
+  expandHintRow: {
+    marginTop: theme.spacing[2],
+  },
+  expandHintText: {
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.tertiary,
+    fontWeight: theme.typography.fontWeight.semibold,
+    textTransform: "uppercase",
+    letterSpacing: theme.typography.letterSpacing.wide,
+  },
+  exerciseListSection: {
+    marginTop: theme.spacing[3],
+    borderTopWidth: theme.borderWidth.hairline,
+    borderTopColor: theme.colors.border.subtle,
+    paddingTop: theme.spacing[3],
+    gap: theme.spacing[2],
+  },
+  exerciseListTitle: {
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.tertiary,
+    fontWeight: theme.typography.fontWeight.semibold,
+    textTransform: "uppercase",
+    letterSpacing: theme.typography.letterSpacing.wide,
+  },
+  exerciseRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: theme.spacing[3],
+  },
+  exerciseListName: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.primary,
+    flex: 1,
+  },
+  exerciseSets: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+    fontWeight: theme.typography.fontWeight.semibold,
+  },
+  exerciseEmptyText: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.disabled,
   },
   exerciseInsights: {
     marginBottom: theme.spacing[4],
