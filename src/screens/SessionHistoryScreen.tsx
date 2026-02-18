@@ -10,17 +10,9 @@ import {
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../App";
 
-import { getExerciseRules } from "../data/exercises";
 import { getDatabase } from "../database/init";
-import {
-  formatMinutes,
-  formatPercentage,
-  formatWeight,
-  formatDistance,
-} from "../utils/formatting";
-import { UNICODE } from "../constants/unicode";
+import { formatMinutes } from "../utils/formatting";
 import { theme } from "../styles/theme";
-import { ExerciseCategory, StopReason } from "../types";
 
 type SessionHistoryNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -34,6 +26,7 @@ interface Props {
 interface SessionSummary {
   id: string;
   date: string;
+  program_name: string;
   session_name: string;
   completed_volume: number;
   planned_volume: number;
@@ -42,82 +35,22 @@ interface SessionSummary {
   notes: string | null;
 }
 
-interface ExerciseSet {
-  exercise_name: string;
-  set_number: number;
-  reps_completed: number | null;
-  duration_seconds: number | null;
-  distance_metres: number | null;
-  weight_kg: number | null;
-  felt_clean: number;
-  stop_reason: string | null;
-}
-
 interface SessionSection {
   title: string;
   data: SessionSummary[];
 }
 
-interface ExerciseOptionRow {
-  exercise_name: string;
-}
+type ProgramFilter = "gym" | "no-gym";
 
-interface ExerciseHistoryRow {
-  session_id: string;
-  date: string;
-  volume_adjustment_applied: number;
-  planned_sets: number;
-  completed_sets: number;
-  total_sets: number;
-  total_clean_reps: number;
-  total_duration: number;
-  total_distance: number;
-  clean_sets: number;
-  top_clean_load: number | null;
-  top_clean_duration: number | null;
-  top_clean_reps: number | null;
-  top_clean_distance: number | null;
-  stop_flag_count: number;
-}
-
-interface ExerciseHistoryEntry {
-  sessionId: string;
-  date: string;
-  volumeAdjustmentApplied: number;
-  plannedSets: number;
-  completedSets: number;
-  totalSets: number;
-  totalCleanReps: number;
-  totalDuration: number;
-  totalDistance: number;
-  cleanSets: number;
-  topCleanLoad: number | null;
-  topCleanDuration: number | null;
-  topCleanReps: number | null;
-  topCleanDistance: number | null;
-  stopFlagCount: number;
-}
-
-interface ProgressionStatus {
-  label: string;
-  description: string;
-  tone: "stable" | "hold" | "regress";
-}
-
-type ExerciseMetricType = "load" | "hold" | "rep" | "distance";
-type ExerciseCategoryGroupKey = ExerciseCategory | "OTHER";
-
-const EXERCISE_CATEGORY_ORDER: Array<{
-  key: ExerciseCategoryGroupKey;
-  label: string;
-}> = [
-  { key: ExerciseCategory.PULL, label: "Pull" },
-  { key: ExerciseCategory.PUSH, label: "Push" },
-  { key: ExerciseCategory.LEGS, label: "Legs" },
-  { key: ExerciseCategory.CORE, label: "Core" },
-  { key: ExerciseCategory.CARRY, label: "Carry" },
-  { key: "OTHER", label: "Other" },
+const PROGRAM_FILTERS: Array<{ key: ProgramFilter; label: string }> = [
+  { key: "gym", label: "Gym" },
+  { key: "no-gym", label: "No-Gym" },
 ];
+
+const PROGRAM_NAME_BY_FILTER: Record<ProgramFilter, string> = {
+  gym: "ATAVIA Gym",
+  "no-gym": "ATAVIA No-Gym",
+};
 
 // ============================================================================
 // SESSION HISTORY SCREEN
@@ -126,91 +59,48 @@ const EXERCISE_CATEGORY_ORDER: Array<{
 export default function SessionHistoryScreen({ navigation }: Props) {
   const [sections, setSections] = useState<SessionSection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [exerciseOptions, setExerciseOptions] = useState<string[]>([]);
-  const [selectedExercise, setSelectedExercise] = useState<string | null>(null);
-  const [exerciseHistory, setExerciseHistory] = useState<
-    ExerciseHistoryEntry[]
-  >([]);
-  const [exerciseHistoryLoading, setExerciseHistoryLoading] = useState(false);
-
-  useEffect(() => {
-    loadExerciseOptions();
-  }, []);
+  const [selectedProgram, setSelectedProgram] =
+    useState<ProgramFilter>("gym");
 
   // Reload history when screen comes into focus
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
-      loadExerciseOptions();
-      if (selectedExercise) {
-        loadSessionHistory(selectedExercise);
-        loadExerciseHistory(selectedExercise);
-      }
+      loadSessionHistory(selectedProgram);
     });
 
     return unsubscribe;
-  }, [navigation, selectedExercise]);
+  }, [navigation, selectedProgram]);
 
   useEffect(() => {
-    if (selectedExercise) {
-      loadSessionHistory(selectedExercise);
-      loadExerciseHistory(selectedExercise);
-    } else {
-      setExerciseHistory([]);
-      setSections([]);
-    }
-  }, [selectedExercise]);
+    loadSessionHistory(selectedProgram);
+  }, [selectedProgram]);
 
-  async function loadExerciseOptions() {
+  async function loadSessionHistory(programFilter: ProgramFilter) {
     try {
+      setIsLoading(true);
       const db = getDatabase();
-      const results = await db.getAllAsync<ExerciseOptionRow>(`
-        SELECT DISTINCT exercise_name
-        FROM exercise_session
-        ORDER BY exercise_name ASC
-      `);
-      setExerciseOptions(results.map((row) => row.exercise_name));
-      if (results.length > 0 && !selectedExercise) {
-        setSelectedExercise(results[0].exercise_name);
-      } else if (results.length === 0) {
-        setIsLoading(false);
-      }
-    } catch (error) {
-      console.error("[SessionHistory] Failed to load exercise options:", error);
-    }
-  }
+      const programName = PROGRAM_NAME_BY_FILTER[programFilter];
 
-  async function loadSessionHistory(exerciseName: string | null) {
-    try {
-      const db = getDatabase();
-
-      const results = exerciseName
-        ? await db.getAllAsync<SessionSummary>(
-            `
-              SELECT DISTINCT
-                ts.id, ts.date, ts.session_name, ts.completed_volume, ts.planned_volume,
-                ts.session_feel,
-                ts.notes,
-                CAST((julianday(ts.end_time) - julianday(ts.start_time)) * 24 * 60 AS INTEGER) as duration_minutes
-              FROM training_session ts
-              JOIN exercise_session es ON ts.id = es.session_id
-              WHERE ts.end_time IS NOT NULL
-                AND es.exercise_name = ?
-              ORDER BY ts.date DESC, ts.start_time DESC
-              LIMIT 50
-            `,
-            [exerciseName],
-          )
-        : await db.getAllAsync<SessionSummary>(`
-            SELECT 
-              id, date, session_name, completed_volume, planned_volume,
-              session_feel,
-              notes,
-              CAST((julianday(end_time) - julianday(start_time)) * 24 * 60 AS INTEGER) as duration_minutes
-            FROM training_session
-            WHERE end_time IS NOT NULL
-            ORDER BY date DESC, start_time DESC
-            LIMIT 50
-          `);
+      const results = await db.getAllAsync<SessionSummary>(
+        `
+          SELECT
+            id,
+            date,
+            program_name,
+            session_name,
+            completed_volume,
+            planned_volume,
+            session_feel,
+            notes,
+            CAST((julianday(end_time) - julianday(start_time)) * 24 * 60 AS INTEGER) as duration_minutes
+          FROM training_session
+          WHERE end_time IS NOT NULL
+            AND program_name = ?
+          ORDER BY date DESC, start_time DESC
+          LIMIT 50
+        `,
+        [programName],
+      );
 
       // Group sessions by date category
       const grouped = groupSessionsByDate(results);
@@ -219,75 +109,9 @@ export default function SessionHistoryScreen({ navigation }: Props) {
       console.log(`[SessionHistory] Loaded ${results.length} sessions`);
     } catch (error) {
       console.error("[SessionHistory] Failed to load:", error);
+      setSections([]);
     } finally {
       setIsLoading(false);
-    }
-  }
-
-  async function loadExerciseHistory(exerciseName: string) {
-    try {
-      setExerciseHistoryLoading(true);
-      const db = getDatabase();
-      const results = await db.getAllAsync<ExerciseHistoryRow>(
-        `
-          SELECT
-            ts.id as session_id,
-            ts.date,
-            ts.volume_adjustment_applied,
-            MAX(es.planned_sets) as planned_sets,
-            MAX(es.completed_sets) as completed_sets,
-            COUNT(ex.id) as total_sets,
-            SUM(ex.clean_reps) as total_clean_reps,
-            SUM(CASE WHEN ex.duration IS NOT NULL THEN ex.duration ELSE 0 END) as total_duration,
-            SUM(CASE WHEN ex.distance IS NOT NULL THEN ex.distance ELSE 0 END) as total_distance,
-            SUM(CASE WHEN ex.felt_clean = 1 THEN 1 ELSE 0 END) as clean_sets,
-            MAX(CASE WHEN ex.felt_clean = 1 THEN ex.weight ELSE NULL END) as top_clean_load,
-            MAX(CASE WHEN ex.felt_clean = 1 THEN ex.duration ELSE NULL END) as top_clean_duration,
-            MAX(CASE WHEN ex.felt_clean = 1 THEN ex.clean_reps ELSE NULL END) as top_clean_reps,
-            MAX(CASE WHEN ex.felt_clean = 1 THEN ex.distance ELSE NULL END) as top_clean_distance,
-            SUM(CASE WHEN ex.stop_reason != ? THEN 1 ELSE 0 END) as stop_flag_count
-          FROM training_session ts
-          JOIN exercise_session es ON ts.id = es.session_id
-          JOIN exercise_set ex ON es.id = ex.exercise_session_id
-          WHERE ts.end_time IS NOT NULL
-            AND es.exercise_name = ?
-          GROUP BY ts.id, ts.date, ts.volume_adjustment_applied
-          ORDER BY ts.date ASC, ts.start_time ASC
-        `,
-        [StopReason.CLEAN_COMPLETION, exerciseName],
-      );
-
-      const mapped: ExerciseHistoryEntry[] = results.map((row) => ({
-        sessionId: row.session_id,
-        date: row.date,
-        volumeAdjustmentApplied: Number(row.volume_adjustment_applied) || 0,
-        plannedSets: Number(row.planned_sets) || 0,
-        completedSets: Number(row.completed_sets) || 0,
-        totalSets: Number(row.total_sets) || 0,
-        totalCleanReps: Number(row.total_clean_reps) || 0,
-        totalDuration: Number(row.total_duration) || 0,
-        totalDistance: Number(row.total_distance) || 0,
-        cleanSets: Number(row.clean_sets) || 0,
-        topCleanLoad:
-          row.top_clean_load === null ? null : Number(row.top_clean_load),
-        topCleanDuration:
-          row.top_clean_duration === null
-            ? null
-            : Number(row.top_clean_duration),
-        topCleanReps:
-          row.top_clean_reps === null ? null : Number(row.top_clean_reps),
-        topCleanDistance:
-          row.top_clean_distance === null
-            ? null
-            : Number(row.top_clean_distance),
-        stopFlagCount: Number(row.stop_flag_count) || 0,
-      }));
-
-      setExerciseHistory(mapped);
-    } catch (error) {
-      console.error("[SessionHistory] Failed to load exercise history:", error);
-    } finally {
-      setExerciseHistoryLoading(false);
     }
   }
 
@@ -340,26 +164,6 @@ export default function SessionHistoryScreen({ navigation }: Props) {
     return sections;
   }
 
-  function groupExerciseOptionsByCategory(options: string[]): Array<{
-    key: ExerciseCategoryGroupKey;
-    label: string;
-    exercises: string[];
-  }> {
-    const grouped = new Map<ExerciseCategoryGroupKey, string[]>();
-
-    options.forEach((exerciseName) => {
-      const rules = getExerciseRules(exerciseName);
-      const category = rules?.category ?? "OTHER";
-      const existing = grouped.get(category) ?? [];
-      grouped.set(category, [...existing, exerciseName]);
-    });
-
-    return EXERCISE_CATEGORY_ORDER.map((category) => ({
-      ...category,
-      exercises: grouped.get(category.key) ?? [],
-    })).filter((category) => category.exercises.length > 0);
-  }
-
   function getDisplayName(sessionName: string): string {
     // Map database session names to display names
     const nameMap: { [key: string]: string } = {
@@ -388,397 +192,31 @@ export default function SessionHistoryScreen({ navigation }: Props) {
     return date.toLocaleDateString("en-US", options);
   }
 
-  function formatDurationSeconds(seconds: number | null): string {
-    if (seconds === null || Number.isNaN(seconds)) {
-      return UNICODE.EM_DASH;
-    }
-    if (seconds < 60) {
-      return `${Math.round(seconds)}s`;
-    }
-    const minutes = Math.floor(seconds / 60);
-    const remaining = Math.round(seconds % 60);
-    return `${minutes}m ${remaining}s`;
-  }
-
-  function getExerciseMetricType(
-    entries: ExerciseHistoryEntry[],
-  ): ExerciseMetricType {
-    if (entries.some((entry) => entry.topCleanDistance !== null)) {
-      return "distance";
-    }
-    if (entries.some((entry) => entry.topCleanDuration !== null)) {
-      return "hold";
-    }
-    if (entries.some((entry) => entry.topCleanLoad !== null)) {
-      return "load";
-    }
-    return "rep";
-  }
-
-  function formatMetricValue(
-    entry: ExerciseHistoryEntry,
-    metricType: ExerciseMetricType,
-  ): string {
-    const loadSuffix =
-      entry.topCleanLoad !== null
-        ? ` @ ${formatTopCleanLoad(entry.topCleanLoad)}`
-        : "";
-    if (metricType === "distance") {
-      if (
-        entry.topCleanDistance === null ||
-        Number.isNaN(entry.topCleanDistance)
-      ) {
-        return UNICODE.EM_DASH;
-      }
-      return `${formatDistance(entry.topCleanDistance)}${loadSuffix}`;
-    }
-    if (metricType === "hold") {
-      return `${formatDurationSeconds(entry.topCleanDuration)}${loadSuffix}`;
-    }
-    if (metricType === "rep") {
-      if (entry.topCleanReps === null || Number.isNaN(entry.topCleanReps)) {
-        return UNICODE.EM_DASH;
-      }
-      return `${Math.round(entry.topCleanReps)} reps${loadSuffix}`;
-    }
-    return formatTopCleanLoad(entry.topCleanLoad);
-  }
-
-  function getInvalidReasons(entry: ExerciseHistoryEntry): string[] {
-    const reasons: string[] = [];
-    if (entry.plannedSets > 0 && entry.completedSets < entry.plannedSets) {
-      reasons.push("Sets incomplete");
-    }
-    if (entry.totalSets === 0) {
-      reasons.push("No completed sets");
-    }
-    if (entry.cleanSets < entry.totalSets) {
-      reasons.push("Clean execution not repeatable");
-    }
-    if (entry.stopFlagCount > 0) {
-      reasons.push("Stop rule triggered");
-    }
-    if (entry.volumeAdjustmentApplied > 0) {
-      reasons.push("Volume reduction");
-    }
-    return reasons;
-  }
-
-  function getCleanPercentage(entry: ExerciseHistoryEntry): number {
-    if (entry.totalSets === 0) return 0;
-    return Math.round((entry.cleanSets / entry.totalSets) * 100);
-  }
-
-  function getProgressionStatus(
-    entry: ExerciseHistoryEntry | null,
-  ): ProgressionStatus {
-    if (!entry) {
-      return {
-        label: "Hold Load",
-        description: "No sessions logged for this exercise yet.",
-        tone: "hold",
-      };
-    }
-
-    if (entry.stopFlagCount > 0) {
-      return {
-        label: "Regress",
-        description: "Stop rule triggered in last session.",
-        tone: "regress",
-      };
-    }
-
-    if (entry.volumeAdjustmentApplied > 0) {
-      return {
-        label: "Regress",
-        description: "Volume reduction applied in last session.",
-        tone: "regress",
-      };
-    }
-
-    if (entry.plannedSets > 0 && entry.completedSets < entry.plannedSets) {
-      return {
-        label: "Hold Load",
-        description: "Prescribed sets not completed.",
-        tone: "hold",
-      };
-    }
-
-    if (entry.totalSets === 0) {
-      return {
-        label: "Hold Load",
-        description: "No completed sets recorded.",
-        tone: "hold",
-      };
-    }
-
-    if (entry.cleanSets < entry.totalSets) {
-      return {
-        label: "Hold Load",
-        description: "Clean execution not repeatable.",
-        tone: "hold",
-      };
-    }
-
-    return {
-      label: "Eligible to Progress",
-      description:
-        "All prescribed sets completed cleanly with no stop rules or volume reductions.",
-      tone: "stable",
-    };
-  }
-
-  function formatTopCleanLoad(load: number | null): string {
-    if (load === null || Number.isNaN(load)) {
-      return UNICODE.EM_DASH;
-    }
-    return formatWeight(load);
-  }
-
-  function formatSetsReps(
-    entry: ExerciseHistoryEntry,
-    metricType: ExerciseMetricType,
-  ): string {
-    if (entry.totalSets === 0) return UNICODE.EM_DASH;
-    if (metricType === "hold") {
-      const averageSeconds =
-        entry.totalSets > 0 ? entry.totalDuration / entry.totalSets : 0;
-      return `${entry.totalSets} × ${formatDurationSeconds(averageSeconds)}`;
-    }
-    if (metricType === "distance") {
-      const averageDistance =
-        entry.totalSets > 0 ? entry.totalDistance / entry.totalSets : 0;
-      return `${entry.totalSets} × ${formatDistance(averageDistance)}`;
-    }
-    const averageReps =
-      entry.totalSets > 0
-        ? Math.round(entry.totalCleanReps / entry.totalSets)
-        : 0;
-    return `${entry.totalSets} × ${averageReps}`;
-  }
-
-  function formatFlags(entry: ExerciseHistoryEntry): string {
-    const flags: string[] = [];
-    const invalidReasons = getInvalidReasons(entry);
-    if (invalidReasons.length > 0) {
-      flags.push(...invalidReasons);
-    }
-    return flags.length > 0 ? flags.join(", ") : "Clear";
-  }
-
-  function formatAuthorityFlags(entry: ExerciseHistoryEntry): string {
-    const flags: string[] = [];
-    if (entry.stopFlagCount > 0) {
-      flags.push("Stop rule");
-    }
-    if (entry.volumeAdjustmentApplied > 0) {
-      flags.push("Volume reduction");
-    }
-    return flags.length > 0 ? flags.join(", ") : "None";
-  }
-
-  function renderExerciseInsights() {
-    if (!selectedExercise) {
-      return (
-        <View style={styles.emptyInsights}>
-          <Text style={styles.emptyInsightsText}>
-            Select an exercise to view progression eligibility and session
-            validity for that movement only.
-          </Text>
-        </View>
-      );
-    }
-
-    if (exerciseHistoryLoading) {
-      return (
-        <View style={styles.loadingInline}>
-          <ActivityIndicator
-            size="small"
-            color={theme.colors.accent.secondary}
-          />
-        </View>
-      );
-    }
-
-    const lastEntry =
-      exerciseHistory.length > 0
-        ? exerciseHistory[exerciseHistory.length - 1]
-        : null;
-    const progressionStatus = getProgressionStatus(lastEntry);
-    const metricType = getExerciseMetricType(exerciseHistory);
-    const tableEntries = [...exerciseHistory].reverse();
-    const lastEntryFlags = lastEntry
-      ? formatAuthorityFlags(lastEntry)
-      : UNICODE.EM_DASH;
-
-    return (
-      <View style={styles.exerciseInsights}>
-        <View style={styles.authorityCard}>
-          <Text style={styles.authorityTitle}>Last Session Authority</Text>
-          {lastEntry ? (
-            <View style={styles.authorityGrid}>
-              <View style={styles.authorityRow}>
-                <Text style={styles.authorityLabel}>Date</Text>
-                <Text style={styles.authorityValue}>
-                  {formatSessionDate(lastEntry.date)}
-                </Text>
-              </View>
-              <View style={styles.authorityRow}>
-                <Text style={styles.authorityLabel}>Key metric</Text>
-                <Text style={styles.authorityValue}>
-                  {formatMetricValue(lastEntry, metricType)}
-                </Text>
-              </View>
-              <View style={styles.authorityRow}>
-                <Text style={styles.authorityLabel}>Sets × avg</Text>
-                <Text style={styles.authorityValue}>
-                  {formatSetsReps(lastEntry, metricType)}
-                </Text>
-              </View>
-              <View style={styles.authorityRow}>
-                <Text style={styles.authorityLabel}>Clean rep %</Text>
-                <Text style={styles.authorityValue}>
-                  {formatPercentage(getCleanPercentage(lastEntry))}
-                </Text>
-              </View>
-              <View style={styles.authorityRow}>
-                <Text style={styles.authorityLabel}>Flags</Text>
-                <Text style={styles.authorityValue}>{lastEntryFlags}</Text>
-              </View>
-            </View>
-          ) : (
-            <Text style={styles.authorityEmptyText}>
-              No completed sessions for this exercise yet.
-            </Text>
-          )}
-        </View>
-        <View style={styles.statusHeader}>
-          <Text style={styles.statusLabel}>Progression Verdict</Text>
-          {progressionStatus ? (
-            <View
-              style={[
-                styles.statusBadge,
-                progressionStatus.tone === "stable"
-                  ? styles.statusBadgeStable
-                  : progressionStatus.tone === "regress"
-                    ? styles.statusBadgeRegress
-                    : styles.statusBadgeHold,
-              ]}
-            >
-              <Text style={styles.statusBadgeText}>
-                {progressionStatus.label}
-              </Text>
-            </View>
-          ) : null}
-        </View>
-        {progressionStatus ? (
-          <Text style={styles.statusDescription}>
-            {progressionStatus.description}
-          </Text>
-        ) : null}
-        <View style={styles.rulesCard}>
-          <Text style={styles.rulesTitle}>Progression rules</Text>
-          <Text style={styles.rulesText}>
-            Progression is allowed only when the most recent session completes
-            all prescribed sets, counts only clean reps, triggers no stop rules,
-            maintains 1{UNICODE.DASH}2 reps in reserve on the final working set,
-            and applies no volume reductions. Any violation blocks progression.
-          </Text>
-        </View>
-
-        <Text style={styles.historyTitle}>Historical Sessions</Text>
-        <View style={styles.historyTable}>
-          <View style={styles.tableHeaderRow}>
-            <Text style={[styles.tableHeaderText, styles.tableDate]}>Date</Text>
-            <Text style={[styles.tableHeaderText, styles.tableLoad]}>
-              Key metric
-            </Text>
-            <Text style={[styles.tableHeaderText, styles.tableSets]}>
-              Sets × avg
-            </Text>
-            <Text style={[styles.tableHeaderText, styles.tableClean]}>
-              Clean %
-            </Text>
-            <Text style={[styles.tableHeaderText, styles.tableFlags]}>
-              Flags
-            </Text>
-          </View>
-          {tableEntries.length === 0 ? (
-            <View style={styles.tableEmptyRow}>
-              <Text style={styles.tableEmptyText}>
-                No sessions logged for this exercise yet.
-              </Text>
-            </View>
-          ) : (
-            tableEntries.map((entry) => {
-              return (
-                <View key={entry.sessionId} style={styles.tableRow}>
-                  <View style={[styles.tableDate, styles.tableDateCell]}>
-                    <Text style={styles.tableCellText}>
-                      {formatSessionDate(entry.date)}
-                    </Text>
-                  </View>
-                  <Text style={[styles.tableCellText, styles.tableLoad]}>
-                    {formatMetricValue(entry, metricType)}
-                  </Text>
-                  <Text style={[styles.tableCellText, styles.tableSets]}>
-                    {formatSetsReps(entry, metricType)}
-                  </Text>
-                  <Text style={[styles.tableCellText, styles.tableClean]}>
-                    {formatPercentage(getCleanPercentage(entry))}
-                  </Text>
-                  <Text style={[styles.tableCellText, styles.tableFlags]}>
-                    {formatFlags(entry)}
-                  </Text>
-                </View>
-              );
-            })
-          )}
-        </View>
-      </View>
-    );
-  }
-
-  function renderExerciseFilter() {
-    const groupedOptions = groupExerciseOptionsByCategory(exerciseOptions);
-
+  function renderProgramFilter() {
     return (
       <View style={styles.filterSection}>
-        <Text style={styles.filterLabel}>Filter by exercise</Text>
-        {exerciseOptions.length === 0 ? (
-          <Text style={styles.filterEmptyText}>No exercise data yet.</Text>
-        ) : (
-          <View style={styles.filterGroups}>
-            {groupedOptions.map((group) => (
-              <View key={group.key} style={styles.filterGroup}>
-                <Text style={styles.filterGroupTitle}>{group.label}</Text>
-                <View style={styles.filterGroupPills}>
-                  {group.exercises.map((exerciseName) => (
-                    <TouchableOpacity
-                      key={exerciseName}
-                      onPress={() => setSelectedExercise(exerciseName)}
-                      style={[
-                        styles.filterPill,
-                        selectedExercise === exerciseName &&
-                          styles.filterPillActive,
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.filterPillText,
-                          selectedExercise === exerciseName &&
-                            styles.filterPillTextActive,
-                        ]}
-                      >
-                        {exerciseName}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            ))}
-          </View>
-        )}
+        <Text style={styles.filterLabel}>Filter by program</Text>
+        <View style={styles.filterGroupPills}>
+          {PROGRAM_FILTERS.map((program) => (
+            <TouchableOpacity
+              key={program.key}
+              onPress={() => setSelectedProgram(program.key)}
+              style={[
+                styles.filterPill,
+                selectedProgram === program.key && styles.filterPillActive,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.filterPillText,
+                  selectedProgram === program.key && styles.filterPillTextActive,
+                ]}
+              >
+                {program.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
     );
   }
@@ -786,8 +224,7 @@ export default function SessionHistoryScreen({ navigation }: Props) {
   function renderHistoryHeader() {
     return (
       <View>
-        {renderExerciseFilter()}
-        {renderExerciseInsights()}
+        {renderProgramFilter()}
       </View>
     );
   }
@@ -886,14 +323,14 @@ export default function SessionHistoryScreen({ navigation }: Props) {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>
-              {selectedExercise
-                ? "No sessions for this exercise yet."
-                : "Select an exercise to view history."}
+              {selectedProgram === "gym"
+                ? "No gym sessions yet."
+                : "No no-gym sessions yet."}
             </Text>
             <Text style={styles.emptySubtext}>
-              {selectedExercise
-                ? "Complete a session with this exercise to see execution history here."
-                : "Choose an exercise to see session validity and progression rules."}
+              {selectedProgram === "gym"
+                ? "Complete a gym session to see it here."
+                : "Complete a no-gym session to see it here."}
             </Text>
           </View>
         }
