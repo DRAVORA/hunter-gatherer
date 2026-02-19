@@ -11,7 +11,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../App";
 
 import { getDatabase } from "../database/init";
-import { formatMinutes } from "../utils/formatting";
+import { formatMinutes, formatWeight } from "../utils/formatting";
 import { theme } from "../styles/theme";
 
 type SessionHistoryNavigationProp = StackNavigationProp<
@@ -40,6 +40,9 @@ interface SessionExerciseSummary {
   exercise_name: string;
   completed_sets: number;
   planned_sets: number;
+  total_clean_reps: number;
+  max_weight: number | null;
+  reps_at_max_weight: number | null;
 }
 
 interface SessionSection {
@@ -137,13 +140,27 @@ export default function SessionHistoryScreen({ navigation }: Props) {
       const exercises = await db.getAllAsync<SessionExerciseSummary>(
         `
           SELECT
-            id,
-            exercise_name,
-            completed_sets,
-            planned_sets
-          FROM exercise_session
-          WHERE session_id = ?
-          ORDER BY order_in_session
+            es.id,
+            es.exercise_name,
+            es.completed_sets,
+            es.planned_sets,
+            COALESCE(SUM(ex.clean_reps), 0) AS total_clean_reps,
+            MAX(ex.weight) AS max_weight,
+            (
+              SELECT MAX(ex2.clean_reps)
+              FROM exercise_set ex2
+              WHERE ex2.exercise_session_id = es.id
+                AND ex2.weight = (
+                  SELECT MAX(ex3.weight)
+                  FROM exercise_set ex3
+                  WHERE ex3.exercise_session_id = es.id
+                )
+            ) AS reps_at_max_weight
+          FROM exercise_session es
+          LEFT JOIN exercise_set ex ON ex.exercise_session_id = es.id
+          WHERE es.session_id = ?
+          GROUP BY es.id
+          ORDER BY es.order_in_session
         `,
         [sessionId],
       );
@@ -363,11 +380,16 @@ export default function SessionHistoryScreen({ navigation }: Props) {
                   exercises.length > 0 ? (
                     exercises.map((exercise) => (
                       <View key={exercise.id} style={styles.exerciseRow}>
-                        <Text style={styles.exerciseListName}>
-                          {exercise.exercise_name}
-                        </Text>
-                        <Text style={styles.exerciseSets}>
-                          {exercise.completed_sets}/{exercise.planned_sets} sets
+                        <View style={styles.exerciseRowMain}>
+                          <Text style={styles.exerciseListName}>
+                            {exercise.exercise_name}
+                          </Text>
+                          <Text style={styles.exerciseSets}>
+                            {exercise.completed_sets}/{exercise.planned_sets} sets
+                          </Text>
+                        </View>
+                        <Text style={styles.exercisePerformanceText}>
+                          {getExercisePerformanceText(exercise)}
                         </Text>
                       </View>
                     ))
@@ -390,6 +412,23 @@ export default function SessionHistoryScreen({ navigation }: Props) {
         </View>
       </TouchableOpacity>
     );
+  }
+
+
+  function getExercisePerformanceText(exercise: SessionExerciseSummary): string {
+    const maxWeight = exercise.max_weight;
+    const hasLoad = typeof maxWeight === "number" && maxWeight > 0;
+    const repsAtMax = exercise.reps_at_max_weight;
+
+    if (hasLoad && repsAtMax && repsAtMax > 0) {
+      return `Best set: ${formatWeight(maxWeight)} × ${repsAtMax} reps`;
+    }
+
+    if (exercise.total_clean_reps > 0) {
+      return `Total clean reps: ${exercise.total_clean_reps}`;
+    }
+
+    return "No rep/load data saved";
   }
 
   function renderSectionHeader({ section }: { section: SessionSection }) {
@@ -546,6 +585,9 @@ const styles = StyleSheet.create({
     letterSpacing: theme.typography.letterSpacing.wide,
   },
   exerciseRow: {
+    gap: theme.spacing[1],
+  },
+  exerciseRowMain: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -560,6 +602,10 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.text.secondary,
     fontWeight: theme.typography.fontWeight.semibold,
+  },
+  exercisePerformanceText: {
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.tertiary,
   },
   exerciseEmptyText: {
     fontSize: theme.typography.fontSize.sm,
