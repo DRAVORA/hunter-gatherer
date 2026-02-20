@@ -333,6 +333,13 @@ export function useDatabase() {
     return sessions;
   };
 
+  const getExerciseSessionsBySessionId = async (
+    sessionId: string,
+  ): Promise<ExerciseSession[]> => {
+    const session = await getSessionById(sessionId);
+    return session?.exercises || [];
+  };
+
   // ==========================================================================
   // EXERCISE SESSION OPERATIONS
   // ==========================================================================
@@ -561,6 +568,7 @@ export function useDatabase() {
     updateTrainingSession,
     getSessionById,
     getSessionHistory,
+    getExerciseSessionsBySessionId,
     // Exercise operations
     saveExerciseSession,
     updateExerciseSession,

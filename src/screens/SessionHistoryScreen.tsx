@@ -43,6 +43,16 @@ interface SessionExerciseSummary {
   total_clean_reps: number;
   max_weight: number | null;
   reps_at_max_weight: number | null;
+  sets: SessionExerciseSetSummary[];
+}
+
+interface SessionExerciseSetSummary {
+  id: string;
+  set_number: number;
+  clean_reps: number;
+  weight: number | null;
+  duration: number | null;
+  distance: number | null;
 }
 
 interface SessionSection {
@@ -137,7 +147,10 @@ export default function SessionHistoryScreen({ navigation }: Props) {
 
     try {
       const db = getDatabase();
-      const exercises = await db.getAllAsync<SessionExerciseSummary>(
+      type ExerciseRow = Omit<SessionExerciseSummary, "sets">;
+      type SetRow = SessionExerciseSetSummary & { exercise_session_id: string };
+
+      const exerciseRows = await db.getAllAsync<ExerciseRow>(
         `
           SELECT
             es.id,
@@ -164,6 +177,67 @@ export default function SessionHistoryScreen({ navigation }: Props) {
         `,
         [sessionId],
       );
+
+      const setRows = await db.getAllAsync<SetRow>(
+        `
+          SELECT
+            ex.id,
+            ex.exercise_session_id,
+            ex.set_number,
+            COALESCE(ex.clean_reps, 0) AS clean_reps,
+            ex.weight,
+            ex.duration,
+            ex.distance
+          FROM exercise_set ex
+          JOIN exercise_session es ON es.id = ex.exercise_session_id
+          WHERE es.session_id = ?
+          ORDER BY es.order_in_session, ex.set_number
+        `,
+        [sessionId],
+      );
+
+      const setsByExerciseSessionId = new Map<string, SessionExerciseSetSummary[]>();
+
+      setRows.forEach((setRow) => {
+        const currentSets = setsByExerciseSessionId.get(setRow.exercise_session_id) || [];
+
+        currentSets.push({
+          id: setRow.id,
+          set_number: Number(setRow.set_number) || 0,
+          clean_reps: Number(setRow.clean_reps) || 0,
+          weight: typeof setRow.weight === "number" ? setRow.weight : null,
+          duration: typeof setRow.duration === "number" ? setRow.duration : null,
+          distance: typeof setRow.distance === "number" ? setRow.distance : null,
+        });
+
+        setsByExerciseSessionId.set(setRow.exercise_session_id, currentSets);
+      });
+
+      const dedupedByExerciseName = new Map<string, SessionExerciseSummary>();
+
+      exerciseRows.forEach((exerciseRow) => {
+        const sets = setsByExerciseSessionId.get(exerciseRow.id) || [];
+        const exercise: SessionExerciseSummary = {
+          ...exerciseRow,
+          sets,
+        };
+
+        const existing = dedupedByExerciseName.get(exercise.exercise_name);
+
+        if (!existing) {
+          dedupedByExerciseName.set(exercise.exercise_name, exercise);
+          return;
+        }
+
+        const existingHasData = existing.sets.length > 0 || existing.completed_sets > 0;
+        const currentHasData = exercise.sets.length > 0 || exercise.completed_sets > 0;
+
+        if (!existingHasData && currentHasData) {
+          dedupedByExerciseName.set(exercise.exercise_name, exercise);
+        }
+      });
+
+      const exercises = Array.from(dedupedByExerciseName.values());
 
       setSessionExercises((prev) => ({
         ...prev,
@@ -391,6 +465,15 @@ export default function SessionHistoryScreen({ navigation }: Props) {
                         <Text style={styles.exercisePerformanceText}>
                           {getExercisePerformanceText(exercise)}
                         </Text>
+                        {exercise.sets.length > 0 ? (
+                          <View style={styles.exerciseSetList}>
+                            {exercise.sets.map((set) => (
+                              <Text key={set.id} style={styles.exerciseSetText}>
+                                {formatExerciseSetText(set)}
+                              </Text>
+                            ))}
+                          </View>
+                        ) : null}
                       </View>
                     ))
                   ) : (
@@ -429,6 +512,26 @@ export default function SessionHistoryScreen({ navigation }: Props) {
     }
 
     return "No rep/load data saved";
+  }
+
+  function formatExerciseSetText(set: SessionExerciseSetSummary): string {
+    const setLabel = `Set ${set.set_number}`;
+
+    if (set.duration !== null) {
+      return `${setLabel}: ${set.duration}s${
+        set.weight !== null ? ` @ ${formatWeight(set.weight)}` : ""
+      }`;
+    }
+
+    if (set.distance !== null) {
+      return `${setLabel}: ${set.distance}m${
+        set.weight !== null ? ` @ ${formatWeight(set.weight)}` : ""
+      }`;
+    }
+
+    return `${setLabel}: ${set.clean_reps} reps${
+      set.weight !== null ? ` @ ${formatWeight(set.weight)}` : ""
+    }`;
   }
 
   function renderSectionHeader({ section }: { section: SessionSection }) {
@@ -606,6 +709,14 @@ const styles = StyleSheet.create({
   exercisePerformanceText: {
     fontSize: theme.typography.fontSize.xs,
     color: theme.colors.text.tertiary,
+  },
+  exerciseSetList: {
+    marginTop: theme.spacing[1],
+    gap: theme.spacing[0.5],
+  },
+  exerciseSetText: {
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.secondary,
   },
   exerciseEmptyText: {
     fontSize: theme.typography.fontSize.sm,

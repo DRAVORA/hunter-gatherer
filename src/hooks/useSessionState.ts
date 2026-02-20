@@ -64,6 +64,20 @@ export function useSessionState({
   useEffect(() => {
     const initExerciseSessions = async () => {
       try {
+        const existingExerciseSessions = await db.getExerciseSessionsBySessionId(
+          sessionId,
+        );
+
+        if (existingExerciseSessions.length > 0) {
+          const orderedExistingSessions = [...existingExerciseSessions].sort(
+            (a, b) => a.orderInSession - b.orderInSession,
+          );
+
+          setExerciseSessionIds(orderedExistingSessions.map((item) => item.id));
+          setIsInitialized(true);
+          return;
+        }
+
         const ids: string[] = [];
 
         for (let i = 0; i < adjustedExercises.length; i++) {
