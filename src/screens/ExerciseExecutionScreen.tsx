@@ -48,6 +48,8 @@ interface LastSessionBest {
   reps: number | null;
 }
 
+type SessionCategory = "gym" | "no-gym" | null;
+
 // ============================================================================
 // EXERCISE EXECUTION SCREEN
 // ============================================================================
@@ -63,6 +65,7 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
   const [weightInput, setWeightInput] = useState("");
   const [distanceInput, setDistanceInput] = useState("");
   const [lastSessionBest, setLastSessionBest] = useState<LastSessionBest | null>(null);
+  const [sessionCategory, setSessionCategory] = useState<SessionCategory>(null);
 
   // Load session data
   useEffect(() => {
@@ -90,6 +93,7 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
       let sessionIdToLoad: string;
       
       const sessionName = sessionRow.session_name || "";
+      const programName = sessionRow.program_name || "";
       
       // Check for gym program sessions (must match exact names from programs.ts)
       if (sessionName.includes("Day 1: Lower Body")) {
@@ -117,6 +121,14 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
       }
 
       console.log(`[ExerciseExecution] Loading session ID: ${sessionIdToLoad} for: ${sessionName}`);
+
+      if (programName.includes("No-Gym")) {
+        setSessionCategory("no-gym");
+      } else if (programName.includes("Gym")) {
+        setSessionCategory("gym");
+      } else {
+        setSessionCategory(null);
+      }
       
       const programSession = getSessionById(sessionIdToLoad);
 
@@ -182,11 +194,17 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
     }
 
     loadLastSessionBest(currentExercise.exerciseName);
-  }, [currentExercise?.exerciseName]);
+  }, [currentExercise?.exerciseName, sessionCategory]);
 
   async function loadLastSessionBest(exerciseName: string) {
     try {
       const db = getDatabase();
+      const categoryFilter =
+        sessionCategory === "gym"
+          ? "%Gym%"
+          : sessionCategory === "no-gym"
+            ? "%No-Gym%"
+            : "%";
       const latestSession = await db.getFirstAsync<{ id: string }>(
         `
           SELECT ts.id
@@ -195,10 +213,11 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
           WHERE ts.end_time IS NOT NULL
             AND es.exercise_name = ?
             AND ts.id != ?
+            AND ts.program_name LIKE ?
           ORDER BY ts.date DESC, ts.start_time DESC
           LIMIT 1
         `,
-        [exerciseName, sessionId],
+        [exerciseName, sessionId, categoryFilter],
       );
 
       if (!latestSession) {
@@ -326,25 +345,7 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
   }
 
   async function completeSet(feltClean: boolean, stopReason: StopReason) {
-    const weightValue = getWeightValue();
-    const result = await stopSet(
-      feltClean,
-      stopReason,
-      currentExercise?.restTimeSeconds,
-      { weight: weightValue },
-    );
-
-    if (result.sessionComplete) {
-      // Session finished!
-      handleSessionComplete();
-    } else if (result.movedToNextExercise) {
-      // New exercise - show setup cues
-      setShowSetupCues(true);
-      setShowRestTimer(false);
-    } else {
-      // Rest between sets
-      setShowRestTimer(true);
-    }
+    await finishSetAndRoute({ feltClean, stopReason, weight: getWeightValue() });
   }
 
   async function completeSetWithDuration(
@@ -352,24 +353,44 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
     feltClean: boolean,
     stopReason: StopReason,
   ) {
-    const weightValue = getWeightValue();
-    const result = await stopSet(
+    await finishSetAndRoute({
       feltClean,
       stopReason,
-      currentExercise?.restTimeSeconds,
-      { duration: durationSeconds, weight: weightValue },
-    );
+      duration: durationSeconds,
+      weight: getWeightValue(),
+    });
+  }
 
-    if (result.sessionComplete) {
-      // Session finished!
-      handleSessionComplete();
-    } else if (result.movedToNextExercise) {
-      // New exercise - show setup cues
-      setShowSetupCues(true);
-      setShowRestTimer(false);
-    } else {
-      // Rest between sets
-      setShowRestTimer(true);
+  async function finishSetAndRoute(params: {
+    feltClean: boolean;
+    stopReason: StopReason;
+    duration?: number;
+    distance?: number;
+    weight?: number;
+  }) {
+    try {
+      const result = await stopSet(
+        params.feltClean,
+        params.stopReason,
+        currentExercise?.restTimeSeconds,
+        {
+          duration: params.duration,
+          distance: params.distance,
+          weight: params.weight,
+        },
+      );
+
+      if (result.sessionComplete) {
+        await handleSessionComplete();
+      } else if (result.movedToNextExercise) {
+        setShowSetupCues(true);
+        setShowRestTimer(false);
+      } else {
+        setShowRestTimer(true);
+      }
+    } catch (error) {
+      console.error("[ExerciseExecution] Failed to complete set:", error);
+      Alert.alert("Error", "Couldn't save this set. Please try again.");
     }
   }
 
@@ -447,22 +468,12 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
     feltClean: boolean,
     stopReason: StopReason,
   ) {
-    const weightValue = getWeightValue();
-    const result = await stopSet(
+    await finishSetAndRoute({
       feltClean,
       stopReason,
-      currentExercise?.restTimeSeconds,
-      { distance: distanceMeters, weight: weightValue },
-    );
-
-    if (result.sessionComplete) {
-      handleSessionComplete();
-    } else if (result.movedToNextExercise) {
-      setShowSetupCues(true);
-      setShowRestTimer(false);
-    } else {
-      setShowRestTimer(true);
-    }
+      distance: distanceMeters,
+      weight: getWeightValue(),
+    });
   }
 
   return (
