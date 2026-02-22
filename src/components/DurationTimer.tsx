@@ -6,13 +6,14 @@ import { theme } from "../styles/theme";
 // ============================================================================
 // DURATION TIMER COMPONENT
 // ============================================================================
-// Stopwatch-style timer for holds/carries
-// Counts UP from 0
-// User stops when they can no longer hold
+// Countdown timer for holds/carries
+// Counts DOWN from target duration
+// User can stop early when they can no longer hold
+// Automatically ends set at 00:00
 // ============================================================================
 
 interface DurationTimerProps {
-  targetSeconds: number; // Target duration to display
+  targetSeconds: number;
   onStop: (actualSeconds: number) => void;
 }
 
@@ -21,8 +22,21 @@ export default function DurationTimer({
   onStop,
 }: DurationTimerProps) {
   const [isRunning, setIsRunning] = useState(false);
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const isMaxHold = targetSeconds === 0;
+  const [remainingSeconds, setRemainingSeconds] = useState(targetSeconds);
+  const [heldSeconds, setHeldSeconds] = useState(0);
   const startTimeRef = useRef<number | null>(null);
+  const endTimeRef = useRef<number | null>(null);
+  const hasCompletedRef = useRef(false);
+
+  useEffect(() => {
+    setIsRunning(false);
+    setRemainingSeconds(targetSeconds);
+    setHeldSeconds(0);
+    startTimeRef.current = null;
+    endTimeRef.current = null;
+    hasCompletedRef.current = false;
+  }, [targetSeconds]);
 
   useEffect(() => {
     if (!isRunning || startTimeRef.current === null) {
@@ -30,41 +44,67 @@ export default function DurationTimer({
     }
 
     const interval = setInterval(() => {
-      if (startTimeRef.current === null) return;
-      const secondsElapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
-      setElapsedSeconds(secondsElapsed);
+      if (startTimeRef.current === null || endTimeRef.current === null) return;
+
+      const now = Date.now();
+      const secondsHeld = Math.max(
+        0,
+        Math.floor((now - startTimeRef.current) / 1000),
+      );
+      const secondsLeft = isMaxHold
+        ? 0
+        : Math.max(0, Math.ceil((endTimeRef.current - now) / 1000));
+
+      setHeldSeconds(secondsHeld);
+      setRemainingSeconds(secondsLeft);
+
+      if (!isMaxHold && secondsLeft === 0 && !hasCompletedRef.current) {
+        hasCompletedRef.current = true;
+        setIsRunning(false);
+        startTimeRef.current = null;
+        endTimeRef.current = null;
+        onStop(targetSeconds);
+      }
     }, 250);
 
     return () => clearInterval(interval);
-  }, [isRunning]);
+  }, [isMaxHold, isRunning, onStop, targetSeconds]);
 
   const handleStart = () => {
     startTimeRef.current = Date.now();
-    setElapsedSeconds(0);
+    endTimeRef.current = isMaxHold ? Number.MAX_SAFE_INTEGER : Date.now() + targetSeconds * 1000;
+    hasCompletedRef.current = false;
+    setHeldSeconds(0);
+    setRemainingSeconds(targetSeconds);
     setIsRunning(true);
   };
 
   const handleStop = () => {
-    const actualElapsed =
-      startTimeRef.current === null
-        ? elapsedSeconds
-        : Math.floor((Date.now() - startTimeRef.current) / 1000);
+    if (startTimeRef.current === null) {
+      setIsRunning(false);
+      onStop(heldSeconds);
+      return;
+    }
 
-    setElapsedSeconds(actualElapsed);
+    const actualHeld = Math.max(
+      0,
+      Math.floor((Date.now() - startTimeRef.current) / 1000),
+    );
+
+    setHeldSeconds(actualHeld);
+    setRemainingSeconds(Math.max(0, targetSeconds - actualHeld));
     setIsRunning(false);
     startTimeRef.current = null;
-    onStop(actualElapsed);
+    endTimeRef.current = null;
+    onStop(actualHeld);
   };
-
-  const targetDisplay =
-    targetSeconds === 0 ? "Max time" : `${targetSeconds}s target`;
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Hold Duration</Text>
-      <Text style={styles.subtitle}>{targetDisplay}</Text>
+      <Text style={styles.subtitle}>{isMaxHold ? "Max time" : `${targetSeconds}s target`}</Text>
 
-      <Text style={styles.timer}>{formatRestTime(elapsedSeconds)}</Text>
+      <Text style={styles.timer}>{formatRestTime(isMaxHold ? heldSeconds : remainingSeconds)}</Text>
 
       <View style={styles.buttonRow}>
         {!isRunning ? (
@@ -84,26 +124,20 @@ export default function DurationTimer({
         )}
       </View>
 
-      {elapsedSeconds > 0 && !isRunning && (
-        <Text style={styles.completedText}>
-          Held for {elapsedSeconds} seconds
-        </Text>
+      {heldSeconds > 0 && !isRunning && (
+        <Text style={styles.completedText}>Held for {heldSeconds} seconds</Text>
       )}
     </View>
   );
 }
 
-// ============================================================================
-// THEMED STYLES
-// ============================================================================
-
 const styles = StyleSheet.create({
   container: {
     padding: theme.spacing["4"],
-    backgroundColor: theme.colors.execution.setup,
+    backgroundColor: theme.colors.surface.elevated,
     borderRadius: theme.borderRadius.md,
-    borderWidth: theme.borderWidth.thick,
-    borderColor: theme.colors.accent.tertiary,
+    borderWidth: theme.borderWidth.thin,
+    borderColor: theme.colors.border.default,
   },
   title: {
     fontSize: theme.typography.fontSize.base,
@@ -120,43 +154,38 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing["3"],
   },
   timer: {
-    fontSize: 72,
+    fontSize: 64,
     fontWeight: theme.typography.fontWeight.bold,
     textAlign: "center",
-    marginVertical: theme.spacing["5"],
-    color: theme.colors.accent.tertiary,
+    marginVertical: theme.spacing["4"],
+    color: theme.colors.timer.active,
   },
   buttonRow: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: theme.spacing["3"],
   },
   button: {
-    flex: 1,
-    paddingVertical: theme.spacing["4"],
+    paddingVertical: theme.spacing["3"],
+    paddingHorizontal: theme.spacing["6"],
     borderRadius: theme.borderRadius.md,
-    alignItems: "center",
-    borderWidth: theme.borderWidth.hairline,
+    minWidth: 140,
   },
   startButton: {
-    backgroundColor: theme.colors.accent.secondary,
-    borderColor: theme.colors.accent.secondaryDark,
+    backgroundColor: theme.colors.state.success,
   },
   stopButton: {
-    backgroundColor: theme.colors.accent.primary,
-    borderColor: theme.colors.accent.primaryDark,
+    backgroundColor: theme.colors.state.error,
   },
   buttonText: {
-    fontSize: theme.typography.fontSize.lg,
-    fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.text.primary,
-    letterSpacing: theme.typography.letterSpacing.wide,
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.bold,
+    textAlign: "center",
   },
   completedText: {
-    fontSize: theme.typography.fontSize.base,
-    color: theme.colors.accent.tertiary,
-    textAlign: "center",
     marginTop: theme.spacing["3"],
-    fontWeight: theme.typography.fontWeight.semibold,
+    textAlign: "center",
+    color: theme.colors.text.secondary,
+    fontSize: theme.typography.fontSize.sm,
   },
 });
