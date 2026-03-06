@@ -48,6 +48,14 @@ interface LastSessionBest {
   reps: number | null;
 }
 
+interface LastSessionSetSummary {
+  setNumber: number;
+  cleanReps: number | null;
+  weight: number | null;
+  duration: number | null;
+  distance: number | null;
+}
+
 type SessionCategory = "gym" | "no-gym" | null;
 
 // ============================================================================
@@ -65,6 +73,7 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
   const [weightInput, setWeightInput] = useState("");
   const [distanceInput, setDistanceInput] = useState("");
   const [lastSessionBest, setLastSessionBest] = useState<LastSessionBest | null>(null);
+  const [lastSessionSets, setLastSessionSets] = useState<LastSessionSetSummary[]>([]);
   const [sessionCategory, setSessionCategory] = useState<SessionCategory>(null);
 
   // Load session data
@@ -190,6 +199,7 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
   useEffect(() => {
     if (!currentExercise?.exerciseName) {
       setLastSessionBest(null);
+      setLastSessionSets([]);
       return;
     }
 
@@ -222,8 +232,22 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
 
       if (!latestSession) {
         setLastSessionBest(null);
+        setLastSessionSets([]);
         return;
       }
+
+      const latestSetRows = await db.getAllAsync<LastSessionSetSummary>(
+        `
+          SELECT ex.set_number as setNumber, ex.clean_reps as cleanReps, ex.weight, ex.duration, ex.distance
+          FROM exercise_set ex
+          JOIN exercise_session es ON ex.exercise_session_id = es.id
+          WHERE es.session_id = ?
+            AND es.exercise_name = ?
+          ORDER BY ex.set_number ASC
+        `,
+        [latestSession.id, exerciseName],
+      );
+      setLastSessionSets(latestSetRows);
 
       const setRows = await db.getAllAsync<LastSessionSetRow>(
         `
@@ -274,6 +298,7 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
     } catch (error) {
       console.error("[ExerciseExecution] Failed to load last session best:", error);
       setLastSessionBest(null);
+      setLastSessionSets([]);
     }
   }
 
@@ -495,6 +520,19 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
               ? ` × ${lastSessionBest.reps} reps`
               : ""}
           </Text>
+          <Text style={styles.lastSessionSetsTitle}>Last session sets:</Text>
+          {lastSessionSets.length > 0 ? (
+            lastSessionSets.map((setRow) => (
+              <Text key={`${setRow.setNumber}-${setRow.weight ?? "bw"}`} style={styles.lastSessionSetRow}>
+                Set {setRow.setNumber}: {setRow.weight && setRow.weight > 0 ? formatWeight(setRow.weight) : "Bodyweight"}
+                {setRow.cleanReps && setRow.cleanReps > 0 ? ` × ${setRow.cleanReps} reps` : ""}
+                {setRow.duration && setRow.duration > 0 ? ` · ${setRow.duration}s` : ""}
+                {setRow.distance && setRow.distance > 0 ? ` · ${setRow.distance}m` : ""}
+              </Text>
+            ))
+          ) : (
+            <Text style={styles.lastSessionSetRow}>No prior set details</Text>
+          )}
           <Text style={styles.intensityRule}>Stop 1 rep before failure</Text>
         </View>
 
@@ -745,6 +783,18 @@ const styles = StyleSheet.create({
     fontWeight: theme.typography.fontWeight.bold,
   },
   lastSessionInfo: {
+    marginTop: theme.spacing[1],
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+  },
+  lastSessionSetsTitle: {
+    marginTop: theme.spacing[2],
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.tertiary,
+    textTransform: "uppercase",
+    letterSpacing: theme.typography.letterSpacing.wide,
+  },
+  lastSessionSetRow: {
     marginTop: theme.spacing[1],
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.text.secondary,

@@ -21,22 +21,37 @@ export default function DurationTimer({
   targetSeconds,
   onStop,
 }: DurationTimerProps) {
-  const [isRunning, setIsRunning] = useState(false);
+  const [isRunning, setIsRunning] = useState(true);
   const isMaxHold = targetSeconds === 0;
   const [remainingSeconds, setRemainingSeconds] = useState(targetSeconds);
   const [heldSeconds, setHeldSeconds] = useState(0);
-  const startTimeRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number | null>(Date.now());
   const endTimeRef = useRef<number | null>(null);
   const hasCompletedRef = useRef(false);
 
-  useEffect(() => {
+  const finalizeStop = (seconds: number) => {
+    if (hasCompletedRef.current) {
+      return;
+    }
+
+    hasCompletedRef.current = true;
     setIsRunning(false);
-    setRemainingSeconds(targetSeconds);
-    setHeldSeconds(0);
     startTimeRef.current = null;
     endTimeRef.current = null;
+    onStop(seconds);
+  };
+
+  useEffect(() => {
+    const now = Date.now();
+    setIsRunning(true);
+    setRemainingSeconds(targetSeconds);
+    setHeldSeconds(0);
+    startTimeRef.current = now;
+    endTimeRef.current = isMaxHold
+      ? Number.MAX_SAFE_INTEGER
+      : now + targetSeconds * 1000;
     hasCompletedRef.current = false;
-  }, [targetSeconds]);
+  }, [isMaxHold, targetSeconds]);
 
   useEffect(() => {
     if (!isRunning || startTimeRef.current === null) {
@@ -59,30 +74,20 @@ export default function DurationTimer({
       setRemainingSeconds(secondsLeft);
 
       if (!isMaxHold && secondsLeft === 0 && !hasCompletedRef.current) {
-        hasCompletedRef.current = true;
-        setIsRunning(false);
-        startTimeRef.current = null;
-        endTimeRef.current = null;
-        onStop(targetSeconds);
+        finalizeStop(targetSeconds);
       }
     }, 250);
 
     return () => clearInterval(interval);
   }, [isMaxHold, isRunning, onStop, targetSeconds]);
 
-  const handleStart = () => {
-    startTimeRef.current = Date.now();
-    endTimeRef.current = isMaxHold ? Number.MAX_SAFE_INTEGER : Date.now() + targetSeconds * 1000;
-    hasCompletedRef.current = false;
-    setHeldSeconds(0);
-    setRemainingSeconds(targetSeconds);
-    setIsRunning(true);
-  };
-
   const handleStop = () => {
+    if (hasCompletedRef.current) {
+      return;
+    }
+
     if (startTimeRef.current === null) {
-      setIsRunning(false);
-      onStop(heldSeconds);
+      finalizeStop(heldSeconds);
       return;
     }
 
@@ -93,10 +98,7 @@ export default function DurationTimer({
 
     setHeldSeconds(actualHeld);
     setRemainingSeconds(Math.max(0, targetSeconds - actualHeld));
-    setIsRunning(false);
-    startTimeRef.current = null;
-    endTimeRef.current = null;
-    onStop(actualHeld);
+    finalizeStop(actualHeld);
   };
 
   return (
@@ -107,21 +109,14 @@ export default function DurationTimer({
       <Text style={styles.timer}>{formatRestTime(isMaxHold ? heldSeconds : remainingSeconds)}</Text>
 
       <View style={styles.buttonRow}>
-        {!isRunning ? (
-          <TouchableOpacity
-            style={[styles.button, styles.startButton]}
-            onPress={handleStart}
-          >
-            <Text style={styles.buttonText}>Start Hold</Text>
-          </TouchableOpacity>
-        ) : (
+        {isRunning ? (
           <TouchableOpacity
             style={[styles.button, styles.stopButton]}
             onPress={handleStop}
           >
-            <Text style={styles.buttonText}>Stop Hold</Text>
+            <Text style={styles.buttonText}>End Hold Early</Text>
           </TouchableOpacity>
-        )}
+        ) : null}
       </View>
 
       {heldSeconds > 0 && !isRunning && (
