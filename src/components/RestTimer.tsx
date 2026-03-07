@@ -32,20 +32,24 @@ export default function RestTimer({
   }, [targetSeconds]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const tick = () => {
+      const now = Date.now();
       const secondsLeft = Math.max(
         0,
-        Math.ceil((endTimeRef.current - Date.now()) / 1000),
+        Math.floor((endTimeRef.current - now) / 1000),
       );
 
       setRemainingSeconds(secondsLeft);
 
-      if (secondsLeft === 0 && !hasCompletedRef.current) {
+      if (now >= endTimeRef.current && !hasCompletedRef.current) {
         hasCompletedRef.current = true;
         onComplete(targetSeconds);
         Alert.alert("Rest Complete", "Time to start your next set.");
       }
-    }, 250);
+    };
+
+    tick();
+    const interval = setInterval(tick, 250);
 
     return () => {
       clearInterval(interval);

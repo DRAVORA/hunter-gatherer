@@ -58,7 +58,7 @@ export default function DurationTimer({
       return;
     }
 
-    const interval = setInterval(() => {
+    const tick = () => {
       if (startTimeRef.current === null || endTimeRef.current === null) return;
 
       const now = Date.now();
@@ -68,15 +68,18 @@ export default function DurationTimer({
       );
       const secondsLeft = isMaxHold
         ? 0
-        : Math.max(0, Math.ceil((endTimeRef.current - now) / 1000));
+        : Math.max(0, Math.floor((endTimeRef.current - now) / 1000));
 
       setHeldSeconds(secondsHeld);
       setRemainingSeconds(secondsLeft);
 
-      if (!isMaxHold && secondsLeft === 0 && !hasCompletedRef.current) {
+      if (!isMaxHold && now >= endTimeRef.current && !hasCompletedRef.current) {
         finalizeStop(targetSeconds);
       }
-    }, 250);
+    };
+
+    tick();
+    const interval = setInterval(tick, 250);
 
     return () => clearInterval(interval);
   }, [isMaxHold, isRunning, onStop, targetSeconds]);
