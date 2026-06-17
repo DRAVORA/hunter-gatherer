@@ -14,7 +14,12 @@ import { v4 as uuidv4 } from "uuid";
 
 import { getDatabase } from "../database/init";
 import { formatDate, getTodayDate } from "../utils/formatting";
-import { getSessionById, getTotalVolumeForSession } from "../data/programs";
+import {
+  getEstimatedSessionDuration,
+  getProgramById,
+  getSessionById,
+  getTotalVolumeForSession,
+} from "../data/programs";
 import { UNICODE } from "../constants/unicode";
 import { theme } from "../styles/theme";
 
@@ -26,136 +31,17 @@ interface Props {
   route: HomeScreenRouteProp;
 }
 
-// ============================================================================
-// PROGRAM DAYS CONFIGURATION
-// ============================================================================
+function getAppProgramId(programId: string): string {
+  return programId === "gym" ? "hunter-gatherer-gym" : "hunter-gatherer-no-gym";
+}
 
-const NO_GYM_PROGRAM_DAYS = [
-  {
-    id: "no-gym-day1",
-    dayNumber: 1,
-    name: "Pull + Traps",
-    exercises: [
-      `Pull-Up (6${UNICODE.MULTIPLY}AMRAP)`,
-      `Chin-Up (4${UNICODE.MULTIPLY}AMRAP)`,
-      `Scapular Pull-Up (3${UNICODE.MULTIPLY}15)`,
-      `High Pull-Up Hold (3${UNICODE.MULTIPLY}30s)`,
-      `Dead Hang (2${UNICODE.MULTIPLY}60s)`,
-    ],
-    estimatedDuration: "35-45 min",
-  },
-  {
-    id: "no-gym-day2",
-    dayNumber: 2,
-    name: "Legs + Hinge",
-    exercises: [
-      `Bulgarian Split Squat (5${UNICODE.MULTIPLY}25/leg)`,
-      `Single-Leg Hip Thrust (4${UNICODE.MULTIPLY}20/leg)`,
-      `Hamstring Walkouts (3${UNICODE.MULTIPLY}15)`,
-      `Wall Sit (2${UNICODE.MULTIPLY}max time)`,
-    ],
-    estimatedDuration: "35-45 min",
-  },
-  {
-    id: "no-gym-day3",
-    dayNumber: 3,
-    name: "Push + Shoulders",
-    exercises: [
-      `Push-Up Feet Elevated (6${UNICODE.MULTIPLY}20)`,
-      `Pike Push-Up (5${UNICODE.MULTIPLY}15)`,
-      `Pseudo-Planche Push-Up (3${UNICODE.MULTIPLY}10)`,
-      `Side Plank (3${UNICODE.MULTIPLY}60s/side)`,
-    ],
-    estimatedDuration: "35-45 min",
-  },
-  {
-    id: "no-gym-day4",
-    dayNumber: 4,
-    name: "Movement / Conditioning",
-    exercises: [
-      "Loaded backpack walk (60-90 min)",
-      "Hill sprints (8-12 reps)",
-      "Long fast walk (60 min)",
-    ],
-    estimatedDuration: "Variable",
-  },
-];
-
-const GYM_PROGRAM_DAYS = [
-  {
-    id: "gym-day1",
-    dayNumber: 1,
-    name: "Day 1: Lower Body",
-    exercises: [
-      `Back Squat (4${UNICODE.MULTIPLY}5)`,
-      `Romanian Deadlift (3${UNICODE.MULTIPLY}6)`,
-      `Bulgarian Split Squat (3${UNICODE.MULTIPLY}6/leg)`,
-      `Standing Calf Raise (3${UNICODE.MULTIPLY}12)`,
-      `Side Plank (3${UNICODE.MULTIPLY}30s/side)`,
-    ],
-    estimatedDuration: "45-60 min",
-  },
-  {
-    id: "gym-day2",
-    dayNumber: 2,
-    name: "Day 2: Upper Pull",
-    exercises: [
-      `Pull-Ups (4${UNICODE.MULTIPLY}6)`,
-      `Barbell Row (3${UNICODE.MULTIPLY}8)`,
-      `Shrugs (3${UNICODE.MULTIPLY}10)`,
-      `Farmer Carries (4${UNICODE.MULTIPLY}40m)`,
-    ],
-    estimatedDuration: "45-60 min",
-  },
-  {
-    id: "gym-day3",
-    dayNumber: 3,
-    name: "Day 3: Upper Push",
-    exercises: [
-      `Overhead Press (4${UNICODE.MULTIPLY}5)`,
-      `Bench Press (3${UNICODE.MULTIPLY}8)`,
-      `Dips (3${UNICODE.MULTIPLY}10)`,
-      `Hollow Hold (3${UNICODE.MULTIPLY}30s)`,
-    ],
-    estimatedDuration: "45-60 min",
-  },
-];
-
-const DAILY_NON_NEGOTIABLE_ROUTINE = [
-  {
-    id: "active-dead-hang",
-    title: "Active Dead Hang",
-    target: "60s total (1x60s, 2x30s, or 3x20s)",
-    checklist: [
-      "Overhand grip with full thumb wrap",
-      "Arms straight, ribs down, glutes lightly on",
-      "Slight shoulder depression (no shrugging)",
-      "Slow nasal breathing, no swinging",
-    ],
-  },
-  {
-    id: "scapular-pullups",
-    title: "Scapular Pull-Ups",
-    target: "15 clean reps",
-    checklist: [
-      "Start in active hang with elbows locked",
-      "Pull shoulders down and think back pockets",
-      "Move only 2-3 cm and pause 1s at top",
-      "No elbow bend, no hip swing, no back arch",
-    ],
-  },
-  {
-    id: "chin-tucks",
-    title: "Chin Tucks",
-    target: "20 controlled reps",
-    checklist: [
-      "Floor or wall setup with head supported",
-      "Pull chin straight back (double chin)",
-      "Hold 1-2s while shoulders stay relaxed",
-      "No head tilt, no jaw clench, no neck strain",
-    ],
-  },
-];
+function formatProgramExercise(
+  exerciseName: string,
+  sets: number,
+  targetDescription?: string,
+): string {
+  return `${exerciseName} (${sets}${UNICODE.MULTIPLY}${targetDescription ?? "AMRAP"})`;
+}
 
 // ============================================================================
 // HOME SCREEN
@@ -166,9 +52,10 @@ export default function HomeScreen({ navigation, route }: Props) {
   const [todayCheckIn, setTodayCheckIn] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Select program days based on programId
-  const PROGRAM_DAYS =
-    programId === "gym" ? GYM_PROGRAM_DAYS : NO_GYM_PROGRAM_DAYS;
+  const selectedProgram = getProgramById(getAppProgramId(programId));
+  const PROGRAM_DAYS = selectedProgram?.sessions ?? [];
+  const mobilityProgram = getProgramById("atavia-daily-mobility");
+  const mobilityRoutine = mobilityProgram?.sessions[0]?.exercises ?? [];
 
   useEffect(() => {
     loadTodayCheckIn();
@@ -381,24 +268,29 @@ export default function HomeScreen({ navigation, route }: Props) {
             <TouchableOpacity
               key={day.id}
               style={styles.dayCard}
-              onPress={() => handleStartDay(day.id, day.dayNumber)}
+              onPress={() => handleStartDay(day.id, day.orderInProgram)}
             >
               <View style={styles.dayHeader}>
                 <View style={styles.dayNumberBadge}>
-                  <Text style={styles.dayNumberText}>{day.dayNumber}</Text>
+                  <Text style={styles.dayNumberText}>{day.orderInProgram}</Text>
                 </View>
                 <View style={styles.dayInfo}>
                   <Text style={styles.dayName}>{day.name}</Text>
                   <Text style={styles.dayDuration}>
-                    {day.estimatedDuration}
+                    {getEstimatedSessionDuration(day.id)} min
                   </Text>
                 </View>
               </View>
 
               <View style={styles.exerciseList}>
-                {day.exercises.map((exercise, index) => (
-                  <Text key={index} style={styles.exerciseItem}>
-                    {UNICODE.BULLET} {exercise}
+                {day.exercises.map((exercise) => (
+                  <Text key={exercise.id} style={styles.exerciseItem}>
+                    {UNICODE.BULLET}{" "}
+                    {formatProgramExercise(
+                      exercise.exerciseName,
+                      exercise.targetSets,
+                      exercise.targetDescription,
+                    )}
                   </Text>
                 ))}
               </View>
@@ -406,32 +298,30 @@ export default function HomeScreen({ navigation, route }: Props) {
           ))}
         </View>
 
-        {/* Daily Non-Negotiables Routine */}
+        {/* Daily Mobility Routine */}
         <View style={styles.nonNegotiablesCard}>
-          <Text style={styles.nonNegotiablesTitle}>DAILY NON-NEGOTIABLES</Text>
+          <Text style={styles.nonNegotiablesTitle}>DAILY MOBILITY</Text>
           <Text style={styles.nonNegotiablesSubtitle}>
-            Daily routine {UNICODE.DASH} complete every day (including rest days)
+            Daily routine {UNICODE.DASH} complete every day, including rest days
           </Text>
           <Text style={styles.nonNegotiablesDescription}>
-            Treat these like your other sessions: open this section, follow each
-            checklist, and mark it done.
+            Short movement practice for hips, hamstrings, trunk control,
+            thoracic rotation, and overhead shoulder tolerance.
           </Text>
           <Text style={styles.nonNegotiablesWarning}>
-            If quality drops, pause progression and reset form first.
+            If quality drops or pain appears, reduce range and reset form.
           </Text>
 
-          {DAILY_NON_NEGOTIABLE_ROUTINE.map((routine, index) => (
+          {mobilityRoutine.map((routine, index) => (
             <View key={routine.id} style={styles.nonNegotiableRoutineCard}>
               <Text style={styles.nonNegotiableHeader}>
-                {index + 1}. {routine.title.toUpperCase()}
+                {index + 1}. {routine.exerciseName.toUpperCase()}
               </Text>
-              <Text style={styles.nonNegotiableTarget}>{routine.target}</Text>
-
-              {routine.checklist.map((item) => (
-                <Text key={item} style={styles.nonNegotiableChecklistItem}>
-                  {UNICODE.BULLET} {item}
-                </Text>
-              ))}
+              <Text style={styles.nonNegotiableTarget}>
+                {routine.targetSets}
+                {UNICODE.MULTIPLY}
+                {routine.targetDescription ?? "practice"}
+              </Text>
             </View>
           ))}
         </View>

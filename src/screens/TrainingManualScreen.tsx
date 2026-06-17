@@ -12,48 +12,51 @@ import { UNICODE } from "../constants/unicode";
 import { theme } from "../styles/theme";
 
 const PROGRESSION_RULES = [
-  "Hit all prescribed sets/reps with clean technique and no stop-rule violations.",
-  "Keep 1-2 reps in reserve on the final working set.",
-  "If the session was marked VOLUME REDUCED, repeat the same weight next time.",
-  "Increase load by the smallest available jump (2.5-5%): 2.5-5 lb for upper body, 5-10 lb for lower body.",
-  "If you miss reps or form breaks, keep the same weight and focus on cleaner execution.",
-  "Bodyweight progressions: add 1-2 reps per set or slow the tempo before adding load.",
+  "Most sets finish with 1-2 reps in reserve.",
+  "No grinding reps.",
+  "When all sets reach the top of the rep range, increase load next session.",
+  "If the session was marked VOLUME REDUCED, reduce work by 30% and repeat the same load next time.",
+  "If you miss reps or form breaks, keep the same load and focus on cleaner execution.",
+  "Bodyweight progressions: add 1-2 reps per set, increase time, or slow the tempo before adding load.",
 ];
 
 const READINESS_RULES = [
   "READY: Train at full volume.",
-  "VOLUME REDUCED: Reduce total volume by the percentage shown in the app.",
+  "VOLUME REDUCED: Reduce total volume by 30% and avoid forced progression.",
   "NO PROGRESSION: Complete the session but do not increase weight.",
   "REST DAY: Rest and recover. Resume when readiness returns to READY or VOLUME REDUCED.",
 ];
 
 const SESSION_FLOW = [
   "Complete the Daily Check-In before training.",
+  "Warm up with 5 minutes of light movement.",
+  "Perform 1-2 ramp-up sets for the first exercises.",
   "Review readiness status and follow the checklist on the Session Readiness screen.",
   "Execute each exercise with strict form and stop-rule compliance.",
   "Log the session, then review the post-session summary for next time.",
 ];
 
 const STOP_RULES = [
-  "Sharp pain, joint instability, or dizziness.",
-  "Technique breakdown that cannot be corrected within one set.",
-  "Loss of control, bouncing, or uncontrolled range of motion.",
-  "Breath-holding beyond intended bracing or seeing stars.",
+  "Sharp pain.",
+  "Nerve symptoms.",
+  "Back pain alters mechanics.",
+  "Joint pain worsens during the set.",
+  "Technique breakdown that cannot be corrected immediately.",
 ];
 
 const TRAINING_PURPOSE = [
-  "Build durable strength with repeatable, high-quality reps.",
-  "Use readiness to manage fatigue and avoid overreaching.",
-  "Progress gradually so joints and connective tissue keep pace.",
+  "Build a man who is strong, lean, mobile, resilient, capable, athletic, and difficult to injure.",
+  "Prioritize longevity, movement quality, strength, mobility, work capacity, and recovery.",
+  "Train for decades, not weeks.",
 ];
 
 const RECOVERY_CHECKLIST = [
-  "Sleep 7–9 hours when possible. Less than 6.5 hours limits progression.",
-  "Protein intake: 1.6–2.2g per kg bodyweight per day.",
+  "Sleep 7-9 hours when possible. Less than 6.5 hours limits progression.",
+  "Protein intake: 1.6-2.2g per kg bodyweight per day.",
   "Energy intake: a small caloric surplus is required for muscle gain; maintenance may sustain strength but slows progression.",
-  "Hydrate before training (500–750ml minimum).",
-  "Eat a balanced meal 60–90 minutes pre-training when possible.",
-  "Take rest days seriously when flagged by readiness — recovery is part of training.",
+  "Hydrate before training (500-750ml minimum).",
+  "Eat a balanced meal 60-90 minutes pre-training when possible.",
+  "Take rest days seriously when flagged by readiness - recovery is part of training.",
 ];
 
 const COMMON_QUESTIONS = [

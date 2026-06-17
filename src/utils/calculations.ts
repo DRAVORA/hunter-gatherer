@@ -39,8 +39,8 @@ export function calculateReadiness(
   if (sleepHours < SLEEP_THRESHOLDS.VOLUME_REDUCTION) {
     return {
       status: ReadinessStatus.VOLUME_REDUCED,
-      volumeAdjustmentPercent: VOLUME_ADJUSTMENTS.POOR_SLEEP * 100, // 35%
-      message: `Sleep below ${SLEEP_THRESHOLDS.VOLUME_REDUCTION}h. Volume reduced by 35%.`,
+      volumeAdjustmentPercent: VOLUME_ADJUSTMENTS.POOR_SLEEP * 100, // 30%
+      message: `Sleep below ${SLEEP_THRESHOLDS.VOLUME_REDUCTION}h. Volume reduced by 30%.`,
       allowTraining: true,
     };
   }

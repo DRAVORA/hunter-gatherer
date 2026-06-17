@@ -38,8 +38,8 @@ function calculateReadiness(sleepHours, hasSharpPain, consecutivePoorNights) {
     if (sleepHours < types_1.SLEEP_THRESHOLDS.VOLUME_REDUCTION) {
         return {
             status: types_1.ReadinessStatus.VOLUME_REDUCED,
-            volumeAdjustmentPercent: types_1.VOLUME_ADJUSTMENTS.POOR_SLEEP * 100, // 35%
-            message: "Sleep below ".concat(types_1.SLEEP_THRESHOLDS.VOLUME_REDUCTION, "h. Volume reduced by 35%."),
+            volumeAdjustmentPercent: types_1.VOLUME_ADJUSTMENTS.POOR_SLEEP * 100, // 30%
+            message: "Sleep below ".concat(types_1.SLEEP_THRESHOLDS.VOLUME_REDUCTION, "h. Volume reduced by 30%."),
             allowTraining: true,
         };
     }

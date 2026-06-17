@@ -1,715 +1,115 @@
 import { Program, ProgramSession, ProgramExercise } from "../types";
 
-// Re-export types for convenience
 export type { ProgramExercise };
 
-// ============================================================================
-// PROGRAM DEFINITIONS
-// ============================================================================
-
-/**
- * Sample Pull Session A
- * Focus: Vertical pulling + scapular control
- */
-const PULL_SESSION_A: ProgramSession = {
-  id: "pull-a",
-  programId: "hunter-gatherer-basic",
-  name: "Pull Session A",
-  orderInProgram: 1,
-  exercises: [
-    {
-      id: "pull-a-1",
-      sessionId: "pull-a",
-      exerciseName: "Scapular Pull-Up",
-      orderInSession: 1,
-      targetSets: 3,
-      targetReps: 5,
-      restTimeSeconds: 90,
-    },
-    {
-      id: "pull-a-2",
-      sessionId: "pull-a",
-      exerciseName: "Pull-Up",
-      orderInSession: 2,
-      targetSets: 5,
-      targetReps: 5,
-      restTimeSeconds: 180,
-    },
-    {
-      id: "pull-a-3",
-      sessionId: "pull-a",
-      exerciseName: "Barbell Row",
-      orderInSession: 3,
-      targetSets: 4,
-      targetReps: 8,
-      restTimeSeconds: 120,
-    },
-    {
-      id: "pull-a-4",
-      sessionId: "pull-a",
-      exerciseName: "Dead Hang",
-      orderInSession: 4,
-      targetSets: 3,
-      targetDuration: 20, // seconds
-      restTimeSeconds: 90,
-    },
-  ],
-};
-
-/**
- * Sample Push Session A
- * Focus: Horizontal + vertical pressing
- */
-const PUSH_SESSION_A: ProgramSession = {
-  id: "push-a",
-  programId: "hunter-gatherer-basic",
-  name: "Push Session A",
-  orderInProgram: 2,
-  exercises: [
-    {
-      id: "push-a-1",
-      sessionId: "push-a",
-      exerciseName: "Push-Up",
-      orderInSession: 1,
-      targetSets: 5,
-      targetReps: 10,
-      restTimeSeconds: 120,
-    },
-    {
-      id: "push-a-2",
-      sessionId: "push-a",
-      exerciseName: "Pike Push-Up",
-      orderInSession: 2,
-      targetSets: 4,
-      targetReps: 8,
-      restTimeSeconds: 120,
-    },
-    {
-      id: "push-a-3",
-      sessionId: "push-a",
-      exerciseName: "Overhead Press",
-      orderInSession: 3,
-      targetSets: 4,
-      targetReps: 8,
-      restTimeSeconds: 180,
-    },
-  ],
-};
-
-/**
- * Sample Legs Session A
- * Focus: Squat + hinge patterns
- */
-const LEGS_SESSION_A: ProgramSession = {
-  id: "legs-a",
-  programId: "hunter-gatherer-basic",
-  name: "Legs Session A",
-  orderInProgram: 3,
-  exercises: [
-    {
-      id: "legs-a-1",
-      sessionId: "legs-a",
-      exerciseName: "Bodyweight Squat",
-      orderInSession: 1,
-      targetSets: 3,
-      targetReps: 15,
-      restTimeSeconds: 90,
-    },
-    {
-      id: "legs-a-2",
-      sessionId: "legs-a",
-      exerciseName: "Bulgarian Split Squat",
-      orderInSession: 2,
-      targetSets: 4,
-      targetReps: 10,
-      restTimeSeconds: 120,
-    },
-    {
-      id: "legs-a-3",
-      sessionId: "legs-a",
-      exerciseName: "Romanian Deadlift",
-      orderInSession: 3,
-      targetSets: 4,
-      targetReps: 8,
-      restTimeSeconds: 180,
-    },
-    {
-      id: "legs-a-4",
-      sessionId: "legs-a",
-      exerciseName: "Glute Bridge",
-      orderInSession: 4,
-      targetSets: 3,
-      targetReps: 15,
-      restTimeSeconds: 90,
-    },
-  ],
-};
-
-/**
- * Sample Pull Session B
- * Focus: Chin-ups + horizontal rows
- */
-const PULL_SESSION_B: ProgramSession = {
-  id: "pull-b",
-  programId: "hunter-gatherer-basic",
-  name: "Pull Session B",
-  orderInProgram: 4,
-  exercises: [
-    {
-      id: "pull-b-1",
-      sessionId: "pull-b",
-      exerciseName: "Chin-Up",
-      orderInSession: 1,
-      targetSets: 5,
-      targetReps: 5,
-      restTimeSeconds: 180,
-    },
-    {
-      id: "pull-b-2",
-      sessionId: "pull-b",
-      exerciseName: "Dumbbell Row",
-      orderInSession: 2,
-      targetSets: 4,
-      targetReps: 10,
-      restTimeSeconds: 120,
-    },
-    {
-      id: "pull-b-3",
-      sessionId: "pull-b",
-      exerciseName: "High Pull-Up Hold",
-      orderInSession: 3,
-      targetSets: 3,
-      targetDuration: 15, // seconds
-      restTimeSeconds: 120,
-    },
-    {
-      id: "pull-b-4",
-      sessionId: "pull-b",
-      exerciseName: "Farmer Carry",
-      orderInSession: 4,
-      targetSets: 3,
-      targetDistance: 40, // metres
-      restTimeSeconds: 120,
-    },
-  ],
-};
-
-/**
- * Sample Push Session B
- * Focus: Bench + dips
- */
-const PUSH_SESSION_B: ProgramSession = {
-  id: "push-b",
-  programId: "hunter-gatherer-basic",
-  name: "Push Session B",
-  orderInProgram: 5,
-  exercises: [
-    {
-      id: "push-b-1",
-      sessionId: "push-b",
-      exerciseName: "Bench Press",
-      orderInSession: 1,
-      targetSets: 5,
-      targetReps: 5,
-      restTimeSeconds: 180,
-    },
-    {
-      id: "push-b-2",
-      sessionId: "push-b",
-      exerciseName: "Dips",
-      orderInSession: 2,
-      targetSets: 4,
-      targetReps: 8,
-      restTimeSeconds: 150,
-    },
-    {
-      id: "push-b-3",
-      sessionId: "push-b",
-      exerciseName: "Push-Up (Feet Elevated)",
-      orderInSession: 3,
-      targetSets: 3,
-      targetReps: 12,
-      restTimeSeconds: 120,
-    },
-  ],
-};
-
-/**
- * Sample Legs Session B
- * Focus: Unilateral + glute emphasis
- */
-const LEGS_SESSION_B: ProgramSession = {
-  id: "legs-b",
-  programId: "hunter-gatherer-basic",
-  name: "Legs Session B",
-  orderInProgram: 6,
-  exercises: [
-    {
-      id: "legs-b-1",
-      sessionId: "legs-b",
-      exerciseName: "Barbell Back Squat",
-      orderInSession: 1,
-      targetSets: 5,
-      targetReps: 5,
-      restTimeSeconds: 210,
-    },
-    {
-      id: "legs-b-2",
-      sessionId: "legs-b",
-      exerciseName: "Lunges",
-      orderInSession: 2,
-      targetSets: 3,
-      targetReps: 12,
-      restTimeSeconds: 120,
-    },
-    {
-      id: "legs-b-3",
-      sessionId: "legs-b",
-      exerciseName: "Hip Thrust",
-      orderInSession: 3,
-      targetSets: 4,
-      targetReps: 10,
-      restTimeSeconds: 120,
-    },
-  ],
-};
-
-/**
- * Core Session (Optional add-on)
- * Focus: Anti-extension + anti-rotation
- */
-const CORE_SESSION: ProgramSession = {
-  id: "core-a",
-  programId: "hunter-gatherer-basic",
-  name: "Core Session",
-  orderInProgram: 7,
-  exercises: [
-    {
-      id: "core-a-1",
-      sessionId: "core-a",
-      exerciseName: "Hollow Body Hold",
-      orderInSession: 1,
-      targetSets: 3,
-      targetDuration: 20, // seconds
-      restTimeSeconds: 60,
-    },
-    {
-      id: "core-a-2",
-      sessionId: "core-a",
-      exerciseName: "Dead Bug",
-      orderInSession: 2,
-      targetSets: 3,
-      targetReps: 10,
-      restTimeSeconds: 60,
-    },
-    {
-      id: "core-a-3",
-      sessionId: "core-a",
-      exerciseName: "Side Plank",
-      orderInSession: 3,
-      targetSets: 3,
-      targetDuration: 20, // seconds per side
-      restTimeSeconds: 60,
-    },
-    {
-      id: "core-a-4",
-      sessionId: "core-a",
-      exerciseName: "Hanging Leg Raise",
-      orderInSession: 4,
-      targetSets: 3,
-      targetReps: 8,
-      restTimeSeconds: 90,
-    },
-  ],
-};
+const exercise = (
+  sessionId: string,
+  order: number,
+  exerciseName: string,
+  targetSets: number,
+  restTimeSeconds: number,
+  targets: Pick<
+    ProgramExercise,
+    "targetReps" | "targetDuration" | "targetDistance" | "targetDescription"
+  >,
+): ProgramExercise => ({
+  id: `${sessionId}-${order}`,
+  sessionId,
+  exerciseName,
+  orderInSession: order,
+  targetSets,
+  restTimeSeconds,
+  ...targets,
+});
 
 // ============================================================================
-// PROGRAM: HUNTER-GATHERER BASIC
+// ATAVIA GYM PROGRAM
 // ============================================================================
 
-export const HUNTER_GATHERER_BASIC: Program = {
-  id: "hunter-gatherer-basic",
-  name: "ATAVIA Basic",
-  description:
-    "Foundational strength program emphasizing execution quality, injury prevention, and controlled fatigue management. Suitable for returning lifters rebuilding capacity.",
-  sessions: [
-    PULL_SESSION_A,
-    PUSH_SESSION_A,
-    LEGS_SESSION_A,
-    PULL_SESSION_B,
-    PUSH_SESSION_B,
-    LEGS_SESSION_B,
-    CORE_SESSION,
-  ],
-};
-
-// ============================================================================
-// PROGRAM: HUNTER-GATHERER NO-GYM (BODYWEIGHT ONLY)
-// ============================================================================
-
-/**
- * Day 1: Pull + Traps
- * Focus: Pull-up variations, scapular control, dead hangs
- */
-const NO_GYM_DAY1_PULL: ProgramSession = {
-  id: "no-gym-day1",
-  programId: "hunter-gatherer-no-gym",
-  name: "Day 1: Pull + Traps",
-  orderInProgram: 1,
-  exercises: [
-    {
-      id: "no-gym-day1-1",
-      sessionId: "no-gym-day1",
-      exerciseName: "Pull-Up",
-      orderInSession: 1,
-      targetSets: 6,
-      targetReps: 0, // AMRAP
-      restTimeSeconds: 180, // 3 min
-    },
-    {
-      id: "no-gym-day1-2",
-      sessionId: "no-gym-day1",
-      exerciseName: "Chin-Up",
-      orderInSession: 2,
-      targetSets: 4,
-      targetReps: 0, // AMRAP
-      restTimeSeconds: 120, // 2 min
-    },
-    {
-      id: "no-gym-day1-3",
-      sessionId: "no-gym-day1",
-      exerciseName: "Scapular Pull-Up",
-      orderInSession: 3,
-      targetSets: 3,
-      targetReps: 15,
-      restTimeSeconds: 90, // 90 sec
-    },
-    {
-      id: "no-gym-day1-4",
-      sessionId: "no-gym-day1",
-      exerciseName: "High Pull-Up Hold",
-      orderInSession: 4,
-      targetSets: 3,
-      targetDuration: 30, // 30 sec
-      restTimeSeconds: 90,
-    },
-    {
-      id: "no-gym-day1-5",
-      sessionId: "no-gym-day1",
-      exerciseName: "Dead Hang",
-      orderInSession: 5,
-      targetSets: 2,
-      targetDuration: 60, // 60 sec
-      restTimeSeconds: 60,
-    },
-  ],
-};
-
-/**
- * Day 2: Legs + Hinge
- * Focus: Single-leg strength, hip hinge, isometric holds
- */
-const NO_GYM_DAY2_LEGS: ProgramSession = {
-  id: "no-gym-day2",
-  programId: "hunter-gatherer-no-gym",
-  name: "Day 2: Legs + Hinge",
-  orderInProgram: 2,
-  exercises: [
-    {
-      id: "no-gym-day2-1",
-      sessionId: "no-gym-day2",
-      exerciseName: "Bulgarian Split Squat",
-      orderInSession: 1,
-      targetSets: 5,
-      targetReps: 25, // Upper bound per leg
-      restTimeSeconds: 90,
-    },
-    {
-      id: "no-gym-day2-2",
-      sessionId: "no-gym-day2",
-      exerciseName: "Single-Leg Hip Thrust",
-      orderInSession: 2,
-      targetSets: 4,
-      targetReps: 20, // Upper bound per leg
-      restTimeSeconds: 90,
-    },
-    {
-      id: "no-gym-day2-3",
-      sessionId: "no-gym-day2",
-      exerciseName: "Hamstring Walkouts",
-      orderInSession: 3,
-      targetSets: 3,
-      targetReps: 15,
-      restTimeSeconds: 60,
-    },
-    {
-      id: "no-gym-day2-4",
-      sessionId: "no-gym-day2",
-      exerciseName: "Wall Sit",
-      orderInSession: 4,
-      targetSets: 2,
-      targetDuration: 0, // Max time (open-ended)
-      restTimeSeconds: 90,
-    },
-  ],
-};
-
-/**
- * Day 3: Push + Shoulders
- * Focus: Push-up progressions, pike variations, core stability
- */
-const NO_GYM_DAY3_PUSH: ProgramSession = {
-  id: "no-gym-day3",
-  programId: "hunter-gatherer-no-gym",
-  name: "Day 3: Push + Shoulders",
-  orderInProgram: 3,
-  exercises: [
-    {
-      id: "no-gym-day3-1",
-      sessionId: "no-gym-day3",
-      exerciseName: "Push-Up (Feet Elevated)",
-      orderInSession: 1,
-      targetSets: 6,
-      targetReps: 20,
-      restTimeSeconds: 90,
-    },
-    {
-      id: "no-gym-day3-2",
-      sessionId: "no-gym-day3",
-      exerciseName: "Pike Push-Up",
-      orderInSession: 2,
-      targetSets: 5,
-      targetReps: 15,
-      restTimeSeconds: 90,
-    },
-    {
-      id: "no-gym-day3-3",
-      sessionId: "no-gym-day3",
-      exerciseName: "Pseudo-Planche Push-Up",
-      orderInSession: 3,
-      targetSets: 3,
-      targetReps: 10,
-      restTimeSeconds: 90,
-    },
-    {
-      id: "no-gym-day3-4",
-      sessionId: "no-gym-day3",
-      exerciseName: "Side Plank",
-      orderInSession: 4,
-      targetSets: 3,
-      targetDuration: 60, // 60 sec per side
-      restTimeSeconds: 45,
-    },
-  ],
-};
-
-/**
- * Day 4: Conditioning
- * Focus: Simple checkbox completion for cardio activities
- */
-const NO_GYM_DAY4_CONDITIONING: ProgramSession = {
-  id: "no-gym-day4",
-  programId: "hunter-gatherer-no-gym",
-  name: "Day 4: Conditioning",
-  orderInProgram: 4,
-  exercises: [
-    {
-      id: "no-gym-day4-1",
-      sessionId: "no-gym-day4",
-      exerciseName: "Loaded Backpack Walk",
-      orderInSession: 1,
-      targetSets: 1,
-      targetDuration: 0, // Max time (60-90 min range, use DurationTimer)
-      restTimeSeconds: 0,
-    },
-    {
-      id: "no-gym-day4-2",
-      sessionId: "no-gym-day4",
-      exerciseName: "Hill Sprints",
-      orderInSession: 2,
-      targetSets: 1,
-      targetReps: 10, // 8-12 reps, use upper bound
-      restTimeSeconds: 0,
-    },
-    {
-      id: "no-gym-day4-3",
-      sessionId: "no-gym-day4",
-      exerciseName: "Long Fast Walk",
-      orderInSession: 3,
-      targetSets: 1,
-      targetDuration: 0, // Max time (60 min recommended, use DurationTimer)
-      restTimeSeconds: 0,
-    },
-  ],
-};
-
-export const HUNTER_GATHERER_NO_GYM: Program = {
-  id: "hunter-gatherer-no-gym",
-  name: "ATAVIA No-Gym",
-  description:
-    "4-day bodyweight program requiring only a pull-up bar. Focus on vertical pulling strength, single-leg work, advanced push-up progressions, and conditioning work. Emphasizes execution quality and injury prevention for returning lifters.",
-  sessions: [
-    NO_GYM_DAY1_PULL,
-    NO_GYM_DAY2_LEGS,
-    NO_GYM_DAY3_PUSH,
-    NO_GYM_DAY4_CONDITIONING,
-  ],
-};
-
-// ============================================================================
-// PROGRAM: HUNTER-GATHERER GYM
-// ============================================================================
-
-/**
- * Day 1 - Lower Body
- */
 const GYM_DAY1_LOWER: ProgramSession = {
   id: "gym-day1",
   programId: "hunter-gatherer-gym",
   name: "Day 1: Lower Body",
   orderInProgram: 1,
   exercises: [
-    {
-      id: "gym-day1-1",
-      sessionId: "gym-day1",
-      exerciseName: "Barbell Back Squat",
-      orderInSession: 1,
-      targetSets: 4,
-      targetReps: 5,
-      restTimeSeconds: 180, // 2-3 min
-    },
-    {
-      id: "gym-day1-2",
-      sessionId: "gym-day1",
-      exerciseName: "Romanian Deadlift",
-      orderInSession: 2,
-      targetSets: 3,
-      targetReps: 6,
-      restTimeSeconds: 120, // 2 min
-    },
-    {
-      id: "gym-day1-3",
-      sessionId: "gym-day1",
-      exerciseName: "Bulgarian Split Squat",
-      orderInSession: 3,
-      targetSets: 3,
-      targetReps: 6, // per leg
-      restTimeSeconds: 90,
-    },
-    {
-      id: "gym-day1-4",
-      sessionId: "gym-day1",
-      exerciseName: "Standing Calf Raise",
-      orderInSession: 4,
-      targetSets: 3,
-      targetReps: 12, // 10-12 range, use upper bound
-      restTimeSeconds: 75, // 60-90 sec average
-    },
-    {
-      id: "gym-day1-5",
-      sessionId: "gym-day1",
-      exerciseName: "Side Plank",
-      orderInSession: 5,
-      targetSets: 3,
-      targetDuration: 30, // 20-30s per side, use upper bound
-      restTimeSeconds: 60,
-    },
+    exercise("gym-day1", 1, "Leg Press", 4, 180, {
+      targetReps: 15,
+      targetDescription: "10-15 reps",
+    }),
+    exercise("gym-day1", 2, "Bulgarian Split Squat", 3, 120, {
+      targetReps: 12,
+      targetDescription: "8-12 reps",
+    }),
+    exercise("gym-day1", 3, "Hamstring Curl", 3, 60, {
+      targetReps: 15,
+      targetDescription: "10-15 reps",
+    }),
+    exercise("gym-day1", 4, "Standing Calf Raise", 3, 60, {
+      targetReps: 20,
+      targetDescription: "12-20 reps",
+    }),
+    exercise("gym-day1", 5, "Hanging Leg Raise", 3, 60, {
+      targetReps: 20,
+      targetDescription: "10-20 reps",
+    }),
   ],
 };
 
-/**
- * Day 2 - Upper Pull
- */
 const GYM_DAY2_PULL: ProgramSession = {
   id: "gym-day2",
   programId: "hunter-gatherer-gym",
-  name: "Day 2: Upper Pull",
+  name: "Day 2: Pull",
   orderInProgram: 2,
   exercises: [
-    {
-      id: "gym-day2-1",
-      sessionId: "gym-day2",
-      exerciseName: "Pull-Up",
-      orderInSession: 1,
-      targetSets: 4,
-      targetReps: 6, // 4-6 range, use upper bound
-      restTimeSeconds: 180, // 2-3 min
-    },
-    {
-      id: "gym-day2-2",
-      sessionId: "gym-day2",
-      exerciseName: "Barbell Row",
-      orderInSession: 2,
-      targetSets: 3,
-      targetReps: 8, // 6-8 range, use upper bound
-      restTimeSeconds: 120, // 2 min
-    },
-    {
-      id: "gym-day2-3",
-      sessionId: "gym-day2",
-      exerciseName: "Shrugs",
-      orderInSession: 3,
-      targetSets: 3,
+    exercise("gym-day2", 1, "Pull-Ups", 4, 180, {
       targetReps: 10,
-      restTimeSeconds: 90,
-    },
-    {
-      id: "gym-day2-4",
-      sessionId: "gym-day2",
-      exerciseName: "Farmer Carry",
-      orderInSession: 4,
-      targetSets: 4,
-      targetDistance: 40, // 20-40m, use upper bound
-      restTimeSeconds: 90,
-    },
+      targetDescription: "6-10 reps",
+    }),
+    exercise("gym-day2", 2, "Chest Supported Row", 4, 120, {
+      targetReps: 12,
+      targetDescription: "8-12 reps",
+    }),
+    exercise("gym-day2", 3, "Chin-Ups", 3, 180, {
+      targetReps: 10,
+      targetDescription: "6-10 reps",
+    }),
+    exercise("gym-day2", 4, "Farmer Carry", 4, 90, {
+      targetDistance: 40,
+      targetDescription: "40 m",
+    }),
+    exercise("gym-day2", 5, "Dead Hang", 2, 90, {
+      targetDuration: 60,
+      targetDescription: "60 sec",
+    }),
   ],
 };
 
-/**
- * Day 3 - Upper Push
- */
 const GYM_DAY3_PUSH: ProgramSession = {
   id: "gym-day3",
   programId: "hunter-gatherer-gym",
-  name: "Day 3: Upper Push",
+  name: "Day 3: Push",
   orderInProgram: 3,
   exercises: [
-    {
-      id: "gym-day3-1",
-      sessionId: "gym-day3",
-      exerciseName: "Overhead Press",
-      orderInSession: 1,
-      targetSets: 4,
-      targetReps: 5,
-      restTimeSeconds: 180, // 2-3 min
-    },
-    {
-      id: "gym-day3-2",
-      sessionId: "gym-day3",
-      exerciseName: "Bench Press",
-      orderInSession: 2,
-      targetSets: 3,
-      targetReps: 8, // 6-8 range, use upper bound
-      restTimeSeconds: 120, // 2 min
-    },
-    {
-      id: "gym-day3-3",
-      sessionId: "gym-day3",
-      exerciseName: "Dips",
-      orderInSession: 3,
-      targetSets: 3,
-      targetReps: 10, // 6-10 range, use upper bound
-      restTimeSeconds: 90,
-    },
-    {
-      id: "gym-day3-4",
-      sessionId: "gym-day3",
-      exerciseName: "Hollow Body Hold",
-      orderInSession: 4,
-      targetSets: 3,
-      targetDuration: 30, // 15-30s, use upper bound
-      restTimeSeconds: 60,
-    },
+    exercise("gym-day3", 1, "Incline Press", 4, 180, {
+      targetReps: 10,
+      targetDescription: "6-10 reps",
+    }),
+    exercise("gym-day3", 2, "Overhead Press", 3, 180, {
+      targetReps: 12,
+      targetDescription: "8-12 reps",
+    }),
+    exercise("gym-day3", 3, "Dips", 3, 120, {
+      targetReps: 15,
+      targetDescription: "8-15 reps",
+    }),
+    exercise("gym-day3", 4, "Lateral Raise", 4, 60, {
+      targetReps: 20,
+      targetDescription: "15-20 reps",
+    }),
+    exercise("gym-day3", 5, "Hollow Hold", 3, 60, {
+      targetDuration: 60,
+      targetDescription: "30-60 sec",
+    }),
   ],
 };
 
@@ -717,34 +117,177 @@ export const HUNTER_GATHERER_GYM: Program = {
   id: "hunter-gatherer-gym",
   name: "ATAVIA Gym",
   description:
-    "3-day gym program with barbell and dumbbell work. Focus on compound movements with controlled execution. Leave 2 reps in reserve on all main lifts. Requires squat rack, bench, pull-up bar, and dumbbells.",
+    "Three-day gym program for durable strength, joint-friendly hypertrophy, grip, core control, and work capacity. Most sets stop with 1-2 reps in reserve.",
   sessions: [GYM_DAY1_LOWER, GYM_DAY2_PULL, GYM_DAY3_PUSH],
 };
 
 // ============================================================================
-// ALL PROGRAMS
+// ATAVIA NO-GYM PROGRAM
 // ============================================================================
+
+const NO_GYM_DAY1_PULL: ProgramSession = {
+  id: "no-gym-day1",
+  programId: "hunter-gatherer-no-gym",
+  name: "Day 1: Pull + Grip",
+  orderInProgram: 1,
+  exercises: [
+    exercise("no-gym-day1", 1, "Pull-Ups", 5, 180, {
+      targetReps: 0,
+      targetDescription: "AMRAP",
+    }),
+    exercise("no-gym-day1", 2, "Chin-Ups", 3, 180, {
+      targetReps: 0,
+      targetDescription: "AMRAP",
+    }),
+    exercise("no-gym-day1", 3, "Dead Hang", 2, 90, {
+      targetDuration: 60,
+      targetDescription: "60 sec",
+    }),
+  ],
+};
+
+const NO_GYM_DAY2_LEGS: ProgramSession = {
+  id: "no-gym-day2",
+  programId: "hunter-gatherer-no-gym",
+  name: "Day 2: Legs + Hinge",
+  orderInProgram: 2,
+  exercises: [
+    exercise("no-gym-day2", 1, "Bulgarian Split Squat", 4, 120, {
+      targetReps: 15,
+      targetDescription: "10-15 reps",
+    }),
+    exercise("no-gym-day2", 2, "Single Leg Hip Thrust", 4, 120, {
+      targetReps: 15,
+      targetDescription: "10-15 reps",
+    }),
+    exercise("no-gym-day2", 3, "Hamstring Walkout", 3, 60, {
+      targetReps: 10,
+      targetDescription: "10 reps",
+    }),
+    exercise("no-gym-day2", 4, "Wall Sit", 2, 90, {
+      targetDuration: 0,
+      targetDescription: "Max time",
+    }),
+  ],
+};
+
+const NO_GYM_DAY3_PUSH: ProgramSession = {
+  id: "no-gym-day3",
+  programId: "hunter-gatherer-no-gym",
+  name: "Day 3: Push + Shoulders",
+  orderInProgram: 3,
+  exercises: [
+    exercise("no-gym-day3", 1, "Feet Elevated Push-Up", 4, 120, {
+      targetReps: 0,
+      targetDescription: "AMRAP",
+    }),
+    exercise("no-gym-day3", 2, "Pike Push-Up", 4, 120, {
+      targetReps: 15,
+      targetDescription: "10-15 reps",
+    }),
+    exercise("no-gym-day3", 3, "Pseudo Planche Push-Up", 3, 120, {
+      targetReps: 12,
+      targetDescription: "8-12 reps",
+    }),
+    exercise("no-gym-day3", 4, "Side Plank", 3, 60, {
+      targetDuration: 60,
+      targetDescription: "60 sec per side",
+    }),
+  ],
+};
+
+const NO_GYM_DAY4_MOVEMENT: ProgramSession = {
+  id: "no-gym-day4",
+  programId: "hunter-gatherer-no-gym",
+  name: "Day 4: Movement",
+  orderInProgram: 4,
+  exercises: [
+    exercise("no-gym-day4", 1, "Hike", 1, 0, {
+      targetDuration: 120 * 60,
+      targetDescription: "60-120 minutes",
+    }),
+  ],
+};
+
+export const HUNTER_GATHERER_NO_GYM: Program = {
+  id: "hunter-gatherer-no-gym",
+  name: "ATAVIA No-Gym",
+  description:
+    "Four-day bodyweight program using pull-ups, single-leg work, push-up progressions, grip, and outdoor movement to build resilient capability without a gym.",
+  sessions: [
+    NO_GYM_DAY1_PULL,
+    NO_GYM_DAY2_LEGS,
+    NO_GYM_DAY3_PUSH,
+    NO_GYM_DAY4_MOVEMENT,
+  ],
+};
+
+// ============================================================================
+// DAILY MOBILITY ROUTINE
+// ============================================================================
+
+const DAILY_MOBILITY_SESSION: ProgramSession = {
+  id: "daily-mobility",
+  programId: "atavia-daily-mobility",
+  name: "Daily Mobility Routine",
+  orderInProgram: 1,
+  exercises: [
+    exercise("daily-mobility", 1, "Deep Squat Hold", 2, 30, {
+      targetDuration: 60,
+      targetDescription: "30-60 sec",
+    }),
+    exercise("daily-mobility", 2, "Couch Stretch", 1, 30, {
+      targetDuration: 60,
+      targetDescription: "1 min each side",
+    }),
+    exercise("daily-mobility", 3, "90/90 Hip Rotations", 2, 30, {
+      targetReps: 10,
+      targetDescription: "10 each side",
+    }),
+    exercise("daily-mobility", 4, "Hamstring Stretch", 1, 30, {
+      targetDuration: 60,
+      targetDescription: "1 min each side",
+    }),
+    exercise("daily-mobility", 5, "Child's Pose With Side Reach", 1, 30, {
+      targetDuration: 60,
+      targetDescription: "1 min each side",
+    }),
+    exercise("daily-mobility", 6, "Thoracic Rotations", 2, 30, {
+      targetReps: 10,
+      targetDescription: "10 each side",
+    }),
+    exercise("daily-mobility", 7, "Dead Bug", 2, 60, {
+      targetReps: 10,
+      targetDescription: "10 each side",
+    }),
+    exercise("daily-mobility", 8, "Passive Hang", 2, 90, {
+      targetDuration: 60,
+      targetDescription: "30-60 sec",
+    }),
+  ],
+};
+
+export const ATAVIA_DAILY_MOBILITY: Program = {
+  id: "atavia-daily-mobility",
+  name: "ATAVIA Daily Mobility",
+  description:
+    "Daily mobility work for hips, hamstrings, thoracic rotation, trunk control, and overhead shoulder tolerance.",
+  sessions: [DAILY_MOBILITY_SESSION],
+};
+
+// Keep this export for older code paths that import the original starter program.
+export const HUNTER_GATHERER_BASIC = HUNTER_GATHERER_GYM;
 
 export const PROGRAMS: Program[] = [
-  HUNTER_GATHERER_BASIC,
   HUNTER_GATHERER_NO_GYM,
   HUNTER_GATHERER_GYM,
+  ATAVIA_DAILY_MOBILITY,
 ];
 
-// ============================================================================
-// HELPER FUNCTIONS
-// ============================================================================
-
-/**
- * Get program by ID
- */
 export function getProgramById(programId: string): Program | null {
   return PROGRAMS.find((p) => p.id === programId) || null;
 }
 
-/**
- * Get session by ID
- */
 export function getSessionById(sessionId: string): ProgramSession | null {
   for (const program of PROGRAMS) {
     const session = program.sessions.find((s) => s.id === sessionId);
@@ -753,55 +296,59 @@ export function getSessionById(sessionId: string): ProgramSession | null {
   return null;
 }
 
-/**
- * Get all sessions for a program
- */
+export function getSessionByProgramAndName(
+  programName: string,
+  sessionName: string,
+): ProgramSession | null {
+  const normalizedProgramName = programName.trim().toLowerCase();
+  const normalizedSessionName = sessionName.trim().toLowerCase();
+
+  for (const program of PROGRAMS) {
+    if (program.name.trim().toLowerCase() !== normalizedProgramName) {
+      continue;
+    }
+
+    const session = program.sessions.find(
+      (item) => item.name.trim().toLowerCase() === normalizedSessionName,
+    );
+
+    if (session) return session;
+  }
+
+  return null;
+}
+
 export function getSessionsForProgram(programId: string): ProgramSession[] {
   const program = getProgramById(programId);
   return program?.sessions || [];
 }
 
-/**
- * Get exercises for a session
- */
 export function getExercisesForSession(sessionId: string): ProgramExercise[] {
   const session = getSessionById(sessionId);
   return session?.exercises || [];
 }
 
-/**
- * Get total volume (sets) for a session
- */
 export function getTotalVolumeForSession(sessionId: string): number {
   const exercises = getExercisesForSession(sessionId);
   return exercises.reduce((total, ex) => total + ex.targetSets, 0);
 }
 
-/**
- * Get estimated session duration (minutes)
- * Rough estimate: 45s per set + rest time
- */
 export function getEstimatedSessionDuration(sessionId: string): number {
   const exercises = getExercisesForSession(sessionId);
-
-  let totalSeconds = 0;
+  let totalSeconds = 5 * 60;
 
   exercises.forEach((ex) => {
-    const setDuration = 45; // Average seconds per set
-    const totalSetTime = setDuration * ex.targetSets;
-    const totalRestTime = ex.restTimeSeconds * (ex.targetSets - 1); // No rest after last set
-    totalSeconds += totalSetTime + totalRestTime;
+    const setDuration = ex.targetDuration && ex.targetDuration > 0
+      ? Math.min(ex.targetDuration, 90)
+      : 45;
+    totalSeconds += setDuration * ex.targetSets;
+    totalSeconds += ex.restTimeSeconds * Math.max(0, ex.targetSets - 1);
+    totalSeconds += 60;
   });
 
-  // Add 5 minutes for transitions between exercises
-  totalSeconds += exercises.length * 60;
-
-  return Math.round(totalSeconds / 60); // Convert to minutes
+  return Math.round(totalSeconds / 60);
 }
 
-/**
- * Get program summary
- */
 export function getProgramSummary(programId: string): {
   name: string;
   totalSessions: number;
@@ -811,21 +358,16 @@ export function getProgramSummary(programId: string): {
   const program = getProgramById(programId);
   if (!program) return null;
 
-  const sessions = program.sessions;
-  const totalSessions = sessions.length;
-
-  const durations = sessions.map((s) => getEstimatedSessionDuration(s.id));
-  const avgDuration = durations.reduce((sum, d) => sum + d, 0) / totalSessions;
-
-  const totalExercises = sessions.reduce(
-    (sum, s) => sum + s.exercises.length,
-    0,
-  );
+  const durations = program.sessions.map((s) => getEstimatedSessionDuration(s.id));
+  const totalDuration = durations.reduce((sum, duration) => sum + duration, 0);
 
   return {
     name: program.name,
-    totalSessions,
-    avgSessionDuration: Math.round(avgDuration),
-    totalExercises,
+    totalSessions: program.sessions.length,
+    avgSessionDuration: Math.round(totalDuration / program.sessions.length),
+    totalExercises: program.sessions.reduce(
+      (sum, session) => sum + session.exercises.length,
+      0,
+    ),
   };
 }

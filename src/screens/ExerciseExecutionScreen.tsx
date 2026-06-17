@@ -15,7 +15,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { StopRulesBox, RepCounter, RestTimer, DurationTimer } from "../components";
 import { getDatabase } from "../database/init";
-import { getSessionById, ProgramExercise } from "../data/programs";
+import { getSessionByProgramAndName, ProgramExercise } from "../data/programs";
 import { getExerciseRules } from "../data/exercises";
 import { useSessionState } from "../hooks/useSessionState";
 import { StopReason } from "../types";
@@ -58,6 +58,21 @@ interface LastSessionSetSummary {
 
 type SessionCategory = "gym" | "no-gym" | null;
 
+function getExerciseHistoryNames(exerciseName: string): string[] {
+  const aliases: Record<string, string[]> = {
+    "Pull-Ups": ["Pull-Ups", "Pull-Up"],
+    "Chin-Ups": ["Chin-Ups", "Chin-Up"],
+    "Feet Elevated Push-Up": ["Feet Elevated Push-Up", "Push-Up (Feet Elevated)"],
+    "Pseudo Planche Push-Up": ["Pseudo Planche Push-Up", "Pseudo-Planche Push-Up"],
+    "Single Leg Hip Thrust": ["Single Leg Hip Thrust", "Single-Leg Hip Thrust"],
+    "Hamstring Walkout": ["Hamstring Walkout", "Hamstring Walkouts"],
+    "Hollow Hold": ["Hollow Hold", "Hollow Body Hold"],
+    Hike: ["Hike", "Long Fast Walk", "Loaded Backpack Walk"],
+  };
+
+  return aliases[exerciseName] ?? [exerciseName];
+}
+
 // ============================================================================
 // EXERCISE EXECUTION SCREEN
 // ============================================================================
@@ -97,39 +112,10 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
         return;
       }
 
-      // Get program session from static data
-      // Determine session ID based on session_name
-      let sessionIdToLoad: string;
-      
       const sessionName = sessionRow.session_name || "";
       const programName = sessionRow.program_name || "";
-      
-      // Check for gym program sessions (must match exact names from programs.ts)
-      if (sessionName.includes("Day 1: Lower Body")) {
-        sessionIdToLoad = "gym-day1";
-      } else if (sessionName.includes("Day 2: Upper Pull")) {
-        sessionIdToLoad = "gym-day2";
-      } else if (sessionName.includes("Day 3: Upper Push")) {
-        sessionIdToLoad = "gym-day3";
-      }
-      // Check for no-gym program sessions
-      else if (sessionName.includes("Day 1: Pull")) {
-        sessionIdToLoad = "no-gym-day1";
-      } else if (sessionName.includes("Day 2: Legs")) {
-        sessionIdToLoad = "no-gym-day2";
-      } else if (sessionName.includes("Day 3: Push")) {
-        sessionIdToLoad = "no-gym-day3";
-      } else if (sessionName.includes("Day 4:")) {
-        sessionIdToLoad = "no-gym-day4";
-      } else {
-        // Fallback - shouldn't happen
-        console.error(`[ExerciseExecution] Unknown session: ${sessionName}`);
-        Alert.alert("Error", `Unknown session type: ${sessionName}`);
-        navigation.goBack();
-        return;
-      }
 
-      console.log(`[ExerciseExecution] Loading session ID: ${sessionIdToLoad} for: ${sessionName}`);
+      const programSession = getSessionByProgramAndName(programName, sessionName);
 
       if (programName.includes("No-Gym")) {
         setSessionCategory("no-gym");
@@ -139,10 +125,8 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
         setSessionCategory(null);
       }
       
-      const programSession = getSessionById(sessionIdToLoad);
-
       if (!programSession) {
-        Alert.alert("Error", "Program not found");
+        Alert.alert("Error", `Program session not found: ${programName} / ${sessionName}`);
         navigation.goBack();
         return;
       }
@@ -209,6 +193,8 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
   async function loadLastSessionBest(exerciseName: string) {
     try {
       const db = getDatabase();
+      const exerciseNames = getExerciseHistoryNames(exerciseName);
+      const exerciseNamePlaceholders = exerciseNames.map(() => "?").join(", ");
       const categoryFilter =
         sessionCategory === "gym"
           ? "%Gym%"
@@ -221,13 +207,13 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
           FROM training_session ts
           JOIN exercise_session es ON ts.id = es.session_id
           WHERE ts.end_time IS NOT NULL
-            AND es.exercise_name = ?
+            AND es.exercise_name IN (${exerciseNamePlaceholders})
             AND ts.id != ?
             AND ts.program_name LIKE ?
           ORDER BY ts.date DESC, ts.start_time DESC
           LIMIT 1
         `,
-        [exerciseName, sessionId, categoryFilter],
+        [...exerciseNames, sessionId, categoryFilter],
       );
 
       if (!latestSession) {
@@ -242,10 +228,10 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
           FROM exercise_set ex
           JOIN exercise_session es ON ex.exercise_session_id = es.id
           WHERE es.session_id = ?
-            AND es.exercise_name = ?
+            AND es.exercise_name IN (${exerciseNamePlaceholders})
           ORDER BY ex.set_number ASC
         `,
-        [latestSession.id, exerciseName],
+        [latestSession.id, ...exerciseNames],
       );
       setLastSessionSets(latestSetRows);
 
@@ -255,10 +241,10 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
           FROM exercise_set ex
           JOIN exercise_session es ON ex.exercise_session_id = es.id
           WHERE es.session_id = ?
-            AND es.exercise_name = ?
+            AND es.exercise_name IN (${exerciseNamePlaceholders})
             AND ex.felt_clean = 1
         `,
-        [latestSession.id, exerciseName],
+        [latestSession.id, ...exerciseNames],
       );
 
       if (setRows.length === 0) {
@@ -447,9 +433,23 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
   }
 
   const performCues = exerciseRules.perform ?? exerciseRules.executionFocus;
+  const readinessWarning =
+    volumeAdjustment > 0
+      ? `Recovery adjustment active: volume reduced by ${volumeAdjustment}%. Keep 1-2 reps in reserve and do not force progression today.`
+      : null;
+  const progressionNotes =
+    volumeAdjustment > 0
+      ? [
+          "Recovery is limited today, so treat clean execution as the win.",
+          "Resume load progression after readiness returns to full volume.",
+          ...(exerciseRules.progression ?? []),
+        ]
+      : exerciseRules.progression;
 
   // Determine target display
-  const targetDisplay = currentExercise.targetReps !== undefined
+  const targetDisplay = currentExercise.targetDescription
+    ? currentExercise.targetDescription
+    : currentExercise.targetReps !== undefined
     ? currentExercise.targetReps === 0
       ? "AMRAP"
       : `${currentExercise.targetReps} reps`
@@ -462,6 +462,24 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
           ? "Max distance carry"
           : `${currentExercise.targetDistance}m carry`
         : "AMRAP"; // Default to AMRAP if neither is specified
+
+  function renderCoachingSection(
+    title: string,
+    items?: string[],
+  ) {
+    if (!items || items.length === 0) return null;
+
+    return (
+      <View style={styles.focusSection}>
+        <Text style={styles.focusTitle}>{title}</Text>
+        {items.map((cue, index) => (
+          <Text key={`${title}-${index}`} style={styles.cueText}>
+            {UNICODE.BULLET} {cue}
+          </Text>
+        ))}
+      </View>
+    );
+  }
 
   function handleDistanceStop() {
     const distanceValue = getDistanceValue();
@@ -534,6 +552,9 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
             <Text style={styles.lastSessionSetRow}>No prior set details</Text>
           )}
           <Text style={styles.intensityRule}>Stop 1 rep before failure</Text>
+          {readinessWarning && (
+            <Text style={styles.readinessWarning}>{readinessWarning}</Text>
+          )}
         </View>
 
         {/* Setup Cues (First Set Only) */}
@@ -543,7 +564,7 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
               <View style={styles.exerciseInfoSection}>
                 {exerciseRules.overview && (
                   <>
-                    <Text style={styles.exerciseInfoTitle}>WHAT IT IS</Text>
+                    <Text style={styles.exerciseInfoTitle}>PURPOSE</Text>
                     <Text style={styles.exerciseInfoText}>
                       {exerciseRules.overview}
                     </Text>
@@ -551,9 +572,9 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
                 )}
                 {exerciseRules.why && (
                   <>
-                    <Text style={styles.exerciseInfoTitle}>WHY THIS EXISTS</Text>
+                    <Text style={styles.exerciseInfoTitle}>HUNTER-GATHERER BENEFIT</Text>
                     <Text style={styles.exerciseInfoText}>
-                      {exerciseRules.why}
+                      {exerciseRules.hunterGathererBenefit ?? exerciseRules.why}
                     </Text>
                   </>
                 )}
@@ -632,6 +653,19 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
             <View style={styles.stopRulesSection}>
               <StopRulesBox rules={exerciseRules.stopRules} />
             </View>
+
+            {renderCoachingSection("PROGRESSION", progressionNotes)}
+            {renderCoachingSection("REGRESSION", exerciseRules.regression)}
+            {renderCoachingSection("TARGET MUSCLES", exerciseRules.targetMuscles)}
+
+            {exerciseRules.hunterGathererBenefit && !showSetupCues && (
+              <View style={styles.focusSection}>
+                <Text style={styles.focusTitle}>HUNTER-GATHERER BENEFIT</Text>
+                <Text style={styles.cueText}>
+                  {UNICODE.BULLET} {exerciseRules.hunterGathererBenefit}
+                </Text>
+              </View>
+            )}
 
             {/* Exercise Tracking - Duration Timer, Distance Input, or Rep Counter */}
             {!isSetActive && (
@@ -804,6 +838,13 @@ const styles = StyleSheet.create({
     color: theme.colors.state.warning,
     fontStyle: "italic",
     marginTop: theme.spacing[1],
+  },
+  readinessWarning: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.state.warning,
+    marginTop: theme.spacing[2],
+    lineHeight:
+      theme.typography.fontSize.sm * theme.typography.lineHeight.relaxed,
   },
   setupSection: {
     backgroundColor: theme.colors.execution.setup,

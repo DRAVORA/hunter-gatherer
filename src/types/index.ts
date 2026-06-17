@@ -117,6 +117,10 @@ export interface ExerciseRules {
   category: ExerciseCategory;
   overview?: string;
   why?: string;
+  progression?: string[];
+  regression?: string[];
+  targetMuscles?: string[];
+  hunterGathererBenefit?: string;
   setup: string[];
   perform?: string[];
   executionFocus: string[];
@@ -139,6 +143,7 @@ export enum ExerciseCategory {
   LEGS = "LEGS",
   CORE = "CORE",
   CARRY = "CARRY",
+  MOBILITY = "MOBILITY",
 }
 
 // ============================================================================
@@ -169,6 +174,7 @@ export interface ProgramExercise {
   targetReps?: number;
   targetDuration?: number; // seconds
   targetDistance?: number; // metres
+  targetDescription?: string;
   restTimeSeconds: number;
 }
 
@@ -271,7 +277,7 @@ export const SLEEP_THRESHOLDS = {
 } as const;
 
 export const VOLUME_ADJUSTMENTS = {
-  POOR_SLEEP: 0.35, // 35% reduction
+  POOR_SLEEP: 0.3, // 30% reduction
   CONSECUTIVE_POOR_NIGHTS: 1.0, // 100% reduction (no progression)
 } as const;
 

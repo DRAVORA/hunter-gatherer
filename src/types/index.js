@@ -48,6 +48,7 @@ var ExerciseCategory;
     ExerciseCategory["LEGS"] = "LEGS";
     ExerciseCategory["CORE"] = "CORE";
     ExerciseCategory["CARRY"] = "CARRY";
+    ExerciseCategory["MOBILITY"] = "MOBILITY";
 })(ExerciseCategory || (exports.ExerciseCategory = ExerciseCategory = {}));
 // ============================================================================
 // CONSTANTS
@@ -59,7 +60,7 @@ exports.SLEEP_THRESHOLDS = {
     VOLUME_REDUCTION: 6.5,
 };
 exports.VOLUME_ADJUSTMENTS = {
-    POOR_SLEEP: 0.35, // 35% reduction
+    POOR_SLEEP: 0.3, // 30% reduction
     CONSECUTIVE_POOR_NIGHTS: 1.0, // 100% reduction (no progression)
 };
 exports.HYDRATION_TARGETS = {
