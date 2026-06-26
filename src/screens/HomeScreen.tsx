@@ -13,13 +13,14 @@ import { RootStackParamList } from "../../App";
 import { v4 as uuidv4 } from "uuid";
 
 import { getDatabase } from "../database/init";
-import { formatDate, getTodayDate } from "../utils/formatting";
+import { getTodayDate } from "../utils/formatting";
 import {
   getEstimatedSessionDuration,
   getProgramById,
   getSessionById,
   getTotalVolumeForSession,
 } from "../data/programs";
+import { getProgramOption } from "../data/programOptions";
 import { UNICODE } from "../constants/unicode";
 import { theme } from "../styles/theme";
 
@@ -29,10 +30,6 @@ type HomeScreenRouteProp = RouteProp<RootStackParamList, "Home">;
 interface Props {
   navigation: HomeScreenNavigationProp;
   route: HomeScreenRouteProp;
-}
-
-function getAppProgramId(programId: string): string {
-  return programId === "gym" ? "hunter-gatherer-gym" : "hunter-gatherer-no-gym";
 }
 
 function formatProgramExercise(
@@ -52,10 +49,9 @@ export default function HomeScreen({ navigation, route }: Props) {
   const [todayCheckIn, setTodayCheckIn] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const selectedProgram = getProgramById(getAppProgramId(programId));
+  const selectedProgramOption = getProgramOption(programId);
+  const selectedProgram = getProgramById(selectedProgramOption.programId);
   const PROGRAM_DAYS = selectedProgram?.sessions ?? [];
-  const mobilityProgram = getProgramById("atavia-daily-mobility");
-  const mobilityRoutine = mobilityProgram?.sessions[0]?.exercises ?? [];
 
   useEffect(() => {
     loadTodayCheckIn();
@@ -162,7 +158,7 @@ export default function HomeScreen({ navigation, route }: Props) {
         [
           sessionId,
           today,
-          programId === "gym" ? "ATAVIA Gym" : "ATAVIA No-Gym",
+          selectedProgram?.name ?? selectedProgramOption.databaseName,
           session.name,
           new Date().toISOString(),
           plannedVolume,
@@ -212,13 +208,7 @@ export default function HomeScreen({ navigation, route }: Props) {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>ATAVIA</Text>
-          <Text style={styles.subtitle}>
-            {programId === "gym"
-              ? "Gym Program"
-              : programId === "no-gym"
-                ? "No-Gym Program"
-                : "Training Program"}
-          </Text>
+          <Text style={styles.subtitle}>{selectedProgramOption.name}</Text>
         </View>
 
         <TouchableOpacity
@@ -295,34 +285,6 @@ export default function HomeScreen({ navigation, route }: Props) {
                 ))}
               </View>
             </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Daily Mobility Routine */}
-        <View style={styles.nonNegotiablesCard}>
-          <Text style={styles.nonNegotiablesTitle}>DAILY MOBILITY</Text>
-          <Text style={styles.nonNegotiablesSubtitle}>
-            Daily routine {UNICODE.DASH} complete every day, including rest days
-          </Text>
-          <Text style={styles.nonNegotiablesDescription}>
-            Short movement practice for hips, hamstrings, trunk control,
-            thoracic rotation, and overhead shoulder tolerance.
-          </Text>
-          <Text style={styles.nonNegotiablesWarning}>
-            If quality drops or pain appears, reduce range and reset form.
-          </Text>
-
-          {mobilityRoutine.map((routine, index) => (
-            <View key={routine.id} style={styles.nonNegotiableRoutineCard}>
-              <Text style={styles.nonNegotiableHeader}>
-                {index + 1}. {routine.exerciseName.toUpperCase()}
-              </Text>
-              <Text style={styles.nonNegotiableTarget}>
-                {routine.targetSets}
-                {UNICODE.MULTIPLY}
-                {routine.targetDescription ?? "practice"}
-              </Text>
-            </View>
           ))}
         </View>
 

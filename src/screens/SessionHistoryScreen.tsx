@@ -11,6 +11,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../App";
 
 import { getDatabase } from "../database/init";
+import { AppProgramId, getProgramOption, PROGRAM_OPTIONS } from "../data/programOptions";
 import { formatMinutes, formatWeight } from "../utils/formatting";
 import { theme } from "../styles/theme";
 
@@ -60,17 +61,7 @@ interface SessionSection {
   data: SessionSummary[];
 }
 
-type ProgramFilter = "gym" | "no-gym";
-
-const PROGRAM_FILTERS: Array<{ key: ProgramFilter; label: string }> = [
-  { key: "gym", label: "Gym" },
-  { key: "no-gym", label: "No-Gym" },
-];
-
-const PROGRAM_NAME_BY_FILTER: Record<ProgramFilter, string> = {
-  gym: "ATAVIA Gym",
-  "no-gym": "ATAVIA No-Gym",
-};
+type ProgramFilter = AppProgramId;
 
 // ============================================================================
 // SESSION HISTORY SCREEN
@@ -105,7 +96,7 @@ export default function SessionHistoryScreen({ navigation }: Props) {
     try {
       setIsLoading(true);
       const db = getDatabase();
-      const programName = PROGRAM_NAME_BY_FILTER[programFilter];
+      const programName = getProgramOption(programFilter).databaseName;
 
       const results = await db.getAllAsync<SessionSummary>(
         `
@@ -344,22 +335,22 @@ export default function SessionHistoryScreen({ navigation }: Props) {
       <View style={styles.filterSection}>
         <Text style={styles.filterLabel}>Filter by program</Text>
         <View style={styles.filterGroupPills}>
-          {PROGRAM_FILTERS.map((program) => (
+          {PROGRAM_OPTIONS.map((program) => (
             <TouchableOpacity
-              key={program.key}
-              onPress={() => setSelectedProgram(program.key)}
+              key={program.id}
+              onPress={() => setSelectedProgram(program.id)}
               style={[
                 styles.filterPill,
-                selectedProgram === program.key && styles.filterPillActive,
+                selectedProgram === program.id && styles.filterPillActive,
               ]}
             >
               <Text
                 style={[
                   styles.filterPillText,
-                  selectedProgram === program.key && styles.filterPillTextActive,
+                  selectedProgram === program.id && styles.filterPillTextActive,
                 ]}
               >
-                {program.label}
+                {program.shortName}
               </Text>
             </TouchableOpacity>
           ))}
@@ -563,14 +554,10 @@ export default function SessionHistoryScreen({ navigation }: Props) {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>
-              {selectedProgram === "gym"
-                ? "No gym sessions yet."
-                : "No no-gym sessions yet."}
+              No {getProgramOption(selectedProgram).shortName.toLowerCase()} sessions yet.
             </Text>
             <Text style={styles.emptySubtext}>
-              {selectedProgram === "gym"
-                ? "Complete a gym session to see it here."
-                : "Complete a no-gym session to see it here."}
+              Complete a {getProgramOption(selectedProgram).shortName.toLowerCase()} session to see it here.
             </Text>
           </View>
         }

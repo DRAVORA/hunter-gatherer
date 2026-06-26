@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../App";
+import { AppProgramId, PROGRAM_OPTIONS } from "../data/programOptions";
 import { UNICODE } from "../constants/unicode";
 import { theme } from "../styles/theme";
 
@@ -21,51 +22,11 @@ interface Props {
 }
 
 // ============================================================================
-// AVAILABLE PROGRAMS
-// ============================================================================
-
-interface ProgramOption {
-  id: string;
-  name: string;
-  description: string;
-  requirements: string[];
-  duration: string;
-  frequency: string;
-}
-
-const AVAILABLE_PROGRAMS: ProgramOption[] = [
-  {
-    id: "no-gym",
-    name: "No-Gym Program",
-    description:
-      "4-day bodyweight program built around pull-ups, single-leg strength, push-up progressions, grip, and outdoor movement.",
-    requirements: ["Pull-up bar", "Open floor space", "Outdoor walking route"],
-    duration: "35-45 min strength days, 60-120 min movement day",
-    frequency: "4 days per week",
-  },
-  {
-    id: "gym",
-    name: "Gym Program",
-    description:
-      "3-day gym program for durable strength, joint-friendly hypertrophy, grip, core control, and work capacity.",
-    requirements: [
-      "Leg press",
-      "Incline press",
-      "Chest supported row",
-      "Pull-up bar",
-      "Dumbbells or carry handles",
-    ],
-    duration: "45-60 min per session",
-    frequency: "3 days per week",
-  },
-];
-
-// ============================================================================
 // PROGRAM SELECTION SCREEN
 // ============================================================================
 
 export default function ProgramSelectionScreen({ navigation }: Props) {
-  function handleSelectProgram(programId: string) {
+  function handleSelectProgram(programId: AppProgramId) {
     // Navigate to Home with selected program
     navigation.navigate("Home", { programId });
   }
@@ -92,7 +53,7 @@ export default function ProgramSelectionScreen({ navigation }: Props) {
 
         {/* Program Cards */}
         <View style={styles.programList}>
-          {AVAILABLE_PROGRAMS.map((program) => (
+          {PROGRAM_OPTIONS.map((program) => (
             <TouchableOpacity
               key={program.id}
               style={styles.programCard}

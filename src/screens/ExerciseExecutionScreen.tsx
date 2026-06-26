@@ -16,6 +16,7 @@ import { v4 as uuidv4 } from "uuid";
 import { StopRulesBox, RepCounter, RestTimer, DurationTimer } from "../components";
 import { getDatabase } from "../database/init";
 import { getSessionByProgramAndName, ProgramExercise } from "../data/programs";
+import { AppProgramId, getProgramOption, getProgramOptionByName } from "../data/programOptions";
 import { getExerciseRules } from "../data/exercises";
 import { useSessionState } from "../hooks/useSessionState";
 import { StopReason } from "../types";
@@ -56,7 +57,7 @@ interface LastSessionSetSummary {
   distance: number | null;
 }
 
-type SessionCategory = "gym" | "no-gym" | null;
+type SessionCategory = AppProgramId | null;
 
 function getExerciseHistoryNames(exerciseName: string): string[] {
   const aliases: Record<string, string[]> = {
@@ -90,6 +91,7 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
   const [lastSessionBest, setLastSessionBest] = useState<LastSessionBest | null>(null);
   const [lastSessionSets, setLastSessionSets] = useState<LastSessionSetSummary[]>([]);
   const [sessionCategory, setSessionCategory] = useState<SessionCategory>(null);
+  const [sessionProgramName, setSessionProgramName] = useState<string | null>(null);
 
   // Load session data
   useEffect(() => {
@@ -116,14 +118,10 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
       const programName = sessionRow.program_name || "";
 
       const programSession = getSessionByProgramAndName(programName, sessionName);
+      const programOption = getProgramOptionByName(programName);
 
-      if (programName.includes("No-Gym")) {
-        setSessionCategory("no-gym");
-      } else if (programName.includes("Gym")) {
-        setSessionCategory("gym");
-      } else {
-        setSessionCategory(null);
-      }
+      setSessionCategory(programOption?.id ?? null);
+      setSessionProgramName(programName || null);
       
       if (!programSession) {
         Alert.alert("Error", `Program session not found: ${programName} / ${sessionName}`);
@@ -188,19 +186,16 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
     }
 
     loadLastSessionBest(currentExercise.exerciseName);
-  }, [currentExercise?.exerciseName, sessionCategory]);
+  }, [currentExercise?.exerciseName, sessionCategory, sessionProgramName]);
 
   async function loadLastSessionBest(exerciseName: string) {
     try {
       const db = getDatabase();
       const exerciseNames = getExerciseHistoryNames(exerciseName);
       const exerciseNamePlaceholders = exerciseNames.map(() => "?").join(", ");
-      const categoryFilter =
-        sessionCategory === "gym"
-          ? "%Gym%"
-          : sessionCategory === "no-gym"
-            ? "%No-Gym%"
-            : "%";
+      const programNameFilter = sessionCategory
+        ? getProgramOption(sessionCategory).databaseName
+        : sessionProgramName;
       const latestSession = await db.getFirstAsync<{ id: string }>(
         `
           SELECT ts.id
@@ -209,11 +204,11 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
           WHERE ts.end_time IS NOT NULL
             AND es.exercise_name IN (${exerciseNamePlaceholders})
             AND ts.id != ?
-            AND ts.program_name LIKE ?
+            AND (? IS NULL OR ts.program_name = ?)
           ORDER BY ts.date DESC, ts.start_time DESC
           LIMIT 1
         `,
-        [...exerciseNames, sessionId, categoryFilter],
+        [...exerciseNames, sessionId, programNameFilter, programNameFilter],
       );
 
       if (!latestSession) {

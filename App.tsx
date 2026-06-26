@@ -5,6 +5,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { initDatabase, checkDatabaseHealth } from "./src/database/init";
 import LiabilityDisclaimerModal from "./src/components/LiabilityDisclaimerModal";
+import { AppProgramId } from "./src/data/programOptions";
 
 // Import screens
 import ProgramSelectionScreen from "./src/screens/ProgramSelectionScreen";
@@ -22,9 +23,9 @@ import TrainingManualScreen from "./src/screens/TrainingManualScreen";
 
 export type RootStackParamList = {
   ProgramSelection: undefined;
-  Home: { programId?: string }; // Make optional
+  Home: { programId?: AppProgramId }; // Make optional
   TrainingManual: undefined;
-  DailyCheckIn: { programId?: string } | undefined;
+  DailyCheckIn: { programId?: AppProgramId } | undefined;
   SessionReadiness: {
     sessionId: string;
     checkInId: string;
