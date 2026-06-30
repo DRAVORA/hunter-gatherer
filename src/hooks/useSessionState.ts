@@ -17,6 +17,7 @@ interface UseSessionStateProps {
   sessionId: string;
   programExercises: ProgramExercise[];
   volumeAdjustmentPercent: number;
+  isCircuit?: boolean;
 }
 
 interface StopSetResult {
@@ -28,6 +29,7 @@ export function useSessionState({
   sessionId,
   programExercises,
   volumeAdjustmentPercent,
+  isCircuit = false,
 }: UseSessionStateProps) {
   const db = useDatabase();
 
@@ -59,6 +61,27 @@ export function useSessionState({
   }, [programExercises, volumeAdjustmentPercent]);
 
   const currentExercise = adjustedExercises[currentExerciseIndex];
+
+  const getNextCircuitPosition = (
+    exerciseIndex: number,
+    roundNumber: number,
+  ): { exerciseIndex: number; setNumber: number } | null => {
+    for (let nextIndex = exerciseIndex + 1; nextIndex < adjustedExercises.length; nextIndex++) {
+      if (adjustedExercises[nextIndex].targetSets >= roundNumber) {
+        return { exerciseIndex: nextIndex, setNumber: roundNumber };
+      }
+    }
+
+    const nextRound = roundNumber + 1;
+
+    for (let nextIndex = 0; nextIndex < adjustedExercises.length; nextIndex++) {
+      if (adjustedExercises[nextIndex].targetSets >= nextRound) {
+        return { exerciseIndex: nextIndex, setNumber: nextRound };
+      }
+    }
+
+    return null;
+  };
 
   // Initialize exercise sessions in database
   useEffect(() => {
@@ -175,6 +198,25 @@ export function useSessionState({
     await db.updateExerciseSession(exerciseSessionId, {
       completedSets: currentSetNumber,
     });
+
+    if (isCircuit) {
+      const nextPosition = getNextCircuitPosition(
+        currentExerciseIndex,
+        currentSetNumber,
+      );
+
+      if (!nextPosition) {
+        return { sessionComplete: true };
+      }
+
+      setCurrentExerciseIndex(nextPosition.exerciseIndex);
+      setCurrentSetNumber(nextPosition.setNumber);
+      setSetupViewed(false);
+      setIsSetActive(false);
+      setCleanReps(0);
+
+      return { sessionComplete: false, movedToNextExercise: true };
+    }
 
     // Determine next state
     if (currentSetNumber < currentExercise.targetSets) {

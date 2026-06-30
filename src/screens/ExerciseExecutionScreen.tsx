@@ -92,6 +92,7 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
   const [lastSessionSets, setLastSessionSets] = useState<LastSessionSetSummary[]>([]);
   const [sessionCategory, setSessionCategory] = useState<SessionCategory>(null);
   const [sessionProgramName, setSessionProgramName] = useState<string | null>(null);
+  const isMobilityCircuit = sessionCategory === "mobility";
 
   // Load session data
   useEffect(() => {
@@ -143,6 +144,7 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
     sessionId,
     programExercises,
     volumeAdjustmentPercent: volumeAdjustment,
+    isCircuit: isMobilityCircuit,
   });
 
   const {
@@ -391,6 +393,8 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
       } else if (result.movedToNextExercise) {
         setShowSetupCues(true);
         setShowRestTimer(false);
+      } else if (isMobilityCircuit || currentExercise?.restTimeSeconds === 0) {
+        setShowRestTimer(false);
       } else {
         setShowRestTimer(true);
       }
@@ -524,7 +528,8 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
           </Text>
           <Text style={styles.exerciseName}>{currentExercise.exerciseName}</Text>
           <Text style={styles.setInfo}>
-            Set {currentSetNumber} of {currentExercise.targetSets}
+            {isMobilityCircuit ? "Round" : "Set"} {currentSetNumber} of{" "}
+            {currentExercise.targetSets}
           </Text>
           <Text style={styles.targetInfo}>Target: {targetDisplay}</Text>
           <Text style={styles.lastSessionInfo}>

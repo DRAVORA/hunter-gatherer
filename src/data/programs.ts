@@ -232,35 +232,35 @@ const DAILY_MOBILITY_SESSION: ProgramSession = {
   name: "Daily Mobility Routine",
   orderInProgram: 1,
   exercises: [
-    exercise("daily-mobility", 1, "Deep Squat Hold", 2, 30, {
+    exercise("daily-mobility", 1, "Deep Squat Hold", 2, 0, {
       targetDuration: 60,
       targetDescription: "30-60 sec",
     }),
-    exercise("daily-mobility", 2, "Couch Stretch", 1, 30, {
+    exercise("daily-mobility", 2, "Couch Stretch", 1, 0, {
       targetDuration: 60,
       targetDescription: "1 min each side",
     }),
-    exercise("daily-mobility", 3, "90/90 Hip Rotations", 2, 30, {
+    exercise("daily-mobility", 3, "90/90 Hip Rotations", 2, 0, {
       targetReps: 10,
       targetDescription: "10 each side",
     }),
-    exercise("daily-mobility", 4, "Hamstring Stretch", 1, 30, {
+    exercise("daily-mobility", 4, "Hamstring Stretch", 1, 0, {
       targetDuration: 60,
       targetDescription: "1 min each side",
     }),
-    exercise("daily-mobility", 5, "Child's Pose With Side Reach", 1, 30, {
+    exercise("daily-mobility", 5, "Child's Pose With Side Reach", 1, 0, {
       targetDuration: 60,
       targetDescription: "1 min each side",
     }),
-    exercise("daily-mobility", 6, "Thoracic Rotations", 2, 30, {
+    exercise("daily-mobility", 6, "Thoracic Rotations", 2, 0, {
       targetReps: 10,
       targetDescription: "10 each side",
     }),
-    exercise("daily-mobility", 7, "Dead Bug", 2, 60, {
+    exercise("daily-mobility", 7, "Dead Bug", 2, 0, {
       targetReps: 10,
       targetDescription: "10 each side",
     }),
-    exercise("daily-mobility", 8, "Passive Hang", 2, 90, {
+    exercise("daily-mobility", 8, "Passive Hang", 2, 0, {
       targetDuration: 60,
       targetDescription: "30-60 sec",
     }),
