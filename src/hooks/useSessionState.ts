@@ -91,20 +91,22 @@ export function useSessionState({
           sessionId,
         );
 
-        if (existingExerciseSessions.length > 0) {
-          const orderedExistingSessions = [...existingExerciseSessions].sort(
-            (a, b) => a.orderInSession - b.orderInSession,
-          );
-
-          setExerciseSessionIds(orderedExistingSessions.map((item) => item.id));
-          setIsInitialized(true);
-          return;
-        }
-
+        const orderedExistingSessions = [...existingExerciseSessions].sort(
+          (a, b) => a.orderInSession - b.orderInSession,
+        );
         const ids: string[] = [];
 
         for (let i = 0; i < adjustedExercises.length; i++) {
           const ex = adjustedExercises[i];
+          const existingSession = orderedExistingSessions.find(
+            (item) => item.orderInSession === i + 1,
+          );
+
+          if (existingSession) {
+            ids.push(existingSession.id);
+            continue;
+          }
+
           const id = await db.saveExerciseSession({
             id: uuidv4(),
             sessionId,
@@ -153,6 +155,9 @@ export function useSessionState({
     if (!setupViewed && currentSetNumber === 1) {
       setSetupViewed(true);
       const exerciseSessionId = exerciseSessionIds[currentExerciseIndex];
+
+      if (!exerciseSessionId) return;
+
       await db.updateExerciseSession(exerciseSessionId, {
         setupViewedOnFirstSet: true,
       });
@@ -174,6 +179,11 @@ export function useSessionState({
     }
 
     const exerciseSessionId = exerciseSessionIds[currentExerciseIndex];
+
+    if (!exerciseSessionId) {
+      throw new Error(`Missing exercise session for exercise index ${currentExerciseIndex}`);
+    }
+
     const { duration, distance, weight } = setMetrics;
     const isNonRepMetric =
       duration !== undefined || distance !== undefined;
