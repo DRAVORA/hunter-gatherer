@@ -74,6 +74,15 @@ function getExerciseHistoryNames(exerciseName: string): string[] {
   return aliases[exerciseName] ?? [exerciseName];
 }
 
+function isAlternatingTimedHold(exercise?: ProgramExercise): boolean {
+  if (exercise?.targetDuration === undefined) {
+    return false;
+  }
+
+  const targetDescription = exercise.targetDescription?.toLowerCase() ?? "";
+  return targetDescription.includes("each side") || targetDescription.includes("per side");
+}
+
 // ============================================================================
 // EXERCISE EXECUTION SCREEN
 // ============================================================================
@@ -92,6 +101,8 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
   const [lastSessionSets, setLastSessionSets] = useState<LastSessionSetSummary[]>([]);
   const [sessionCategory, setSessionCategory] = useState<SessionCategory>(null);
   const [sessionProgramName, setSessionProgramName] = useState<string | null>(null);
+  const [timedHoldSideNumber, setTimedHoldSideNumber] = useState(1);
+  const [timedHoldSideDurations, setTimedHoldSideDurations] = useState<number[]>([]);
   const isMobilityCircuit = sessionCategory === "mobility";
 
   // Load session data
@@ -169,6 +180,7 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
   const exerciseRules = currentExercise ? getExerciseRules(currentExercise.exerciseName) : null;
   const isDistanceExercise = currentExercise?.targetDistance !== undefined;
   const isTimedExercise = currentExercise?.targetDuration !== undefined;
+  const alternatesTimedHold = isAlternatingTimedHold(currentExercise);
 
   useEffect(() => {
     if (!currentExercise) return;
@@ -179,6 +191,11 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
         : "",
     );
   }, [currentExerciseIndex, currentExercise]);
+
+  useEffect(() => {
+    setTimedHoldSideNumber(1);
+    setTimedHoldSideDurations([]);
+  }, [currentExerciseIndex, currentSetNumber]);
 
   useEffect(() => {
     if (!currentExercise?.exerciseName) {
@@ -299,22 +316,42 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
       markSetupViewed();
       setShowSetupCues(false);
     }
+    setTimedHoldSideNumber(1);
+    setTimedHoldSideDurations([]);
     startSet();
   }
 
   function handleDurationStop(seconds: number) {
+    if (alternatesTimedHold && timedHoldSideNumber === 1) {
+      setTimedHoldSideDurations([seconds]);
+      Alert.alert("Side Complete", "Switch sides for the second hold.", [
+        {
+          text: "Start Second Side",
+          onPress: () => setTimedHoldSideNumber(2),
+        },
+      ]);
+      return;
+    }
+
+    const totalSeconds = alternatesTimedHold
+      ? [...timedHoldSideDurations, seconds].reduce(
+          (total, sideSeconds) => total + sideSeconds,
+          0,
+        )
+      : seconds;
+
     // Ask if the hold felt clean
     Alert.alert(
       "Hold Complete",
-      `Held for ${seconds} seconds. Did this hold feel clean?`,
+      `Held for ${totalSeconds} seconds. Did this hold feel clean?`,
       [
         {
           text: "Yes - Clean",
-          onPress: () => completeSetWithDuration(seconds, true, StopReason.CLEAN_COMPLETION),
+          onPress: () => completeSetWithDuration(totalSeconds, true, StopReason.CLEAN_COMPLETION),
         },
         {
           text: "No - Form Break",
-          onPress: () => completeSetWithDuration(seconds, false, StopReason.CORE_FAILURE),
+          onPress: () => completeSetWithDuration(totalSeconds, false, StopReason.CORE_FAILURE),
           style: "destructive",
         },
       ],
@@ -712,8 +749,19 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
                 {isTimedExercise ? (
                   <View style={styles.durationTimerSection}>
                     <DurationTimer
+                      key={`${currentExercise.id}-${currentSetNumber}-${timedHoldSideNumber}`}
                       targetSeconds={currentExercise?.targetDuration ?? 0}
                       onStop={handleDurationStop}
+                      title={
+                        alternatesTimedHold
+                          ? `Side ${timedHoldSideNumber} of 2`
+                          : undefined
+                      }
+                      subtitle={
+                        alternatesTimedHold && currentExercise?.targetDuration
+                          ? `${currentExercise.targetDuration}s each side`
+                          : undefined
+                      }
                     />
                   </View>
                 ) : isDistanceExercise ? (

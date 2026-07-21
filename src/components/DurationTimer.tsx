@@ -15,11 +15,15 @@ import { theme } from "../styles/theme";
 interface DurationTimerProps {
   targetSeconds: number;
   onStop: (actualSeconds: number) => void;
+  title?: string;
+  subtitle?: string;
 }
 
 export default function DurationTimer({
   targetSeconds,
   onStop,
+  title = "Hold Duration",
+  subtitle,
 }: DurationTimerProps) {
   const [isRunning, setIsRunning] = useState(true);
   const isMaxHold = targetSeconds === 0;
@@ -106,10 +110,14 @@ export default function DurationTimer({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Hold Duration</Text>
-      <Text style={styles.subtitle}>{isMaxHold ? "Max time" : `${targetSeconds}s target`}</Text>
+      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.subtitle}>
+        {subtitle ?? (isMaxHold ? "Max time" : `${targetSeconds}s target`)}
+      </Text>
 
-      <Text style={styles.timer}>{formatRestTime(isMaxHold ? heldSeconds : remainingSeconds)}</Text>
+      <Text style={styles.timer}>
+        {formatRestTime(isMaxHold ? heldSeconds : remainingSeconds)}
+      </Text>
 
       <View style={styles.buttonRow}>
         {isRunning ? (
