@@ -74,6 +74,12 @@ function resolveAlias(exerciseName: string): string {
     "Passive Dead Hang": "Passive Hang",
     "Long Fast Walk": "Hike",
     "Loaded Backpack Walk": "Hike",
+    "Weighted Neutral-Grip Pull-Up": "Pull-Up",
+    "Incline Dumbbell Press": "Incline Press",
+    "Horizontal Leg Press": "Leg Press",
+    "Cable Lateral Raise": "Lateral Raise",
+    "Seated or Lying Leg Curl": "Hamstring Curl",
+    "Hanging Knee Raise or Leg Raise": "Hanging Leg Raise",
   };
 
   return aliases[exerciseName] ?? exerciseName;
@@ -306,6 +312,60 @@ export const EXERCISE_RULES: Record<string, ExerciseRules> = {
     regression: ["Use lighter weights", "Use partial pain-free range", "Use cables or bands"],
     targetMuscles: ["Side delts", "Rotator cuff", "Upper traps"],
     hunterGathererBenefit: "Supports shoulder durability for carrying, climbing, and pressing.",
+  }),
+
+  "Reverse Pec Deck": movement({
+    name: "Reverse Pec Deck",
+    category: ExerciseCategory.PULL,
+    overview: "A supported rear-delt and upper-back isolation movement.",
+    why: "Builds rear-deltoid detail, upper-back balance, and shoulder control without loading the lower back.",
+    setup: ["Set handles at shoulder height", "Chest stays against pad", "Soft elbows", "Neck stays neutral"],
+    perform: ["Sweep arms back under control", "Pause briefly behind the body", "Return slowly", "Keep the chest supported"],
+    executionFocus: ["Rear delts working", "No torso swing", "No shrugging", "Smooth controlled reps"],
+    commonMistakes: ["Using too much weight", "Shrugging", "Jerking the handles", "Losing chest contact"],
+    stopRules: DEFAULT_STOP_RULES,
+    progression: ["Increase load only after all sets reach 20 clean reps without shrugging"],
+    regression: ["Use lighter load", "Shorten range slightly", "Use chest-supported rear-delt raises"],
+    targetMuscles: ["Rear delts", "Rhomboids", "Mid traps", "Rotator cuff"],
+    hunterGathererBenefit: "Balances pressing volume and supports shoulder position during carrying and climbing.",
+  }),
+
+  "Cable Crunch": movement({
+    name: "Cable Crunch",
+    category: ExerciseCategory.CORE,
+    overview: "A loaded trunk-flexion exercise performed from a kneeling or standing cable setup.",
+    why: "Builds direct abdominal strength with a simple load progression.",
+    setup: ["Use a rope attachment", "Kneel or stand with hips steady", "Ribs stacked over pelvis", "Brace before each rep"],
+    perform: ["Curl ribs toward pelvis", "Exhale through the effort", "Pause in the shortened position", "Return under control"],
+    executionFocus: ["Abs initiate the movement", "Hips stay quiet", "Controlled eccentric", "No neck pulling"],
+    commonMistakes: ["Turning it into a hip hinge", "Yanking with arms", "Rushing the return", "Overloading before control"],
+    stopRules: DEFAULT_STOP_RULES,
+    progression: ["Add reps first, then increase load once all sets reach 15 clean reps"],
+    regression: ["Use lighter load", "Shorten range", "Use dead bug or hollow hold"],
+    targetMuscles: ["Abs", "Obliques", "Hip flexors"],
+    hunterGathererBenefit: "Builds trunk strength for bracing, carrying, and controlled ground movement.",
+  }),
+
+  "Neck Flexion + Neck Extension": movement({
+    name: "Neck Flexion + Neck Extension",
+    category: ExerciseCategory.MOBILITY,
+    overview: "Smooth direct neck work pairing forward flexion with controlled extension.",
+    why: "Adds targeted neck volume while keeping the movement light, deliberate, and joint-friendly.",
+    setup: ["Use very light resistance", "Sit or lie with ribs down", "Keep jaw relaxed", "Move through a comfortable range"],
+    perform: ["Complete flexion reps smoothly", "Reset before extension reps", "Use a slow tempo", "Stop well before strain"],
+    executionFocus: ["No jerking", "Even range", "Relaxed jaw", "No dizziness or nerve symptoms"],
+    commonMistakes: ["Loading too heavy", "Snapping through reps", "Holding breath", "Pushing into symptoms"],
+    stopRules: [
+      "Sharp pain",
+      "Nerve symptoms",
+      "Dizziness",
+      "Headache symptoms",
+      "Jaw tension or form changes",
+    ],
+    progression: ["Add reps toward 25 each before adding the smallest possible amount of resistance"],
+    regression: ["Use bodyweight only", "Reduce range", "Perform gentle isometric holds instead"],
+    targetMuscles: ["Deep neck flexors", "Neck extensors", "Upper traps"],
+    hunterGathererBenefit: "Supports head and neck resilience for loaded movement and grappling-like positions.",
   }),
 
   "Hollow Hold": movement({

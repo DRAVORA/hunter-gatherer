@@ -122,6 +122,100 @@ export const HUNTER_GATHERER_GYM: Program = {
 };
 
 // ============================================================================
+// HUNTER-GATHERER FULL BODY A/B PROGRAM
+// ============================================================================
+
+const FULL_BODY_A: ProgramSession = {
+  id: "full-body-a",
+  programId: "hunter-gatherer-full-body",
+  name: "Workout A",
+  orderInProgram: 1,
+  exercises: [
+    exercise("full-body-a", 1, "Weighted Neutral-Grip Pull-Up", 3, 180, {
+      targetReps: 8,
+      targetDescription: "5-8 reps",
+    }),
+    exercise("full-body-a", 2, "Incline Dumbbell Press", 3, 180, {
+      targetReps: 10,
+      targetDescription: "6-10 reps",
+    }),
+    exercise("full-body-a", 3, "Horizontal Leg Press", 3, 180, {
+      targetReps: 12,
+      targetDescription: "8-12 reps",
+    }),
+    exercise("full-body-a", 4, "Cable Lateral Raise", 3, 60, {
+      targetReps: 20,
+      targetDescription: "12-20 reps",
+    }),
+    exercise("full-body-a", 5, "Seated or Lying Leg Curl", 2, 90, {
+      targetReps: 15,
+      targetDescription: "8-15 reps",
+    }),
+    exercise("full-body-a", 6, "Farmer Carry", 2, 90, {
+      targetDuration: 45,
+      targetDescription: "30-45 sec",
+    }),
+    exercise("full-body-a", 7, "Cable Crunch", 3, 60, {
+      targetReps: 15,
+      targetDescription: "8-15 reps",
+    }),
+    exercise("full-body-a", 8, "Neck Flexion + Neck Extension", 2, 60, {
+      targetReps: 25,
+      targetDescription: "15-25 each",
+    }),
+  ],
+};
+
+const FULL_BODY_B: ProgramSession = {
+  id: "full-body-b",
+  programId: "hunter-gatherer-full-body",
+  name: "Workout B",
+  orderInProgram: 2,
+  exercises: [
+    exercise("full-body-b", 1, "Chest Supported Row", 3, 180, {
+      targetReps: 10,
+      targetDescription: "6-10 reps",
+    }),
+    exercise("full-body-b", 2, "Incline Dumbbell Press", 3, 180, {
+      targetReps: 10,
+      targetDescription: "6-10 reps",
+    }),
+    exercise("full-body-b", 3, "Horizontal Leg Press", 3, 180, {
+      targetReps: 15,
+      targetDescription: "10-15 reps",
+    }),
+    exercise("full-body-b", 4, "Cable Lateral Raise", 3, 60, {
+      targetReps: 20,
+      targetDescription: "12-20 reps",
+    }),
+    exercise("full-body-b", 5, "Reverse Pec Deck", 2, 60, {
+      targetReps: 20,
+      targetDescription: "12-20 reps",
+    }),
+    exercise("full-body-b", 6, "Farmer Carry", 2, 90, {
+      targetDuration: 45,
+      targetDescription: "30-45 sec",
+    }),
+    exercise("full-body-b", 7, "Hanging Knee Raise or Leg Raise", 3, 60, {
+      targetReps: 15,
+      targetDescription: "8-15 reps",
+    }),
+    exercise("full-body-b", 8, "Neck Flexion + Neck Extension", 2, 60, {
+      targetReps: 25,
+      targetDescription: "15-25 each",
+    }),
+  ],
+};
+
+export const HUNTER_GATHERER_FULL_BODY: Program = {
+  id: "hunter-gatherer-full-body",
+  name: "Hunter-Gatherer Full Body",
+  description:
+    "Alternating full-body Workout A and B plan for upper chest, back, shoulder width, legs, carries, abs, and neck work. Train A, rest, B, rest, then repeat.",
+  sessions: [FULL_BODY_A, FULL_BODY_B],
+};
+
+// ============================================================================
 // ATAVIA NO-GYM PROGRAM
 // ============================================================================
 
@@ -279,6 +373,7 @@ export const ATAVIA_DAILY_MOBILITY: Program = {
 export const HUNTER_GATHERER_BASIC = HUNTER_GATHERER_GYM;
 
 export const PROGRAMS: Program[] = [
+  HUNTER_GATHERER_FULL_BODY,
   HUNTER_GATHERER_NO_GYM,
   HUNTER_GATHERER_GYM,
   ATAVIA_DAILY_MOBILITY,

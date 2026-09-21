@@ -1,4 +1,4 @@
-export type AppProgramId = "no-gym" | "gym" | "mobility";
+export type AppProgramId = "full-body" | "no-gym" | "gym" | "mobility";
 
 export interface ProgramOption {
   id: AppProgramId;
@@ -13,6 +13,24 @@ export interface ProgramOption {
 }
 
 export const PROGRAM_OPTIONS: ProgramOption[] = [
+  {
+    id: "full-body",
+    programId: "hunter-gatherer-full-body",
+    databaseName: "Hunter-Gatherer Full Body",
+    name: "Full Body A/B",
+    shortName: "Full Body",
+    description:
+      "Alternating Workout A and B plan for upper chest, back, shoulder width, legs, carries, abs, and neck work.",
+    requirements: [
+      "Pull-up bar with neutral grips",
+      "Incline dumbbell bench",
+      "Leg press",
+      "Cable station",
+      "Farmer carry implements",
+    ],
+    duration: "45-60 min per session",
+    frequency: "Workout A, rest, Workout B, rest, repeat",
+  },
   {
     id: "no-gym",
     programId: "hunter-gatherer-no-gym",
