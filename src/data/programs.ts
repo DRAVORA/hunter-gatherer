@@ -1,3 +1,4 @@
+import { UPPER_BODY_ATFL } from "./atflProgram";
 import { Program, ProgramSession, ProgramExercise } from "../types";
 
 export type { ProgramExercise };
@@ -373,6 +374,7 @@ export const ATAVIA_DAILY_MOBILITY: Program = {
 export const HUNTER_GATHERER_BASIC = HUNTER_GATHERER_GYM;
 
 export const PROGRAMS: Program[] = [
+  UPPER_BODY_ATFL,
   HUNTER_GATHERER_FULL_BODY,
   HUNTER_GATHERER_NO_GYM,
   HUNTER_GATHERER_GYM,

@@ -1,3 +1,4 @@
+import { ATFL_RECOVERY_NOTES } from "../data/atflProgram";
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -217,6 +218,16 @@ export default function HomeScreen({ navigation, route }: Props) {
         >
           <Text style={styles.manualButtonText}>Open Training Manual</Text>
         </TouchableOpacity>
+
+        {programId === "atfl-rehab" && (
+          <View style={styles.statusCard}>
+            <Text style={styles.statusTitle}>Recovery &amp; progression</Text>
+            <Text style={styles.statusDetail}>A / rest / B / rest / repeat</Text>
+            {ATFL_RECOVERY_NOTES.map((note) => (
+              <Text key={note} style={styles.statusDetail}>{note}</Text>
+            ))}
+          </View>
+        )}
 
         {/* Daily Check-In Status */}
         <View style={styles.statusCard}>

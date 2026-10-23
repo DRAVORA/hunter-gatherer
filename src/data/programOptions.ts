@@ -1,4 +1,4 @@
-export type AppProgramId = "full-body" | "no-gym" | "gym" | "mobility";
+export type AppProgramId = "atfl-rehab" | "full-body" | "no-gym" | "gym" | "mobility";
 
 export interface ProgramOption {
   id: AppProgramId;
@@ -13,6 +13,17 @@ export interface ProgramOption {
 }
 
 export const PROGRAM_OPTIONS: ProgramOption[] = [
+  {
+    id: "atfl-rehab",
+    programId: "upper-body-atfl",
+    databaseName: "Upper Body A/B + ATFL Rehab",
+    name: "Upper Body A/B + ATFL Rehab",
+    shortName: "Upper Body + ATFL",
+    description: "The supplied upper-body A/B routine with arm work and ATFL rehabilitation. Rehabilitation is the only lower-body training; no neck exercises.",
+    requirements: ["Neutral-grip pull-up bar", "Incline bench and dumbbells", "Cable station", "Chest-supported T-bar row and preacher bench", "Resistance band and stable balance support"],
+    duration: "Approximately 60 min per session",
+    frequency: "A / rest / B / rest / repeat",
+  },
   {
     id: "full-body",
     programId: "hunter-gatherer-full-body",

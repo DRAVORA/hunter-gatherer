@@ -469,12 +469,15 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
   }
 
   const performCues = exerciseRules.perform ?? exerciseRules.executionFocus;
+  const isAnkleRehab = currentExercise.exerciseName.startsWith("ATFL:");
   const readinessWarning =
     volumeAdjustment > 0
-      ? `Recovery adjustment active: volume reduced by ${volumeAdjustment}%. Keep 1-2 reps in reserve and do not force progression today.`
+      ? isAnkleRehab
+        ? `Recovery adjustment active: volume reduced by ${volumeAdjustment}%. Keep ankle rehab gentle and controlled.`
+        : `Recovery adjustment active: volume reduced by ${volumeAdjustment}%. Keep 1-2 reps in reserve and do not force progression today.`
       : null;
   const progressionNotes =
-    volumeAdjustment > 0
+    volumeAdjustment > 0 && !isAnkleRehab
       ? [
           "Recovery is limited today, so treat clean execution as the win.",
           "Resume load progression after readiness returns to full volume.",
@@ -588,7 +591,12 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
           ) : (
             <Text style={styles.lastSessionSetRow}>No prior set details</Text>
           )}
-          <Text style={styles.intensityRule}>Stop 1 rep before failure</Text>
+          {currentExercise.restDescription && (
+            <Text style={styles.targetInfo}>Rest: {currentExercise.restDescription}</Text>
+          )}
+          <Text style={styles.intensityRule}>
+            {isAnkleRehab ? "Gentle, controlled range only; do not force painful end range." : sessionCategory === "atfl-rehab" ? "Keep 1-2 reps in reserve" : "Stop 1 rep before failure"}
+          </Text>
           {readinessWarning && (
             <Text style={styles.readinessWarning}>{readinessWarning}</Text>
           )}

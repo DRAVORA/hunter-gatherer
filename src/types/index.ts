@@ -176,6 +176,7 @@ export interface ProgramExercise {
   targetDistance?: number; // metres
   targetDescription?: string;
   restTimeSeconds: number;
+  restDescription?: string;
 }
 
 // ============================================================================
