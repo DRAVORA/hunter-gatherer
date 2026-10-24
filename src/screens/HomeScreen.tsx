@@ -1,4 +1,4 @@
-import { ATFL_RECOVERY_NOTES } from "../data/atflProgram";
+import { ATFL_RECOVERY_NOTES, ATFL_SUPERSET_NOTE } from "../data/atflProgram";
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -223,6 +223,7 @@ export default function HomeScreen({ navigation, route }: Props) {
           <View style={styles.statusCard}>
             <Text style={styles.statusTitle}>Recovery &amp; progression</Text>
             <Text style={styles.statusDetail}>A / rest / B / rest / repeat</Text>
+            <Text style={styles.statusDetail}>{ATFL_SUPERSET_NOTE}</Text>
             {ATFL_RECOVERY_NOTES.map((note) => (
               <Text key={note} style={styles.statusDetail}>{note}</Text>
             ))}
@@ -287,6 +288,7 @@ export default function HomeScreen({ navigation, route }: Props) {
                 {day.exercises.map((exercise) => (
                   <Text key={exercise.id} style={styles.exerciseItem}>
                     {UNICODE.BULLET}{" "}
+                    {exercise.supersetLabel ? `${exercise.supersetLabel} · ` : ""}
                     {formatProgramExercise(
                       exercise.exerciseName,
                       exercise.targetSets,

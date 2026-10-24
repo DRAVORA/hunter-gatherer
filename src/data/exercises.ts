@@ -1,4 +1,4 @@
-import { ATFL_EXERCISE_RULES } from "./atflProgram";
+import { ATFL_EXERCISE_RULES } from "./atflExerciseRules";
 import { ExerciseRules, ExerciseCategory } from "../types";
 
 // ============================================================================

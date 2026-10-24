@@ -1,3 +1,4 @@
+import { getNextStrengthPosition, getRestAfterSet } from "../utils/sessionProgression";
 import { useState, useEffect, useMemo } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useDatabase } from "./useDatabase";
@@ -23,6 +24,7 @@ interface UseSessionStateProps {
 interface StopSetResult {
   sessionComplete: boolean;
   movedToNextExercise?: boolean;
+  restSeconds?: number;
 }
 
 export function useSessionState({
@@ -228,30 +230,19 @@ export function useSessionState({
       return { sessionComplete: false, movedToNextExercise: true };
     }
 
-    // Determine next state
-    if (currentSetNumber < currentExercise.targetSets) {
-      // More sets in this exercise
-      setCurrentSetNumber((prev) => prev + 1);
-      setIsSetActive(false);
-      setCleanReps(0);
+    const nextPosition = getNextStrengthPosition(
+      adjustedExercises, currentExerciseIndex, currentSetNumber,
+    );
+    if (!nextPosition) return { sessionComplete: true };
 
-      return { sessionComplete: false, movedToNextExercise: false };
-    } else {
-      // Exercise complete, move to next exercise or finish session
-      if (currentExerciseIndex < adjustedExercises.length - 1) {
-        // Move to next exercise
-        setCurrentExerciseIndex((prev) => prev + 1);
-        setCurrentSetNumber(1);
-        setSetupViewed(false);
-        setIsSetActive(false);
-        setCleanReps(0);
-
-        return { sessionComplete: false, movedToNextExercise: true };
-      } else {
-        // Session complete!
-        return { sessionComplete: true };
-      }
-    }
+    const movedToNextExercise = nextPosition.exerciseIndex !== currentExerciseIndex;
+    const restSeconds = getRestAfterSet(currentExercise, nextPosition, currentExerciseIndex);
+    setCurrentExerciseIndex(nextPosition.exerciseIndex);
+    setCurrentSetNumber(nextPosition.setNumber);
+    if (movedToNextExercise) setSetupViewed(false);
+    setIsSetActive(false);
+    setCleanReps(0);
+    return { sessionComplete: false, movedToNextExercise, restSeconds };
   };
 
   // ==========================================================================

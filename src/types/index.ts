@@ -177,6 +177,8 @@ export interface ProgramExercise {
   targetDescription?: string;
   restTimeSeconds: number;
   restDescription?: string;
+  supersetId?: string;
+  supersetLabel?: string;
 }
 
 // ============================================================================

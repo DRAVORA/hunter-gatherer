@@ -61,6 +61,7 @@ type SessionCategory = AppProgramId | null;
 
 function getExerciseHistoryNames(exerciseName: string): string[] {
   const aliases: Record<string, string[]> = {
+    "ATFL: Supported single-leg balance": ["ATFL: Supported single-leg balance", "ATFL: Single-leg balance"],
     "Pull-Ups": ["Pull-Ups", "Pull-Up"],
     "Chin-Ups": ["Chin-Ups", "Chin-Up"],
     "Feet Elevated Push-Up": ["Feet Elevated Push-Up", "Push-Up (Feet Elevated)"],
@@ -95,6 +96,7 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [showSetupCues, setShowSetupCues] = useState(true);
   const [showRestTimer, setShowRestTimer] = useState(false);
+  const [pendingRest, setPendingRest] = useState({ seconds: 0, exerciseName: "" });
   const [weightInput, setWeightInput] = useState("");
   const [distanceInput, setDistanceInput] = useState("");
   const [lastSessionBest, setLastSessionBest] = useState<LastSessionBest | null>(null);
@@ -427,13 +429,11 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
 
       if (result.sessionComplete) {
         await handleSessionComplete();
-      } else if (result.movedToNextExercise) {
-        setShowSetupCues(true);
-        setShowRestTimer(false);
-      } else if (isMobilityCircuit || currentExercise?.restTimeSeconds === 0) {
-        setShowRestTimer(false);
       } else {
-        setShowRestTimer(true);
+        if (result.movedToNextExercise) setShowSetupCues(true);
+        const seconds = result.restSeconds ?? 0;
+        setPendingRest({ seconds, exerciseName: currentExercise?.exerciseName ?? "" });
+        setShowRestTimer(seconds > 0);
       }
     } catch (error) {
       console.error("[ExerciseExecution] Failed to complete set:", error);
@@ -572,6 +572,12 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
             {currentExercise.targetSets}
           </Text>
           <Text style={styles.targetInfo}>Target: {targetDisplay}</Text>
+          {currentExercise.supersetId && (
+            <Text style={styles.targetInfo}>
+              Arm superset {currentExercise.supersetLabel} · Round {currentSetNumber} of {currentExercise.targetSets}
+              {"\n"}Alternate curl → triceps. 0-15 sec between exercises; 90 sec after triceps.
+            </Text>
+          )}
           <Text style={styles.lastSessionInfo}>
             Last session max: {lastSessionBest?.weightLabel ?? UNICODE.EM_DASH}
             {lastSessionBest?.reps !== null && lastSessionBest?.reps !== undefined
@@ -603,7 +609,7 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
         </View>
 
         {/* Setup Cues (First Set Only) */}
-        {showSetupCues && (
+        {showSetupCues && !showRestTimer && (
           <View style={styles.setupSection}>
             {(exerciseRules.overview || exerciseRules.why) && (
               <View style={styles.exerciseInfoSection}>
@@ -812,8 +818,9 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
         {/* Rest Timer */}
         {showRestTimer && (
           <View style={styles.restSection}>
+            <Text style={styles.targetInfo}>Rest after {pendingRest.exerciseName}</Text>
             <RestTimer
-              targetSeconds={currentExercise.restTimeSeconds}
+              targetSeconds={pendingRest.seconds}
               onComplete={handleRestComplete}
             />
           </View>
