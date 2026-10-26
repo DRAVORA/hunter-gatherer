@@ -1,4 +1,4 @@
-export type AppProgramId = "atfl-rehab" | "full-body" | "no-gym" | "gym" | "mobility";
+export type AppProgramId = "atfl-standalone" | "atfl-rehab" | "full-body" | "no-gym" | "gym" | "mobility";
 
 export interface ProgramOption {
   id: AppProgramId;
@@ -13,6 +13,17 @@ export interface ProgramOption {
 }
 
 export const PROGRAM_OPTIONS: ProgramOption[] = [
+  {
+    id: "atfl-standalone",
+    programId: "atfl-standalone",
+    databaseName: "ATFL Rehab",
+    name: "ATFL Rehab",
+    shortName: "ATFL Rehab",
+    description: "One complete ankle rehab session: band exercises, seated and supported calf raises, balance and knee-to-wall mobility, with step-by-step guidance.",
+    requirements: ["Light resistance band", "Chair", "Sturdy support or countertop", "Wall"],
+    duration: "Approximately 30 min per session",
+    frequency: "Every second day, with rest / gentle mobility between sessions",
+  },
   {
     id: "atfl-rehab",
     programId: "upper-body-atfl",

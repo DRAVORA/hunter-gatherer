@@ -63,6 +63,22 @@ try {
     }
   });
 
+  const standalone = getProgramById('atfl-standalone');
+  assert.equal(standalone.sessions.length, 1);
+  const ankleExercises = standalone.sessions[0].exercises;
+  assert.deepEqual(ankleExercises.map(e => [e.exerciseName, e.targetSets, e.targetDuration ?? e.targetReps, e.restTimeSeconds]), [
+    ['ATFL: Band eversion', 3, 15, 45],
+    ['ATFL: Band dorsiflexion', 3, 15, 45],
+    ['ATFL: Seated calf raises', 3, 15, 60],
+    ['ATFL: Supported single-leg balance', 2, 30, 30],
+    ['ATFL: Supported double-leg calf raises', 3, 12, 90],
+    ['ATFL: Tandem balance', 2, 30, 30],
+    ['ATFL: Knee-to-wall mobility', 2, 10, 30],
+  ]);
+  assert.ok(ankleExercises.every(e => !e.supersetId));
+  assert.equal(new Set(ankleExercises.map(e => e.exerciseName)).size, 7);
+  assert.equal(trace(ankleExercises).length, 18);
+
   const ids = [];
   for (const option of PROGRAM_OPTIONS) {
     const program = getProgramById(option.programId);

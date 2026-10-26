@@ -240,3 +240,35 @@ export const UPPER_BODY_ATFL: Program = {
     }
   ]
 };
+
+// Standalone session: combine the existing rehab blocks, keeping the first
+// prescription for shared exercises (supported balance: 2 x 30 seconds).
+const standaloneExercises = UPPER_BODY_ATFL.sessions
+  .flatMap((session) => session.exercises)
+  .filter((exercise) => exercise.exerciseName.startsWith("ATFL:"))
+  .filter((exercise, index, exercises) =>
+    exercises.findIndex((item) => item.exerciseName === exercise.exerciseName) === index,
+  );
+
+export const ATFL_STANDALONE: Program = {
+  id: "atfl-standalone",
+  name: "ATFL Rehab",
+  description: "One complete ankle rehab session with band work, calf raises, balance and ankle mobility.",
+  sessions: [{
+    id: "atfl-standalone-session",
+    programId: "atfl-standalone",
+    name: "Complete ATFL Rehab",
+    orderInProgram: 1,
+    exercises: standaloneExercises.map((exercise, index) => ({
+      ...exercise,
+      id: `atfl-standalone-${index + 1}`,
+      sessionId: "atfl-standalone-session",
+      orderInSession: index + 1,
+    })),
+  }],
+};
+
+export const ATFL_STANDALONE_NOTES = [
+  "One combined rehab session. Shared exercises are included once; supported single-leg balance is 2 x 30 seconds.",
+  ...ATFL_RECOVERY_NOTES.slice(2),
+];
