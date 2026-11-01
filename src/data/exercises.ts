@@ -1,3 +1,4 @@
+import { WEEKLY_LEG_RULES } from "./weeklyLegProgram";
 import { ATFL_EXERCISE_RULES } from "./atflExerciseRules";
 import { ExerciseRules, ExerciseCategory } from "../types";
 
@@ -92,6 +93,7 @@ function resolveAlias(exerciseName: string): string {
 
 export const EXERCISE_RULES: Record<string, ExerciseRules> = {
   ...ATFL_EXERCISE_RULES,
+  ...WEEKLY_LEG_RULES,
   "Leg Press": movement({
     name: "Leg Press",
     category: ExerciseCategory.LEGS,

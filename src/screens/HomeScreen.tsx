@@ -1,3 +1,4 @@
+import { WEEKLY_LEG_NOTES } from "../data/weeklyLegProgram";
 import { ATFL_RECOVERY_NOTES, ATFL_SUPERSET_NOTE, ATFL_STANDALONE_NOTES } from "../data/atflProgram";
 import React, { useState, useEffect } from "react";
 import {
@@ -219,7 +220,7 @@ export default function HomeScreen({ navigation, route }: Props) {
           <Text style={styles.manualButtonText}>Open Training Manual</Text>
         </TouchableOpacity>
 
-        {(programId === "atfl-rehab" || programId === "atfl-standalone") && (
+        {(programId === "weekly-legs" || programId === "atfl-rehab" || programId === "atfl-standalone") && (
           <View style={styles.statusCard}>
             <Text style={styles.statusTitle}>Recovery &amp; progression</Text>
             {programId === "atfl-rehab" ? (
@@ -227,7 +228,7 @@ export default function HomeScreen({ navigation, route }: Props) {
             ) : (
               <Text style={styles.statusDetail}>{selectedProgramOption.frequency}</Text>
             )}
-            {(programId === "atfl-standalone" ? ATFL_STANDALONE_NOTES : ATFL_RECOVERY_NOTES).map((note) => (
+            {(programId === "weekly-legs" ? WEEKLY_LEG_NOTES : programId === "atfl-standalone" ? ATFL_STANDALONE_NOTES : ATFL_RECOVERY_NOTES).map((note) => (
               <Text key={note} style={styles.statusDetail}>{note}</Text>
             ))}
           </View>

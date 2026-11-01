@@ -1,4 +1,4 @@
-export type AppProgramId = "atfl-standalone" | "atfl-rehab" | "full-body" | "no-gym" | "gym" | "mobility";
+export type AppProgramId = "weekly-legs" | "atfl-standalone" | "atfl-rehab" | "full-body" | "no-gym" | "gym" | "mobility";
 
 export interface ProgramOption {
   id: AppProgramId;
@@ -13,6 +13,17 @@ export interface ProgramOption {
 }
 
 export const PROGRAM_OPTIONS: ProgramOption[] = [
+  {
+    id: "weekly-legs",
+    programId: "weekly-legs",
+    databaseName: "Weekly Leg Routine",
+    name: "Weekly Leg Routine",
+    shortName: "Weekly Legs",
+    description: "ATFL-conscious glute, quad and hamstring development with hip thrusts, leg extensions and seated leg curls. 12 working sets.",
+    requirements: ["Stable bench and hip thrust weight", "Leg extension machine", "Seated leg curl machine"],
+    duration: "35-45 min including warm-up",
+    frequency: "Once per week",
+  },
   {
     id: "atfl-standalone",
     programId: "atfl-standalone",

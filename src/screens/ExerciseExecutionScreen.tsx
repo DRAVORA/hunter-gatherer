@@ -601,7 +601,7 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
             <Text style={styles.targetInfo}>Rest: {currentExercise.restDescription}</Text>
           )}
           <Text style={styles.intensityRule}>
-            {isAnkleRehab ? "Gentle, controlled range only; do not force painful end range." : sessionCategory === "atfl-rehab" ? "Keep 1-2 reps in reserve" : "Stop 1 rep before failure"}
+            {isAnkleRehab ? "Gentle, controlled range only; do not force painful end range." : (sessionCategory === "atfl-rehab" || sessionCategory === "weekly-legs") ? "Keep 1-2 reps in reserve once tolerated" : "Stop 1 rep before failure"}
           </Text>
           {readinessWarning && (
             <Text style={styles.readinessWarning}>{readinessWarning}</Text>
