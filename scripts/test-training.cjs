@@ -32,10 +32,10 @@ try {
     return steps;
   }
 
-  // Base PDF prescriptions plus user-requested core finishers: sets, reps/seconds, rest seconds.
+  // Base PDF prescriptions plus user-requested core exercises before rehab: sets, reps/seconds, rest seconds.
   const expected = [
-    [[3,8,180],[3,10,180],[3,20,60],[3,12,15],[3,15,90],[3,15,45],[3,15,45],[3,15,60],[2,30,30],[3,15,60]],
-    [[3,10,180],[3,10,180],[3,20,60],[3,12,15],[3,15,90],[3,12,90],[3,30,30],[2,30,30],[2,10,30],[3,15,60]],
+    [[3,8,180],[3,10,180],[3,20,60],[3,12,15],[3,15,90],[3,15,60],[3,15,45],[3,15,45],[3,15,60],[2,30,30]],
+    [[3,10,180],[3,10,180],[3,20,60],[3,12,15],[3,15,90],[3,15,60],[3,12,90],[3,30,30],[2,30,30],[2,10,30]],
   ];
   const rehab = getProgramById('upper-body-atfl');
   assert.equal(rehab.sessions.length, 2);
@@ -46,6 +46,8 @@ try {
     assert.equal(core[0].exerciseName, index === 0 ? 'Cable Crunch' : 'Hanging Leg Raise');
     assert.equal(core[0].targetDescription, '8-15 reps');
     assert.equal(core[0].supersetId, undefined);
+    assert.equal(session.exercises[5], core[0], 'Core follows the arm superset');
+    assert.ok(session.exercises.slice(6).every(e => e.exerciseName.startsWith('ATFL:')), 'Ankle rehab follows core');
     for (const e of session.exercises) {
       const rules = getExerciseRules(e.exerciseName);
       assert.ok(rules.setup.length > 0, e.exerciseName);

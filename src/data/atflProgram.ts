@@ -1,7 +1,7 @@
 import { Program } from "../types";
 
 // Base source: Atavia_Upper_Body_AB_ATFL_Rehab_Updated.pdf.
-// User-added core finishers: cable crunch in A, hanging leg raise in B.
+// User-added core exercises before ankle rehab: cable crunch in A, hanging leg raise in B.
 export const ATFL_RECOVERY_NOTES = [
   "Train every second day: A / rest / B / rest / repeat. One core exercise per workout: cable crunches in A and hanging leg raises in B.",
   "Upper body: use controlled repetitions with about 1-2 reps in reserve. When all sets reach the top of the rep range with clean form, increase load by the smallest practical amount. Avoid jumping down and unstable foot positioning.",
@@ -83,10 +83,21 @@ export const UPPER_BODY_ATFL: Program = {
           supersetLabel: "A2"
         },
         {
+          id: "atfl-a-core",
+          sessionId: "atfl-a",
+          exerciseName: "Cable Crunch",
+          orderInSession: 6,
+          targetSets: 3,
+          restTimeSeconds: 60,
+          restDescription: "60 sec",
+          targetDescription: "8-15 reps",
+          targetReps: 15
+        },
+        {
           id: "atfl-a-7",
           sessionId: "atfl-a",
           exerciseName: "ATFL: Band eversion",
-          orderInSession: 6,
+          orderInSession: 7,
           targetSets: 3,
           restTimeSeconds: 45,
           restDescription: "45 sec",
@@ -97,7 +108,7 @@ export const UPPER_BODY_ATFL: Program = {
           id: "atfl-a-8",
           sessionId: "atfl-a",
           exerciseName: "ATFL: Band dorsiflexion",
-          orderInSession: 7,
+          orderInSession: 8,
           targetSets: 3,
           restTimeSeconds: 45,
           restDescription: "45 sec",
@@ -108,7 +119,7 @@ export const UPPER_BODY_ATFL: Program = {
           id: "atfl-a-9",
           sessionId: "atfl-a",
           exerciseName: "ATFL: Seated calf raises",
-          orderInSession: 8,
+          orderInSession: 9,
           targetSets: 3,
           restTimeSeconds: 60,
           restDescription: "60 sec",
@@ -119,23 +130,12 @@ export const UPPER_BODY_ATFL: Program = {
           id: "atfl-a-10",
           sessionId: "atfl-a",
           exerciseName: "ATFL: Supported single-leg balance",
-          orderInSession: 9,
+          orderInSession: 10,
           targetSets: 2,
           restTimeSeconds: 30,
           restDescription: "30 sec",
           targetDescription: "30 sec",
           targetDuration: 30
-        },
-        {
-          id: "atfl-a-core",
-          sessionId: "atfl-a",
-          exerciseName: "Cable Crunch",
-          orderInSession: 10,
-          targetSets: 3,
-          restTimeSeconds: 60,
-          restDescription: "60 sec",
-          targetDescription: "8-15 reps",
-          targetReps: 15
         }
       ]
     },
@@ -205,10 +205,21 @@ export const UPPER_BODY_ATFL: Program = {
           supersetLabel: "B2"
         },
         {
+          id: "atfl-b-core",
+          sessionId: "atfl-b",
+          exerciseName: "Hanging Leg Raise",
+          orderInSession: 6,
+          targetSets: 3,
+          restTimeSeconds: 60,
+          restDescription: "60 sec",
+          targetDescription: "8-15 reps",
+          targetReps: 15
+        },
+        {
           id: "atfl-b-7",
           sessionId: "atfl-b",
           exerciseName: "ATFL: Supported double-leg calf raises",
-          orderInSession: 6,
+          orderInSession: 7,
           targetSets: 3,
           restTimeSeconds: 90,
           restDescription: "60-90 sec",
@@ -219,7 +230,7 @@ export const UPPER_BODY_ATFL: Program = {
           id: "atfl-b-8",
           sessionId: "atfl-b",
           exerciseName: "ATFL: Supported single-leg balance",
-          orderInSession: 7,
+          orderInSession: 8,
           targetSets: 3,
           restTimeSeconds: 30,
           restDescription: "30 sec",
@@ -230,7 +241,7 @@ export const UPPER_BODY_ATFL: Program = {
           id: "atfl-b-9",
           sessionId: "atfl-b",
           exerciseName: "ATFL: Tandem balance",
-          orderInSession: 8,
+          orderInSession: 9,
           targetSets: 2,
           restTimeSeconds: 30,
           restDescription: "30 sec",
@@ -241,23 +252,12 @@ export const UPPER_BODY_ATFL: Program = {
           id: "atfl-b-10",
           sessionId: "atfl-b",
           exerciseName: "ATFL: Knee-to-wall mobility",
-          orderInSession: 9,
+          orderInSession: 10,
           targetSets: 2,
           restTimeSeconds: 30,
           restDescription: "20-30 sec",
           targetDescription: "10 reps",
           targetReps: 10
-        },
-        {
-          id: "atfl-b-core",
-          sessionId: "atfl-b",
-          exerciseName: "Hanging Leg Raise",
-          orderInSession: 10,
-          targetSets: 3,
-          restTimeSeconds: 60,
-          restDescription: "60 sec",
-          targetDescription: "8-15 reps",
-          targetReps: 15
         }
       ]
     }
