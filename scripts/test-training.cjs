@@ -13,7 +13,7 @@ try {
     'src/utils/sessionProgression.ts', 'src/utils/calculations.ts',
     '--outDir', output, '--module', 'commonjs', '--target', 'es2020', '--skipLibCheck',
   ], { cwd: root, stdio: 'inherit' });
-  const { PROGRAMS, getProgramById, getSessionByProgramAndName } = require(path.join(output, 'data/programs.js'));
+  const { PROGRAMS, getProgramById, getSessionByProgramAndName, getEstimatedSessionDuration } = require(path.join(output, 'data/programs.js'));
   const { PROGRAM_OPTIONS, getProgramOptionByName } = require(path.join(output, 'data/programOptions.js'));
   const { getExerciseRules } = require(path.join(output, 'data/exercises.js'));
   const { getNextStrengthPosition, getRestAfterSet } = require(path.join(output, 'utils/sessionProgression.js'));
@@ -78,6 +78,10 @@ try {
   assert.ok(ankleExercises.every(e => !e.supersetId));
   assert.equal(new Set(ankleExercises.map(e => e.exerciseName)).size, 7);
   assert.equal(trace(ankleExercises).length, 18);
+
+  assert.equal(getEstimatedSessionDuration('no-gym-day4'), 126, 'Hike estimate must include the full two hours');
+  assert.equal(getEstimatedSessionDuration('daily-mobility'), 28, 'Mobility estimate includes both sides');
+  assert.equal(getEstimatedSessionDuration('weekly-legs-session'), 32);
 
   const ids = [];
   for (const option of PROGRAM_OPTIONS) {

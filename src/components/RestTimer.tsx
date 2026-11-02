@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
+import { useWorkoutTimer } from "../hooks/useWorkoutTimer";
 import { View, Text, StyleSheet, Alert } from "react-native";
 import { formatRestTime } from "../utils/formatting";
 import { theme } from "../styles/theme";
@@ -7,9 +8,8 @@ import { theme } from "../styles/theme";
 // REST TIMER COMPONENT
 // ============================================================================
 // Countdown timer between sets
-// Editable duration before starting
 // Shows MM:SS format
-// Plays alarm when finished
+// Shows a completion alert when finished
 // ============================================================================
 
 interface RestTimerProps {
@@ -21,40 +21,10 @@ export default function RestTimer({
   targetSeconds,
   onComplete,
 }: RestTimerProps) {
-  const [remainingSeconds, setRemainingSeconds] = useState(targetSeconds);
-  const endTimeRef = useRef<number>(Date.now() + targetSeconds * 1000);
-  const hasCompletedRef = useRef(false);
-
-  useEffect(() => {
-    endTimeRef.current = Date.now() + targetSeconds * 1000;
-    hasCompletedRef.current = false;
-    setRemainingSeconds(targetSeconds);
-  }, [targetSeconds]);
-
-  useEffect(() => {
-    const tick = () => {
-      const now = Date.now();
-      const secondsLeft = Math.max(
-        0,
-        Math.floor((endTimeRef.current - now) / 1000),
-      );
-
-      setRemainingSeconds(secondsLeft);
-
-      if (now >= endTimeRef.current && !hasCompletedRef.current) {
-        hasCompletedRef.current = true;
-        onComplete(targetSeconds);
-        Alert.alert("Rest Complete", "Time to start your next set.");
-      }
-    };
-
-    tick();
-    const interval = setInterval(tick, 250);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [onComplete, targetSeconds]);
+  const { remainingSeconds } = useWorkoutTimer(targetSeconds, false, seconds => {
+    onComplete(seconds);
+    if (targetSeconds > 0) Alert.alert("Rest Complete", "Time to start your next set.");
+  });
 
   return (
     <View style={styles.container}>

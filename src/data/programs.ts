@@ -1,3 +1,5 @@
+import { isPerSideDuration } from "../utils/timing";
+import { getNextStrengthPosition, getRestAfterSet, SessionPosition } from "../utils/sessionProgression";
 import { WEEKLY_LEGS } from "./weeklyLegProgram";
 import { UPPER_BODY_ATFL, ATFL_STANDALONE } from "./atflProgram";
 import { Program, ProgramSession, ProgramExercise } from "../types";
@@ -439,13 +441,19 @@ export function getEstimatedSessionDuration(sessionId: string): number {
 
   exercises.forEach((ex) => {
     const setDuration = ex.targetDuration && ex.targetDuration > 0
-      ? Math.min(ex.targetDuration, 90)
+      ? ex.targetDuration * (isPerSideDuration(ex) ? 2 : 1)
       : 45;
     totalSeconds += setDuration * ex.targetSets;
-    totalSeconds += ex.restTimeSeconds * Math.max(0, ex.targetSets - 1);
     totalSeconds += 60;
   });
 
+  let position: SessionPosition | null = exercises.length ? { exerciseIndex: 0, setNumber: 1 } : null;
+  while (position) {
+    const { exerciseIndex, setNumber } = position;
+    const next = getNextStrengthPosition(exercises, exerciseIndex, setNumber);
+    totalSeconds += getRestAfterSet(exercises[exerciseIndex], next, exerciseIndex);
+    position = next;
+  }
   return Math.round(totalSeconds / 60);
 }
 

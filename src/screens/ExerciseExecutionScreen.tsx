@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { isPerSideDuration } from "../utils/timing";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -75,21 +76,13 @@ function getExerciseHistoryNames(exerciseName: string): string[] {
   return aliases[exerciseName] ?? [exerciseName];
 }
 
-function isAlternatingTimedHold(exercise?: ProgramExercise): boolean {
-  if (exercise?.targetDuration === undefined) {
-    return false;
-  }
-
-  const targetDescription = exercise.targetDescription?.toLowerCase() ?? "";
-  return targetDescription.includes("each side") || targetDescription.includes("per side");
-}
-
 // ============================================================================
 // EXERCISE EXECUTION SCREEN
 // ============================================================================
 
 export default function ExerciseExecutionScreen({ navigation, route }: Props) {
   const { sessionId } = route.params;
+  const savingSet = useRef(false);
   
   const [programExercises, setProgramExercises] = useState<ProgramExercise[]>([]);
   const [volumeAdjustment, setVolumeAdjustment] = useState(0);
@@ -182,7 +175,7 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
   const exerciseRules = currentExercise ? getExerciseRules(currentExercise.exerciseName) : null;
   const isDistanceExercise = currentExercise?.targetDistance !== undefined;
   const isTimedExercise = currentExercise?.targetDuration !== undefined;
-  const alternatesTimedHold = isAlternatingTimedHold(currentExercise);
+  const alternatesTimedHold = currentExercise ? isPerSideDuration(currentExercise) : false;
 
   useEffect(() => {
     if (!currentExercise) return;
@@ -331,7 +324,7 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
           text: "Start Second Side",
           onPress: () => setTimedHoldSideNumber(2),
         },
-      ]);
+      ], { cancelable: false });
       return;
     }
 
@@ -357,6 +350,7 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
           style: "destructive",
         },
       ],
+      { cancelable: false },
     );
   }
 
@@ -415,6 +409,8 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
     distance?: number;
     weight?: number;
   }) {
+    if (savingSet.current) return;
+    savingSet.current = true;
     try {
       const result = await stopSet(
         params.feltClean,
@@ -438,6 +434,8 @@ export default function ExerciseExecutionScreen({ navigation, route }: Props) {
     } catch (error) {
       console.error("[ExerciseExecution] Failed to complete set:", error);
       Alert.alert("Error", "Couldn't save this set. Please try again.");
+    } finally {
+      savingSet.current = false;
     }
   }
 

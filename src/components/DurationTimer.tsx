@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
+import { useWorkoutTimer } from "../hooks/useWorkoutTimer";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { formatRestTime } from "../utils/formatting";
 import { theme } from "../styles/theme";
@@ -25,88 +26,9 @@ export default function DurationTimer({
   title = "Hold Duration",
   subtitle,
 }: DurationTimerProps) {
-  const [isRunning, setIsRunning] = useState(true);
   const isMaxHold = targetSeconds === 0;
-  const [remainingSeconds, setRemainingSeconds] = useState(targetSeconds);
-  const [heldSeconds, setHeldSeconds] = useState(0);
-  const startTimeRef = useRef<number | null>(Date.now());
-  const endTimeRef = useRef<number | null>(null);
-  const hasCompletedRef = useRef(false);
-
-  const finalizeStop = (seconds: number) => {
-    if (hasCompletedRef.current) {
-      return;
-    }
-
-    hasCompletedRef.current = true;
-    setIsRunning(false);
-    startTimeRef.current = null;
-    endTimeRef.current = null;
-    onStop(seconds);
-  };
-
-  useEffect(() => {
-    const now = Date.now();
-    setIsRunning(true);
-    setRemainingSeconds(targetSeconds);
-    setHeldSeconds(0);
-    startTimeRef.current = now;
-    endTimeRef.current = isMaxHold
-      ? Number.MAX_SAFE_INTEGER
-      : now + targetSeconds * 1000;
-    hasCompletedRef.current = false;
-  }, [isMaxHold, targetSeconds]);
-
-  useEffect(() => {
-    if (!isRunning || startTimeRef.current === null) {
-      return;
-    }
-
-    const tick = () => {
-      if (startTimeRef.current === null || endTimeRef.current === null) return;
-
-      const now = Date.now();
-      const secondsHeld = Math.max(
-        0,
-        Math.floor((now - startTimeRef.current) / 1000),
-      );
-      const secondsLeft = isMaxHold
-        ? 0
-        : Math.max(0, Math.floor((endTimeRef.current - now) / 1000));
-
-      setHeldSeconds(secondsHeld);
-      setRemainingSeconds(secondsLeft);
-
-      if (!isMaxHold && now >= endTimeRef.current && !hasCompletedRef.current) {
-        finalizeStop(targetSeconds);
-      }
-    };
-
-    tick();
-    const interval = setInterval(tick, 250);
-
-    return () => clearInterval(interval);
-  }, [isMaxHold, isRunning, onStop, targetSeconds]);
-
-  const handleStop = () => {
-    if (hasCompletedRef.current) {
-      return;
-    }
-
-    if (startTimeRef.current === null) {
-      finalizeStop(heldSeconds);
-      return;
-    }
-
-    const actualHeld = Math.max(
-      0,
-      Math.floor((Date.now() - startTimeRef.current) / 1000),
-    );
-
-    setHeldSeconds(actualHeld);
-    setRemainingSeconds(Math.max(0, targetSeconds - actualHeld));
-    finalizeStop(actualHeld);
-  };
+  const { running: isRunning, remainingSeconds, elapsedSeconds: heldSeconds, stop: handleStop } =
+    useWorkoutTimer(targetSeconds, isMaxHold, onStop);
 
   return (
     <View style={styles.container}>
@@ -125,9 +47,13 @@ export default function DurationTimer({
             style={[styles.button, styles.stopButton]}
             onPress={handleStop}
           >
-            <Text style={styles.buttonText}>End Hold Early</Text>
+            <Text style={styles.buttonText}>{isMaxHold ? "Finish Set" : "End Set Early"}</Text>
           </TouchableOpacity>
-        ) : null}
+        ) : (
+          <TouchableOpacity style={[styles.button, styles.startButton]} onPress={() => onStop(heldSeconds)}>
+            <Text style={styles.buttonText}>Review Result</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {heldSeconds > 0 && !isRunning && (
