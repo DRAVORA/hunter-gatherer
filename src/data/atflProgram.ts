@@ -1,8 +1,9 @@
 import { Program } from "../types";
 
-// Source: Atavia_Upper_Body_AB_ATFL_Rehab_Updated.pdf.
+// Base source: Atavia_Upper_Body_AB_ATFL_Rehab_Updated.pdf.
+// User-added core finishers: cable crunch in A, hanging leg raise in B.
 export const ATFL_RECOVERY_NOTES = [
-  "Train every second day: A / rest / B / rest / repeat. No conventional leg, abdominal or neck exercises.",
+  "Train every second day: A / rest / B / rest / repeat. One core exercise per workout: cable crunches in A and hanging leg raises in B.",
   "Upper body: use controlled repetitions with about 1-2 reps in reserve. When all sets reach the top of the rep range with clean form, increase load by the smallest practical amount. Avoid jumping down and unstable foot positioning.",
   "Ankle rehab: start light and prioritise movement quality. Aim for no more than mild discomfort (ideally 0-2/10), with no increase in pain, swelling or limping the following morning. If symptoms flare, reduce resistance, range or sets. Do not push through sharp pain or ankle giving way.",
   "Rest days: 5-10 minutes of comfortable ankle pumps and gentle mobility. Walking is acceptable if you can do it without a limp and symptoms remain stable. Elevate or use comfortable compression if swelling develops.",
@@ -14,7 +15,7 @@ export const ATFL_SUPERSET_NOTE = "Arm superset: alternate the curl and triceps 
 export const UPPER_BODY_ATFL: Program = {
   id: "upper-body-atfl",
   name: "Upper Body A/B + ATFL Rehab",
-  description: "Every-second-day A/B rotation with upper-body lifts, a three-round arm superset and ATFL rehabilitation. No conventional leg, abdominal or neck exercises.",
+  description: "Every-second-day A/B rotation with upper-body lifts, a three-round arm superset and ATFL rehabilitation. One core exercise per workout: cable crunches in A and hanging leg raises in B.",
   sessions: [
     {
       id: "atfl-a",
@@ -124,6 +125,17 @@ export const UPPER_BODY_ATFL: Program = {
           restDescription: "30 sec",
           targetDescription: "30 sec",
           targetDuration: 30
+        },
+        {
+          id: "atfl-a-core",
+          sessionId: "atfl-a",
+          exerciseName: "Cable Crunch",
+          orderInSession: 10,
+          targetSets: 3,
+          restTimeSeconds: 60,
+          restDescription: "60 sec",
+          targetDescription: "8-15 reps",
+          targetReps: 15
         }
       ]
     },
@@ -235,6 +247,17 @@ export const UPPER_BODY_ATFL: Program = {
           restDescription: "20-30 sec",
           targetDescription: "10 reps",
           targetReps: 10
+        },
+        {
+          id: "atfl-b-core",
+          sessionId: "atfl-b",
+          exerciseName: "Hanging Leg Raise",
+          orderInSession: 10,
+          targetSets: 3,
+          restTimeSeconds: 60,
+          restDescription: "60 sec",
+          targetDescription: "8-15 reps",
+          targetReps: 15
         }
       ]
     }

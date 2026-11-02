@@ -41,7 +41,7 @@ export const PROGRAM_OPTIONS: ProgramOption[] = [
     databaseName: "Upper Body A/B + ATFL Rehab",
     name: "Upper Body A/B + ATFL Rehab",
     shortName: "Upper Body + ATFL",
-    description: "Upper-body A/B training with three-round arm supersets and ATFL rehabilitation. No conventional leg, abdominal or neck exercises.",
+    description: "Upper-body A/B training with three-round arm supersets and ATFL rehabilitation. Cable crunches finish A; hanging leg raises finish B.",
     requirements: ["Neutral-grip pull-up bar", "Incline bench and dumbbells", "Cable station", "Chest-supported T-bar row and preacher bench", "Resistance band and stable balance support"],
     duration: "Approximately 60 min per session",
     frequency: "A / rest / B / rest / repeat",
